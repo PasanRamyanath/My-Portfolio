@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import Profile3D from "../components/Profile3D";
+
 const me = "/me.glb";
 
 export default function HeroSection() {
@@ -33,7 +33,7 @@ export default function HeroSection() {
           >
             <div className="space-y-2">
               <p className="text-blue-600 font-semibold text-lg">
-                Hi, I'm
+                Hi, I&apos;m
               </p>
               <h1 className="text-5xl md:text-6xl font-bold text-gray-900">
                 Your Name
@@ -79,7 +79,7 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* Right Content - Profile Image */}
+          {/* Right Content - 3D Model */}
           <div
             className={`flex justify-center transition-all duration-1000 delay-300 ${
               mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
