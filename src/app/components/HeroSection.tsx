@@ -26,9 +26,7 @@ export default function HeroSection() {
           {/* Left Content */}
           <div
             className={`space-y-6 transition-all duration-1000 ${
-              mounted
-                ? "opacity-100 translate-x-0"
-                : "opacity-0 -translate-x-10"
+              mounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"
             }`}
           >
             <div className="space-y-2">
@@ -64,7 +62,6 @@ export default function HeroSection() {
               </button>
             </div>
 
-            {/* Tech Stack Icons */}
             <div className="flex gap-6 pt-4">
               {["React", "Next.js", "TypeScript", "Node.js"].map((tech) => (
                 <div

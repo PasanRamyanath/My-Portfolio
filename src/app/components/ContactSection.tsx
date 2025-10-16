@@ -21,13 +21,10 @@ export default function ContactSection() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission (replace with actual API call)
     setTimeout(() => {
       setIsSubmitting(false);
       setSubmitStatus("success");
       setFormData({ name: "", email: "", message: "" });
-      
-      // Reset status after 3 seconds
       setTimeout(() => setSubmitStatus("idle"), 3000);
     }, 1500);
   };
@@ -56,19 +53,17 @@ export default function ContactSection() {
   return (
     <section id="contact" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Get In Touch
           </h2>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
             Have a project in mind or want to collaborate? Feel free to reach
-            out. I'd love to hear from you!
+            out. I&apos;d love to hear from you!
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-12">
-          {/* Contact Information */}
           <div className="space-y-8">
             <div>
               <h3 className="text-2xl font-bold text-gray-900 mb-6">
@@ -102,7 +97,6 @@ export default function ContactSection() {
               ))}
             </div>
 
-            {/* Social Links */}
             <div className="pt-8">
               <h4 className="text-lg font-semibold text-gray-900 mb-4">
                 Follow Me
@@ -123,7 +117,6 @@ export default function ContactSection() {
             </div>
           </div>
 
-          {/* Contact Form */}
           <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-2xl">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
@@ -197,7 +190,7 @@ export default function ContactSection() {
 
               {submitStatus === "success" && (
                 <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-center">
-                  ✓ Message sent successfully! I'll get back to you soon.
+                  ✓ Message sent successfully! I&apos;ll get back to you soon.
                 </div>
               )}
             </form>
