@@ -15,37 +15,40 @@ export default function Login({ onLogin }: Props) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
+
     if (email !== ADMIN_EMAIL) {
-      setError("Login failed: unauthorized email");
+      setError("Unauthorized email");
       return;
     }
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
       onLogin();
-    } catch (err) {
-      setError("Login failed: invalid email or password");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Login failed: unknown error";
+      setError(message);
     }
   };
 
   const handleGoogleLogin = async () => {
+    setError("");
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const email = result.user.email;
-      if (email !== ADMIN_EMAIL) {
+      const userEmail = result.user.email;
+      if (userEmail !== ADMIN_EMAIL) {
         await auth.signOut();
-        setError("Login failed: unauthorized Google account");
+        setError("Unauthorized Google account");
         return;
       }
       onLogin();
-    } catch (err: any) {
-      setError(
-        err?.message
-          ? `Login failed: ${err.message}`
-          : "Login failed: Google login error"
-      );
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Google login failed";
+      setError(message);
     }
   };
 
