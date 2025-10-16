@@ -1,116 +1,67 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface Project {
-  id: number;
+  id: string;
   title: string;
   description: string;
-  image: string;
-  technologies: string[];
   github: string;
   demo: string;
+  image?: string;
 }
 
 export default function ProjectsSection() {
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
 
-  const projects: Project[] = [
-    {
-      id: 1,
-      title: "E-Commerce Platform",
-      description:
-        "A full-stack e-commerce solution with payment integration, inventory management, and real-time analytics.",
-      image: "/project1.png",
-      technologies: ["Next.js", "TypeScript", "Stripe", "Firebase"],
-      github: "https://github.com/yourusername/project1",
-      demo: "https://project1-demo.com",
-    },
-    {
-      id: 2,
-      title: "Social Media Dashboard",
-      description:
-        "Analytics dashboard for social media metrics with beautiful data visualizations and real-time updates.",
-      image: "/project2.png",
-      technologies: ["React", "Node.js", "Chart.js", "MongoDB"],
-      github: "https://github.com/yourusername/project2",
-      demo: "https://project2-demo.com",
-    },
-    {
-      id: 3,
-      title: "Task Management App",
-      description:
-        "Collaborative task management tool with drag-and-drop functionality and team collaboration features.",
-      image: "/project1.png",
-      technologies: ["React", "Firebase", "Tailwind CSS", "Redux"],
-      github: "https://github.com/yourusername/project3",
-      demo: "https://project3-demo.com",
-    },
-  ];
+  useEffect(() => {
+    const fetchProjects = async () => {
+      const col = collection(db, "projects");
+      const snapshot = await getDocs(col);
+      const projectsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Project[];
+      setProjects(projectsData);
+    };
+
+    fetchProjects();
+  }, []);
 
   return (
     <section id="projects" className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Featured Projects
           </h2>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            A showcase of my recent work, demonstrating my skills in web
-            development and problem-solving.
+            A showcase of my recent work, demonstrating my skills in web development.
           </p>
         </div>
 
-        {/* Projects Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projects.map((project) => (
-            <div
-              key={project.id}
-              onMouseEnter={() => setHoveredId(project.id)}
-              onMouseLeave={() => setHoveredId(null)}
-              className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
-            >
-              {/* Project Image */}
-              <div className="relative h-48 overflow-hidden bg-gray-200">
-                <Image
-                  src={project.image}
-                  alt={project.title}
-                  fill
-                  className={`object-cover transition-transform duration-500 ${
-                    hoveredId === project.id ? "scale-110" : "scale-100"
-                  }`}
-                />
-                <div
-                  className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-300 ${
-                    hoveredId === project.id ? "opacity-100" : "opacity-0"
-                  }`}
-                />
-              </div>
-
-              {/* Project Content */}
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {project.title}
-                </h3>
-                <p className="text-gray-600 mb-4 line-clamp-3">
-                  {project.description}
-                </p>
-
-                {/* Technologies */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {project.technologies.map((tech) => (
-                    <span
-                      key={tech}
-                      className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-medium"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Action Buttons */}
+        {projects.length === 0 ? (
+          <div className="text-center text-gray-500 text-lg">Loading projects...</div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {projects.map((project) => (
+              <div
+                key={project.id}
+                className="bg-white rounded-xl overflow-hidden shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+              >
+                {project.image && (
+                  <div className="mb-4 rounded-lg overflow-hidden h-48 bg-gray-100 flex items-center justify-center">
+                    <img
+                      src={project.image}
+                      alt={project.title}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                )}
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{project.title}</h3>
+                <p className="text-gray-600 mb-4 line-clamp-3">{project.description}</p>
                 <div className="flex gap-3">
                   <a
                     href={project.github}
@@ -130,16 +81,9 @@ export default function ProjectsSection() {
                   </a>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* View More Button */}
-        <div className="text-center mt-12">
-          <button className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all">
-            View All Projects
-          </button>
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
