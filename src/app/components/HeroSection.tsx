@@ -1,0 +1,104 @@
+"use client";
+
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import Profile3D from "../components/Profile3D";
+const me = "/me.glb";
+
+export default function HeroSection() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  return (
+    <section
+      id="home"
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-16"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          {/* Left Content */}
+          <div
+            className={`space-y-6 transition-all duration-1000 ${
+              mounted
+                ? "opacity-100 translate-x-0"
+                : "opacity-0 -translate-x-10"
+            }`}
+          >
+            <div className="space-y-2">
+              <p className="text-blue-600 font-semibold text-lg">
+                Hi, I'm
+              </p>
+              <h1 className="text-5xl md:text-6xl font-bold text-gray-900">
+                Your Name
+              </h1>
+              <h2 className="text-3xl md:text-4xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Full Stack Developer
+              </h2>
+            </div>
+
+            <p className="text-gray-600 text-lg leading-relaxed">
+              I craft beautiful, functional websites and applications that solve
+              real-world problems. Specializing in modern web technologies and
+              user-centered design.
+            </p>
+
+            <div className="flex flex-wrap gap-4">
+              <button
+                onClick={() => scrollToSection("projects")}
+                className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transform hover:scale-105 transition-all shadow-lg hover:shadow-xl"
+              >
+                View Projects
+              </button>
+              <button
+                onClick={() => scrollToSection("contact")}
+                className="px-8 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transform hover:scale-105 transition-all"
+              >
+                Contact Me
+              </button>
+            </div>
+
+            {/* Tech Stack Icons */}
+            <div className="flex gap-6 pt-4">
+              {["React", "Next.js", "TypeScript", "Node.js"].map((tech) => (
+                <div
+                  key={tech}
+                  className="px-4 py-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                >
+                  <span className="text-sm font-medium text-gray-700">
+                    {tech}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Content - Profile Image */}
+          <div
+            className={`flex justify-center transition-all duration-1000 delay-300 ${
+              mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
+            }`}
+          >
+            <div className="relative w-80 h-80 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-white shadow-2xl">
+              <Profile3D modelPath={me} />
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full blur-2xl opacity-30 animate-pulse pointer-events-none" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex justify-center">
+          <div className="w-1 h-3 bg-gray-400 rounded-full mt-2 animate-pulse" />
+        </div>
+      </div>
+    </section>
+  );
+}
