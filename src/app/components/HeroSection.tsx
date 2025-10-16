@@ -1,16 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Profile3D from "../components/Profile3D";
+import dynamic from "next/dynamic";
 
+const Profile3D = dynamic(() => import("../components/Profile3D"), { ssr: false });
 const me = "/me.glb";
 
 export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => setMounted(true), []);
 
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -30,12 +29,8 @@ export default function HeroSection() {
             }`}
           >
             <div className="space-y-2">
-              <p className="text-blue-600 font-semibold text-lg">
-                Hi, I&apos;m
-              </p>
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900">
-                Your Name
-              </h1>
+              <p className="text-blue-600 font-semibold text-lg">Hi, I&apos;m</p>
+              <h1 className="text-5xl md:text-6xl font-bold text-gray-900">Your Name</h1>
               <h2 className="text-3xl md:text-4xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Full Stack Developer
               </h2>
@@ -68,9 +63,7 @@ export default function HeroSection() {
                   key={tech}
                   className="px-4 py-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
                 >
-                  <span className="text-sm font-medium text-gray-700">
-                    {tech}
-                  </span>
+                  <span className="text-sm font-medium text-gray-700">{tech}</span>
                 </div>
               ))}
             </div>
@@ -83,7 +76,7 @@ export default function HeroSection() {
             }`}
           >
             <div className="relative w-80 h-80 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-white shadow-2xl">
-              <Profile3D modelPath={me} />
+              {mounted && <Profile3D modelPath={me} />}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full blur-2xl opacity-30 animate-pulse pointer-events-none" />
             </div>
           </div>
