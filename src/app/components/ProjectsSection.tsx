@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import { collection, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 interface Project {
@@ -16,41 +15,20 @@ interface Project {
 
 export default function ProjectsSection() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProjects = async () => {
-      try {
-        const col = collection(db, "projects");
-        const snapshot = await getDocs(col);
-        const projectsData: Project[] = snapshot.docs.map(
-          (doc: QueryDocumentSnapshot<DocumentData>) => ({
-            id: doc.id,
-            title: doc.data().title as string,
-            description: doc.data().description as string,
-            github: doc.data().github as string,
-            demo: doc.data().demo as string,
-            image: doc.data().image as string | undefined,
-          })
-        );
-        setProjects(projectsData);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      } finally {
-        setLoading(false);
-      }
+      const col = collection(db, "projects");
+      const snapshot = await getDocs(col);
+      const projectsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Project[];
+      setProjects(projectsData);
     };
 
     fetchProjects();
   }, []);
-
-  if (loading) {
-    return (
-      <section className="py-20 bg-gray-50 text-center text-gray-500 text-lg">
-        Loading projects...
-      </section>
-    );
-  }
 
   return (
     <section id="projects" className="py-20 bg-gray-50">
@@ -65,7 +43,7 @@ export default function ProjectsSection() {
         </div>
 
         {projects.length === 0 ? (
-          <div className="text-center text-gray-500 text-lg">No projects found.</div>
+          <div className="text-center text-gray-500 text-lg">Loading projects...</div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.map((project) => (
@@ -74,12 +52,11 @@ export default function ProjectsSection() {
                 className="bg-white rounded-xl overflow-hidden shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
               >
                 {project.image && (
-                  <div className="mb-4 rounded-lg overflow-hidden h-48 bg-gray-100 relative">
-                    <Image
+                  <div className="mb-4 rounded-lg overflow-hidden h-48 bg-gray-100 flex items-center justify-center">
+                    <img
                       src={project.image}
                       alt={project.title}
-                      fill
-                      className="object-cover"
+                      className="object-cover w-full h-full"
                     />
                   </div>
                 )}
