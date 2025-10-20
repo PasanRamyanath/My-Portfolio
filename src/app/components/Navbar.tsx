@@ -16,9 +16,10 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { name: "Home", href: "#home" },
-    { name: "Projects", href: "#projects" },
-    { name: "Contact", href: "#contact" },
+    { name: "Home", href: "/" },
+    { name: "Projects", href: "/projects" },
+    { name: "Certifications", href: "/certifications" },
+    { name: "Contact", href: "/contact" },
   ];
 
   return (
@@ -33,7 +34,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link
-            href="#home"
+            href="/"
             className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:scale-105 transition-transform"
           >
             Portfolio
@@ -80,11 +81,11 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - overlay so it doesn't shift content */}
       <div
-        className={`md:hidden transition-all duration-300 overflow-hidden ${
-          mobileMenuOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
-        }`}
+        className={`md:hidden transition-all duration-300 ${
+          mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        } absolute left-0 right-0 top-16 z-40`}
       >
         <div className="px-4 py-4 bg-white/95 backdrop-blur-lg shadow-lg">
           {navLinks.map((link) => (

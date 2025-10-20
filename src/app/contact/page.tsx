@@ -1,0 +1,339 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { Mail, MapPin, Github, Linkedin, Send, RotateCcw, CheckCircle2 } from "lucide-react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+
+export default function StylishContactPage() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [info, setInfo] = useState<{
+    description?: string;
+    email?: string;
+    facebook?: string;
+    fullName?: string;
+    github?: string;
+    initialName?: string;
+    instagram?: string;
+    linkedin?: string;
+    location?: string;
+    portfolio?: string;
+    techStacks?: string[];
+  } | null>(null);
+  const [loadingInfo, setLoadingInfo] = useState(true);
+  const [infoError, setInfoError] = useState<string | null>(null);
+
+  const handleSubmit = () => {
+    setError(null);
+
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    const subject = encodeURIComponent(`Message from ${name} via portfolio`);
+    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
+    const mailto = `mailto:pjramyanath@gmail.com?subject=${subject}&body=${body}`;
+
+    window.location.href = mailto;
+    setSent(true);
+  };
+
+  const handleReset = () => {
+    setName("");
+    setEmail("");
+    setMessage("");
+    setError(null);
+    setSent(false);
+  };
+
+  const contactInfo = [
+    {
+      icon: Mail,
+      label: "Email",
+      value: info?.email ?? "pjramyanath@gmail.com",
+      href: `mailto:${info?.email ?? "pjramyanath@gmail.com"}`,
+      color: "from-pink-500 to-rose-500",
+    },
+    {
+      icon: MapPin,
+      label: "Location",
+      value: info?.location ?? "Colombo, Sri Lanka",
+      color: "from-purple-500 to-indigo-500",
+    },
+    {
+      icon: Linkedin,
+      label: "LinkedIn",
+      value: info?.linkedin ?? "pasan-ramyanath",
+      href: info?.linkedin ? info.linkedin : "https://www.linkedin.com/in/pasan-ramyanath/",
+      color: "from-blue-500 to-cyan-500",
+    },
+    {
+      icon: Github,
+      label: "Github",
+      value: info?.github ?? "PasanRamyanath",
+      href: info?.github ? info.github : "https://github.com/PasanRamyanath",
+      color: "from-gray-700 to-gray-900",
+    },
+  ];
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadInfo() {
+      setLoadingInfo(true);
+      setInfoError(null);
+      try {
+        const snap = await getDocs(collection(db, "my-information"));
+        if (!mounted) return;
+        if (snap.empty) {
+          console.log("my-information collection is empty");
+          setInfo(null);
+        } else {
+          // take the first document
+          const d = snap.docs[0].data() as any;
+          console.log("Loaded my-information (raw doc):", d);
+          setInfo({
+            description: d.description,
+            email: d.email,
+            facebook: d.facebook,
+            fullName: d.fullName,
+            github: d.github,
+            initialName: d.initialName,
+            instagram: d.instagram,
+            linkedin: d.linkedin,
+            location: d.location,
+            portfolio: d.portfolio,
+            techStacks: Array.isArray(d.techStacks) ? d.techStacks : [],
+          });
+          console.log("Info state set to:", {
+            description: d.description,
+            email: d.email,
+            github: d.github,
+            linkedin: d.linkedin,
+            location: d.location,
+            techStacks: Array.isArray(d.techStacks) ? d.techStacks : [],
+          });
+        }
+      } catch (err: any) {
+        console.error("Failed to load my-infomation:", err);
+        if (!mounted) return;
+        setInfoError(String(err?.message ?? err));
+      } finally {
+        if (mounted) setLoadingInfo(false);
+      }
+    }
+
+    loadInfo();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+
+
+      <main className="relative py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <h1 className="text-5xl sm:text-6xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+              Let's Connect
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              I'd love to hear about your project or opportunity. Reach out using the form below or via email / social links.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Contact Info Sidebar */}
+            <div className="lg:col-span-1 space-y-4">
+              {/* Info Card */}
+              <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 hover:shadow-2xl transition-all duration-300">
+                <h2 className="text-2xl font-bold text-gray-800 mb-3">Get in Touch</h2>
+                <p className="text-gray-600 mb-6">
+                  Available for freelance work, contract roles, and collaborations. 
+                  <span className="block mt-2 text-sm text-indigo-600 font-medium">Response time: 1-2 business days</span>
+                </p>
+
+                <div className="space-y-4">
+                  {contactInfo.map((item, index) => (
+                    <div 
+                      key={index}
+                      className="group relative overflow-hidden rounded-xl p-4 bg-gradient-to-br from-gray-50 to-white hover:shadow-lg transition-all duration-300 border border-gray-100"
+                    >
+                      <div className={`absolute inset-0 bg-gradient-to-r ${item.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
+                      
+                      <div className="relative flex items-start gap-3">
+                        <div className={`flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg`}>
+                          <item.icon className="w-5 h-5 text-white" />
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-semibold text-gray-700 mb-1">{item.label}</h3>
+                          {item.href ? (
+                            <a 
+                              href={item.href}
+                              target={item.href.startsWith('http') ? '_blank' : undefined}
+                              rel={item.href.startsWith('http') ? 'noreferrer' : undefined}
+                              className="text-sm text-indigo-600 hover:text-indigo-700 font-medium break-all group-hover:underline"
+                            >
+                              {item.value}
+                            </a>
+                          ) : (
+                            <p className="text-sm text-gray-600">{item.value}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Tech stacks */}
+                <div className="mt-6">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">Tech stacks</h3>
+                  {loadingInfo ? (
+                    <p className="text-sm text-gray-500">Loading...</p>
+                  ) : infoError ? (
+                    <p className="text-sm text-red-600">Failed to load tech stacks</p>
+                  ) : (info?.techStacks && info.techStacks.length > 0) ? (
+                    <div className="flex flex-wrap gap-2">
+                      {info.techStacks.map((t, i) => (
+                        <span key={i} className="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-sm font-medium">{t}</span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No tech stacks listed.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Form */}
+            <div className="lg:col-span-2">
+              <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/20">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2">Send a Message</h2>
+                  <p className="text-gray-600">Fill out the form below and it will open your mail client with the message prefilled.</p>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {/* Name Field */}
+                    <div className="relative">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Your Name
+                      </label>
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        onFocus={() => setFocusedField('name')}
+                        onBlur={() => setFocusedField(null)}
+                        className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 bg-white/50 backdrop-blur-sm
+                          ${focusedField === 'name' 
+                            ? 'border-indigo-500 shadow-lg shadow-indigo-100' 
+                            : 'border-gray-200 hover:border-gray-300'
+                          } focus:outline-none`}
+                        placeholder="Jane Doe"
+                      />
+                    </div>
+
+                    {/* Email Field */}
+                    <div className="relative">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Your Email
+                      </label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        onFocus={() => setFocusedField('email')}
+                        onBlur={() => setFocusedField(null)}
+                        className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 bg-white/50 backdrop-blur-sm
+                          ${focusedField === 'email' 
+                            ? 'border-indigo-500 shadow-lg shadow-indigo-100' 
+                            : 'border-gray-200 hover:border-gray-300'
+                          } focus:outline-none`}
+                        placeholder="you@example.com"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Message Field */}
+                  <div className="relative">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Your Message
+                    </label>
+                    <textarea
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onFocus={() => setFocusedField('message')}
+                      onBlur={() => setFocusedField(null)}
+                      rows={6}
+                      className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 bg-white/50 backdrop-blur-sm resize-none
+                        ${focusedField === 'message' 
+                          ? 'border-indigo-500 shadow-lg shadow-indigo-100' 
+                          : 'border-gray-200 hover:border-gray-300'
+                        } focus:outline-none`}
+                      placeholder="Tell me about your project, collaboration idea, or question..."
+                    />
+                  </div>
+
+                  {/* Error Message */}
+                  {error && (
+                    <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+                      <span className="text-sm font-medium">{error}</span>
+                    </div>
+                  )}
+
+                  {/* Success Message */}
+                  {sent && !error && (
+                    <div className="flex items-center gap-2 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700">
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span className="text-sm font-medium">Opening your mail client...</span>
+                    </div>
+                  )}
+
+                  {/* Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <button
+                      onClick={handleSubmit}
+                      className="flex-1 group relative overflow-hidden px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                    >
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        <Send className="w-5 h-5" />
+                        Send Message
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </button>
+
+                    <button
+                      onClick={handleReset}
+                      className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
+                    >
+                      <RotateCcw className="w-5 h-5" />
+                      Reset
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

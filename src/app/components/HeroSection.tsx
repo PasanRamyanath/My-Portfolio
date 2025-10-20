@@ -18,7 +18,7 @@ export default function HeroSection() {
   return (
     <section
       id="home"
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-16"
+      className="min-h-[80vh] md:min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-16"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -29,9 +29,9 @@ export default function HeroSection() {
             }`}
           >
             <div className="space-y-2">
-              <p className="text-blue-600 font-semibold text-lg">Hi, I&apos;m</p>
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900">Your Name</h1>
-              <h2 className="text-3xl md:text-4xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <p className="text-blue-600 font-semibold text-sm sm:text-base">Hi, I&apos;m</p>
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-900">Your Name</h1>
+              <h2 className="text-xl sm:text-2xl md:text-4xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Full Stack Developer
               </h2>
             </div>
@@ -75,7 +75,7 @@ export default function HeroSection() {
               mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
             }`}
           >
-            <div className="relative w-80 h-80 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-white shadow-2xl">
+            <div className="relative w-56 h-56 sm:w-72 sm:h-72 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-white shadow-2xl">
               {mounted && <Profile3D modelPath={me} />}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full blur-2xl opacity-30 animate-pulse pointer-events-none" />
             </div>
