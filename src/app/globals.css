@@ -9,3 +9,24 @@ html, body {
 * {
   box-sizing: border-box;
 }
+
+/* Make images and videos responsive by default */
+img, picture, video, canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Reduce base spacing on very small screens */
+@media (max-width: 420px) {
+  :root {
+    /* Slightly reduce the root font size so large headings scale better */
+    font-size: 14px;
+  }
+}
+
+/* Utility: center content inside full-bleed sections on small screens */
+.container-sm {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}

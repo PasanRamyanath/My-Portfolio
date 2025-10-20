@@ -5,7 +5,7 @@ import { auth, googleProvider } from "@/lib/firebase";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 
 interface Props {
-  onLogin: () => void;
+  onLogin: (user?: any) => void;
 }
 
 const ADMIN_EMAIL = "pjramyanath@gmail.com";
@@ -23,8 +23,8 @@ export default function Login({ onLogin }: Props) {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      onLogin();
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      onLogin(cred.user);
     } catch (err) {
       setError("Login failed: invalid email or password");
     }
@@ -39,7 +39,7 @@ export default function Login({ onLogin }: Props) {
         setError("Login failed: unauthorized Google account");
         return;
       }
-      onLogin();
+  onLogin(result.user);
     } catch (err: any) {
       setError(
         err?.message
@@ -93,5 +93,6 @@ export default function Login({ onLogin }: Props) {
         Login with Google
       </button>
     </div>
+    
   );
 }

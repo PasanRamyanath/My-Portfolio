@@ -1,22 +1,21 @@
-"use client";
-
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
+// Read Firebase config from environment variables.
+// Use NEXT_PUBLIC_ prefix for values that may be needed on the client.
 const firebaseConfig = {
-  apiKey: "AIzaSyBlp5kL85iwox27LjCYRBiPVdvrwWCZT9U",
-  authDomain: "pasan-portfolio-5d478.firebaseapp.com",
-  projectId: "pasan-portfolio-5d478",
-  storageBucket: "pasan-portfolio-5d478.firebasestorage.app",
-  messagingSenderId: "18126615169",
-  appId: "1:18126615169:web:1c630b846d3ad13a90d380",
-  measurementId: "G-SCT4XMJ5JJ",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase only once
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 // Analytics (only in browser)
