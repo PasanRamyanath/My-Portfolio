@@ -1,18 +1,18 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { createPortal } from "react-dom";
+// import { createPortal } from "react-dom";
 import Image from "next/image";
 import { db, auth } from "@/lib/firebase";
 import {
   collection,
   addDoc,
   getDocs,
-  deleteDoc,
+  // deleteDoc,
   doc,
   updateDoc,
-  getDoc,
-  deleteField,
+  // getDoc,
+  // deleteField,
 } from "firebase/firestore";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 
@@ -51,7 +51,7 @@ export default function AdminProjectsPage() {
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
-  const [selectedType, setSelectedType] = useState<string>("all");
+  // const [selectedType, setSelectedType] = useState<string>("all");
   const [projectTypes, setProjectTypes] = useState<string[]>([]);
 
   const [form, setForm] = useState<ProjectForm>({
@@ -69,13 +69,14 @@ export default function AdminProjectsPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [uploadingMedia, setUploadingMedia] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [selectedMediaIndex, setSelectedMediaIndex] = useState<number>(0);
+  // const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  // const [selectedMediaIndex, setSelectedMediaIndex] = useState<number>(0);
+
+  const [loading, setLoading] = useState(false);
 
   const ADMIN_EMAIL = "pjramyanath@gmail.com";
 
@@ -113,65 +114,73 @@ export default function AdminProjectsPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleTechKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key !== "Enter") return;
-    e.preventDefault();
-    const val = (e.target as HTMLInputElement).value.trim();
-    if (!val) return;
-    setForm((prev) => ({ ...prev, techStacks: Array.from(new Set([...prev.techStacks, val])) }));
-    (e.target as HTMLInputElement).value = "";
-  };
+  // const handleTechKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key !== "Enter") return;
+  //   e.preventDefault();
+  //   const val = (e.target as HTMLInputElement).value.trim();
+  //   if (!val) return;
+  //   setForm((prev) => ({ ...prev, techStacks: Array.from(new Set([...prev.techStacks, val])) }));
+  //   (e.target as HTMLInputElement).value = "";
+  // };
 
-  const handleMediaUpload = async () => {
-    if (!mediaFiles.length) {
-      setError("Please select files");
-      return;
-    }
-    setUploadingMedia(true);
-    setError("");
-    setSuccess("");
+  // const handleMediaUpload = async () => {
+  //   if (!mediaFiles.length) {
+  //     setError("Please select files");
+  //     return;
+  //   }
+  //   setUploadingMedia(true);
+  //   setError("");
+  //   setSuccess("");
+  //
+  //   try {
+  //     const uploaded: MediaItem[] = [];
+  //     for (const file of mediaFiles) {
+  //       const fd = new FormData();
+  //       fd.append("file", file);
+  //       const res = await fetch("/api/upload", { method: "POST", body: fd });
+  //       const data = await res.json();
+  //       if (!data.success) throw new Error(data.error || "Upload failed");
+  //       uploaded.push({ url: data.url, fileId: data.fileId });
+  //     }
+  //     setForm((prev) => ({ ...prev, media: [...prev.media, ...uploaded] }));
+  //     setMediaFiles([]);
+  //     if (fileInputRef.current) fileInputRef.current.value = "";
+  //     setSuccess(`Uploaded ${uploaded.length} file(s)`);
+  //   } catch (err: unknown) {
+  //     if (err && typeof err === "object" && "message" in err && typeof (err as { message?: unknown }).message === "string") {
+  //       setError((err as { message: string }).message);
+  //     } else {
+  //       setError("Upload failed");
+  //     }
+  //   } finally {
+  //     setUploadingMedia(false);
+  //   }
+  // };
 
-    try {
-      const uploaded: MediaItem[] = [];
-      for (const file of mediaFiles) {
-        const fd = new FormData();
-        fd.append("file", file);
-        const res = await fetch("/api/upload", { method: "POST", body: fd });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || "Upload failed");
-        uploaded.push({ url: data.url, fileId: data.fileId });
-      }
-      setForm((prev) => ({ ...prev, media: [...prev.media, ...uploaded] }));
-      setMediaFiles([]);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      setSuccess(`Uploaded ${uploaded.length} file(s)`);
-    } catch (err: any) {
-      setError(err.message || "Upload failed");
-    } finally {
-      setUploadingMedia(false);
-    }
-  };
-
-  const removeMediaAt = async (index: number) => {
-    const item = form.media[index];
-    const fileId = item?.fileId;
-
-    if (editingId) {
-      try {
-        if (fileId) await fetch(`/api/upload/delete`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ fileId }) });
-        const remaining = form.media.filter((_, i) => i !== index);
-        const docRef = doc(db, "projects", editingId);
-        await updateDoc(docRef, { media: remaining.map((m) => m.url) });
-        setForm((prev) => ({ ...prev, media: remaining }));
-        await fetchProjects();
-        setSuccess("Media removed");
-      } catch (err: any) {
-        setError(err.message || "Failed to remove media");
-      }
-    } else {
-      setForm((prev) => ({ ...prev, media: prev.media.filter((_, i) => i !== index) }));
-    }
-  };
+  // const removeMediaAt = async (index: number) => {
+  //   const item = form.media[index];
+  //   const fileId = item?.fileId;
+  //
+  //   if (editingId) {
+  //     try {
+  //       if (fileId) await fetch(`/api/upload/delete`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ fileId }) });
+  //       const remaining = form.media.filter((_, i) => i !== index);
+  //       const docRef = doc(db, "projects", editingId);
+  //       await updateDoc(docRef, { media: remaining.map((m) => m.url) });
+  //       setForm((prev) => ({ ...prev, media: remaining }));
+  //       await fetchProjects();
+  //       setSuccess("Media removed");
+  //     } catch (err: unknown) {
+  //       if (err && typeof err === "object" && "message" in err && typeof (err as { message?: unknown }).message === "string") {
+  //         setError((err as { message: string }).message);
+  //       } else {
+  //         setError("Failed to remove media");
+  //       }
+  //     }
+  //   } else {
+  //     setForm((prev) => ({ ...prev, media: prev.media.filter((_, i) => i !== index) }));
+  //   }
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,8 +210,12 @@ export default function AdminProjectsPage() {
       setMediaFiles([]);
       setEditingId(null);
       await fetchProjects();
-    } catch (err: any) {
-      setError(err.message || "Save failed");
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && "message" in err && typeof (err as { message?: unknown }).message === "string") {
+        setError((err as { message: string }).message);
+      } else {
+        setError("Save failed");
+      }
     } finally {
       setLoading(false);
     }
@@ -266,3 +279,5 @@ export default function AdminProjectsPage() {
     </div>
   );
 }
+
+

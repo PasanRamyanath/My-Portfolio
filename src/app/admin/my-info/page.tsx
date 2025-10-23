@@ -56,7 +56,7 @@ export default function AdminMyInfoPage() {
 
   useEffect(() => {
     loadInfo();
-  }, []);
+  }, [loadInfo]);
 
   async function loadInfo() {
     setLoading(true);

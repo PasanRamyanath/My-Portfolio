@@ -27,7 +27,7 @@ export default function Login({ onLogin }: Props) {
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       onLogin(cred.user);
-    } catch (err) {
+    } catch {
       setError("Login failed: invalid email or password");
     }
   };

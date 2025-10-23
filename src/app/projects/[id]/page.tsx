@@ -26,23 +26,40 @@ interface ProjectDetail {
   [key: string]: string | string[] | (string | MediaObject)[] | MediaObject | undefined;
 }
 
-// Metadata generation must be in a server component (no "use client")
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+interface ProjectPageParams {
+  id: string;
+}
+
+// Metadata must be in a server component
+export async function generateMetadata({ params }: { params?: Promise<ProjectPageParams> }): Promise<Metadata> {
   try {
-    const snapshot = await getDoc(doc(db, "projects", params.id));
+    const resolvedParams = params ? await params : undefined;
+    if (!resolvedParams?.id) return { title: "Project", description: "Project details" };
+    const snapshot = await getDoc(doc(db, "projects", resolvedParams.id));
     const data = snapshot.exists() ? (snapshot.data() as ProjectDetail) : null;
+
     return {
       title: data?.title ? `${data.title} — Project` : "Project",
-      description:
-        data?.["long-description"] ?? data?.longDescription ?? data?.description ?? "Project details",
+      description: data?.["long-description"] ?? data?.longDescription ?? data?.description ?? "Project details",
     };
   } catch {
     return { title: "Project", description: "Project details" };
   }
 }
 
-export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
-  const snapshot = await getDoc(doc(db, "projects", params.id));
+export default async function ProjectDetailPage({ params }: { params?: Promise<ProjectPageParams> }) {
+  const resolvedParams = params ? await params : undefined;
+  if (!resolvedParams?.id) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold">Project not found</h1>
+          <p className="text-gray-600 mt-2">The project you&apos;re looking for doesn&apos;t exist.</p>
+        </div>
+      </main>
+    );
+  }
+  const snapshot = await getDoc(doc(db, "projects", resolvedParams.id));
   if (!snapshot.exists()) {
     return (
       <main className="min-h-screen flex items-center justify-center">
@@ -58,8 +75,8 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
 
   const project = snapshot.data() as ProjectDetail;
 
-  const buildMediaArray = (p: ProjectDetail) => {
-    if (!p) return [] as string[];
+  const buildMediaArray = (p: ProjectDetail): string[] => {
+    if (!p) return [];
     if (Array.isArray(p.media) && p.media.length > 0)
       return p.media.map((v) => (typeof v === "string" ? v : v.url)).filter(Boolean) as string[];
 
