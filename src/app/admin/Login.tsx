@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { auth, googleProvider } from "@/lib/firebase";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, User } from "firebase/auth";
 
 interface Props {
-  onLogin: (user?: any) => void;
+  onLogin: (user?: User) => void;
 }
 
 const ADMIN_EMAIL = "pjramyanath@gmail.com";
@@ -15,8 +15,10 @@ export default function Login({ onLogin }: Props) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
+
     if (email !== ADMIN_EMAIL) {
       setError("Login failed: unauthorized email");
       return;
@@ -31,21 +33,22 @@ export default function Login({ onLogin }: Props) {
   };
 
   const handleGoogleLogin = async () => {
+    setError("");
+
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const email = result.user.email;
-      if (email !== ADMIN_EMAIL) {
+      const user = result.user;
+
+      if (user.email !== ADMIN_EMAIL) {
         await auth.signOut();
         setError("Login failed: unauthorized Google account");
         return;
       }
-  onLogin(result.user);
-    } catch (err: any) {
-      setError(
-        err?.message
-          ? `Login failed: ${err.message}`
-          : "Login failed: Google login error"
-      );
+
+      onLogin(user);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Google login error";
+      setError(`Login failed: ${message}`);
     }
   };
 
@@ -93,6 +96,5 @@ export default function Login({ onLogin }: Props) {
         Login with Google
       </button>
     </div>
-    
   );
 }

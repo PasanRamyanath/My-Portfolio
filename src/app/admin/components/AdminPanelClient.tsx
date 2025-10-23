@@ -1,15 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { db, auth } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
-import { signOut, onAuthStateChanged } from "firebase/auth";
+import { signOut, onAuthStateChanged, User } from "firebase/auth";
 
-export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }) {
+interface ProjectForm {
+  title: string;
+  description: string;
+  image: string;
+  github: string;
+  demo: string;
+  type: "own" | "private" | "group";
+}
+
+interface Props {
+  onLogout?: () => void;
+}
+
+export default function AdminPanelClient({ onLogout }: Props) {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<ProjectForm>({
     title: "",
     description: "",
     image: "",
@@ -19,7 +33,6 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
-
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
@@ -27,7 +40,7 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
   const ADMIN_EMAIL = "pjramyanath@gmail.com";
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
       setUserEmail(user?.email ?? null);
       setLoadingUser(false);
     });
@@ -61,16 +74,18 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
         body: formData,
       });
 
-      const data = await res.json();
+      const data: { success: boolean; url?: string; error?: string } =
+        await res.json();
 
-      if (!data.success) {
+      if (!data.success || !data.url) {
         throw new Error(data.error || "Failed to upload image");
       }
 
-      setForm((prev) => ({ ...prev, image: data.url }));
+      setForm((prev) => ({ ...prev, image: data.url || "" }));
       setSuccess("Image uploaded successfully!");
-    } catch (err: any) {
-      setError(err.message || "Image upload failed");
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Image upload failed");
     } finally {
       setUploadingImage(false);
     }
@@ -83,19 +98,13 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
     setSuccess("");
 
     try {
-      await addDoc(collection(db, "projects"), {
-        title: form.title,
-        description: form.description,
-        image: form.image,
-        github: form.github,
-        demo: form.demo,
-        type: form.type,
-      });
-  setSuccess("Project added successfully!");
-  setForm({ title: "", description: "", image: "", github: "", demo: "", type: "own" });
+      await addDoc(collection(db, "projects"), form);
+      setSuccess("Project added successfully!");
+      setForm({ title: "", description: "", image: "", github: "", demo: "", type: "own" });
       setImageFile(null);
-    } catch (err: any) {
-      setError(err.message || "Error adding project");
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Error adding project");
     } finally {
       setLoading(false);
     }
@@ -113,7 +122,10 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
       <div className="text-center mt-20 text-red-500">
         Access Denied. You are not authorized to view this page.
         <div className="mt-4">
-          <button onClick={handleLogout} className="px-4 py-2 bg-red-600 text-white rounded-lg">
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg"
+          >
             Logout
           </button>
         </div>
@@ -124,7 +136,10 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
   return (
     <div className="max-w-xl mx-auto bg-white rounded-xl shadow-lg p-8 mt-8">
       <div className="flex justify-end mb-4">
-        <button onClick={handleLogout} className="px-4 py-2 bg-red-600 text-white rounded-lg">
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 bg-red-600 text-white rounded-lg"
+        >
           Logout
         </button>
       </div>
@@ -141,7 +156,6 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
           required
         />
 
-        {/* Type Dropdown */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Project type</label>
           <select
@@ -165,7 +179,6 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
           required
         />
 
-        {/* Image Upload Section */}
         <div className="space-y-2">
           <input
             type="file"
@@ -182,8 +195,13 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
           </button>
 
           {form.image && (
-            <div className="mt-2">
-              <img src={form.image} alt="Preview" className="w-full h-40 object-cover rounded" />
+            <div className="mt-2 relative w-full h-40 rounded overflow-hidden">
+              <Image
+                src={form.image}
+                alt="Preview"
+                fill
+                className="object-cover"
+              />
             </div>
           )}
         </div>

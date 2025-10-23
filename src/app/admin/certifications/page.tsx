@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import Image from "next/image";
 import { db, auth } from "@/lib/firebase";
-import { collection, getDocs, addDoc, updateDoc, doc, deleteDoc } from "firebase/firestore";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { collection, getDocs, addDoc, updateDoc, doc, deleteDoc, DocumentData } from "firebase/firestore";
+import { onAuthStateChanged, signOut, User } from "firebase/auth";
 
 interface Cert {
   id: string;
@@ -16,13 +17,13 @@ interface Cert {
 }
 
 export default function AdminCertsPage() {
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
   const [certs, setCerts] = useState<Cert[]>([]);
   const [loadingCerts, setLoadingCerts] = useState(true);
 
-  const [form, setForm] = useState({ cert_name: "", description: "", image: "", issuer: "", linkedin: "" });
+  const [form, setForm] = useState<Omit<Cert, "id">>({ cert_name: "", description: "", image: "", issuer: "", linkedin: "" });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -35,7 +36,7 @@ export default function AdminCertsPage() {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
-      setUserEmail(u?.email ?? null);
+      setUser(u);
       setLoadingUser(false);
     });
     return () => unsub();
@@ -49,10 +50,11 @@ export default function AdminCertsPage() {
     setLoadingCerts(true);
     try {
       const snap = await getDocs(collection(db, "certifications"));
-      const data = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Cert[];
+      const data: Cert[] = snap.docs.map((d) => ({ id: d.id, ...(d.data() as DocumentData) }));
       setCerts(data);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Failed to load certs:", err);
+      setError((err as Error).message);
     } finally {
       setLoadingCerts(false);
     }
@@ -72,11 +74,11 @@ export default function AdminCertsPage() {
       const fd = new FormData();
       fd.append("file", imageFile);
       const res = await fetch("/api/upload", { method: "POST", body: fd });
-      const data = await res.json();
+      const data = (await res.json()) as { success: boolean; url?: string; error?: string };
       if (!data.success) throw new Error(data.error || "Upload failed");
-      setForm((p) => ({ ...p, image: data.url }));
-    } catch (err: any) {
-      setError(err.message || String(err));
+      setForm((p) => ({ ...p, image: data.url ?? "" }));
+    } catch (err) {
+      setError((err as Error).message);
     } finally {
       setUploadingImage(false);
     }
@@ -94,8 +96,8 @@ export default function AdminCertsPage() {
       setForm({ cert_name: "", description: "", image: "", issuer: "", linkedin: "" });
       setEditingId(null);
       await loadCerts();
-    } catch (err: any) {
-      setError(err.message || String(err));
+    } catch (err) {
+      setError((err as Error).message);
     } finally {
       setSaving(false);
     }
@@ -112,8 +114,8 @@ export default function AdminCertsPage() {
     try {
       await deleteDoc(doc(db, "certifications", id));
       await loadCerts();
-    } catch (err: any) {
-      setError(err.message || String(err));
+    } catch (err) {
+      setError((err as Error).message);
     }
   };
 
@@ -137,12 +139,14 @@ export default function AdminCertsPage() {
 
   if (loadingUser) return <p>Loading...</p>;
 
-  if (userEmail !== ADMIN_EMAIL) {
+  if (user?.email !== ADMIN_EMAIL) {
     return (
       <div className="text-center mt-20 text-red-500">
         Access Denied.
         <div className="mt-4">
-          <button onClick={handleLogout} className="px-4 py-2 bg-red-600 text-white rounded-lg">Logout</button>
+          <button onClick={handleLogout} className="px-4 py-2 bg-red-600 text-white rounded-lg">
+            Logout
+          </button>
         </div>
       </div>
     );
@@ -161,13 +165,31 @@ export default function AdminCertsPage() {
 
           <div className="flex gap-3 items-center">
             <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
-            <button onClick={handleUpload} className="px-3 py-2 bg-blue-600 text-white rounded" disabled={uploadingImage}>{uploadingImage ? "Uploading..." : "Upload image"}</button>
-            {form.image && <img src={form.image} alt="preview" className="w-32 h-20 object-cover rounded" />}
+            <button onClick={handleUpload} className="px-3 py-2 bg-blue-600 text-white rounded" disabled={uploadingImage}>
+              {uploadingImage ? "Uploading..." : "Upload image"}
+            </button>
+            {form.image && (
+              <div className="w-32 h-20 relative">
+                <Image src={form.image} alt="preview" fill className="object-cover rounded" />
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3">
-            <button onClick={handleSave} className="px-4 py-2 bg-green-600 text-white rounded" disabled={saving}>{saving ? "Saving..." : (editingId ? "Update" : "Add")}</button>
-            {editingId && <button onClick={() => { setEditingId(null); setForm({ cert_name: "", description: "", image: "", issuer: "", linkedin: "" }); }} className="px-3 py-2 bg-gray-200 rounded">Cancel</button>}
+            <button onClick={handleSave} className="px-4 py-2 bg-green-600 text-white rounded" disabled={saving}>
+              {saving ? "Saving..." : editingId ? "Update" : "Add"}
+            </button>
+            {editingId && (
+              <button
+                onClick={() => {
+                  setEditingId(null);
+                  setForm({ cert_name: "", description: "", image: "", issuer: "", linkedin: "" });
+                }}
+                className="px-3 py-2 bg-gray-200 rounded"
+              >
+                Cancel
+              </button>
+            )}
           </div>
 
           {error && <div className="text-red-600">{error}</div>}
@@ -185,7 +207,11 @@ export default function AdminCertsPage() {
           <div className="grid md:grid-cols-2 gap-4">
             {certs.map((c) => (
               <div key={c.id} className="border rounded p-3 flex gap-3 items-start cursor-pointer" onClick={() => setSelectedCert(c)}>
-                {c.image && <img src={c.image} alt={c.cert_name} className="w-28 h-20 object-cover rounded" />}
+                {c.image && (
+                  <div className="w-28 h-20 relative">
+                    <Image src={c.image} alt={c.cert_name ?? ""} fill className="object-cover rounded" />
+                  </div>
+                )}
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
                     <div>
@@ -193,8 +219,24 @@ export default function AdminCertsPage() {
                       <p className="text-sm text-gray-600">{c.issuer}</p>
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={(e) => { e.stopPropagation(); handleEdit(c); }} className="px-3 py-1 bg-yellow-400 text-white rounded">Edit</button>
-                      <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id); }} className="px-3 py-1 bg-red-500 text-white rounded">Delete</button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(c);
+                        }}
+                        className="px-3 py-1 bg-yellow-400 text-white rounded"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(c.id);
+                        }}
+                        className="px-3 py-1 bg-red-500 text-white rounded"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
                   <p className="text-sm text-gray-700 mt-2 line-clamp-3">{c.description}</p>
@@ -204,40 +246,62 @@ export default function AdminCertsPage() {
           </div>
         )}
       </div>
+
       {selectedCert &&
-        (typeof document !== "undefined"
-          ? createPortal(
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setSelectedCert(null)}>
-                <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex justify-end p-4">
-                    <button onClick={() => setSelectedCert(null)} className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Close</button>
+        typeof document !== "undefined" &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setSelectedCert(null)}>
+            <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
+              <div className="flex justify-end p-4">
+                <button onClick={() => setSelectedCert(null)} className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">
+                  Close
+                </button>
+              </div>
+
+              <div className="px-6 pb-8">
+                {selectedCert.image && (
+                  <div className="w-full mb-6 flex justify-center relative h-[60vh]">
+                    <Image src={selectedCert.image} alt={selectedCert.cert_name ?? ""} fill className="object-contain rounded" />
                   </div>
+                )}
 
-                  <div className="px-6 pb-8">
-                    {selectedCert.image && (
-                      <div className="w-full mb-6 flex justify-center">
-                        <img src={selectedCert.image} alt={selectedCert.cert_name} className="w-full max-w-full max-h-[60vh] object-contain rounded" />
-                      </div>
-                    )}
+                <h2 className="text-2xl font-bold mb-2">{selectedCert.cert_name}</h2>
+                {selectedCert.issuer && <p className="text-sm text-gray-500 mb-2">Issuer: {selectedCert.issuer}</p>}
+                {selectedCert.linkedin && (
+                  <p className="mb-4">
+                    <a href={selectedCert.linkedin} target="_blank" rel="noreferrer" className="text-indigo-600">
+                      View on LinkedIn
+                    </a>
+                  </p>
+                )}
 
-                    <h2 className="text-2xl font-bold mb-2">{selectedCert.cert_name}</h2>
-                    {selectedCert.issuer && <p className="text-sm text-gray-500 mb-2">Issuer: {selectedCert.issuer}</p>}
-                    {selectedCert.linkedin && (
-                      <p className="mb-4"><a href={selectedCert.linkedin} target="_blank" rel="noreferrer" className="text-indigo-600">View on LinkedIn</a></p>
-                    )}
+                <div className="prose max-w-none text-gray-700 mb-4">{selectedCert.description}</div>
 
-                    <div className="prose max-w-none text-gray-700 mb-4">{selectedCert.description}</div>
-
-                    <div className="flex gap-3 mt-4">
-                      <button onClick={() => { setSelectedCert(null); handleEdit(selectedCert); }} className="px-4 py-2 bg-yellow-400 text-white rounded">Edit</button>
-                      <button onClick={() => { setSelectedCert(null); handleDelete(selectedCert.id); }} className="px-4 py-2 bg-red-500 text-white rounded">Delete</button>
-                    </div>
-                  </div>
+                <div className="flex gap-3 mt-4">
+                  <button
+                    onClick={() => {
+                      setSelectedCert(null);
+                      handleEdit(selectedCert);
+                    }}
+                    className="px-4 py-2 bg-yellow-400 text-white rounded"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedCert(null);
+                      handleDelete(selectedCert.id);
+                    }}
+                    className="px-4 py-2 bg-red-500 text-white rounded"
+                  >
+                    Delete
+                  </button>
                 </div>
-              </div>,
-              document.body
-            )
-          : null)}
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

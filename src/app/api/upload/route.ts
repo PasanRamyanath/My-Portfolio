@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import ImageKit from "imagekit";
 
-// Ensure this route runs in a Node runtime (ImageKit Node SDK requires Node APIs)
 export const runtime = "nodejs";
 
 const imagekit = new ImageKit({
@@ -20,15 +19,19 @@ export async function POST(request: Request) {
     });
 
     const formData = await request.formData();
-    const file = formData.get("file") as File | null;
+    const file = formData.get("file");
 
-    if (!file) {
-      console.warn("No file found in form data");
-      return NextResponse.json({ success: false, error: "No file uploaded" }, { status: 400 });
+    if (!(file instanceof File)) {
+      console.warn("No valid file found in form data");
+      return NextResponse.json(
+        { success: false, error: "No file uploaded or invalid file" },
+        { status: 400 }
+      );
     }
 
-    const fileName = (file as any).name ?? `upload-${Date.now()}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const fileName = file.name || `upload-${Date.now()}`;
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
     console.log(`Uploading file ${fileName} (${buffer.length} bytes) to ImageKit`);
 
@@ -41,12 +44,19 @@ export async function POST(request: Request) {
     console.log("ImageKit response:", uploadResponse);
 
     if (!uploadResponse || !uploadResponse.url) {
-      return NextResponse.json({ success: false, error: "ImageKit upload failed, no url returned", raw: uploadResponse }, { status: 500 });
+      return NextResponse.json(
+        { success: false, error: "ImageKit upload failed, no url returned", raw: uploadResponse },
+        { status: 500 }
+      );
     }
 
-  return NextResponse.json({ success: true, url: uploadResponse.url, fileId: uploadResponse.fileId });
-  } catch (error: any) {
-    console.error("Image upload failed:", error);
-    return NextResponse.json({ success: false, error: error.message ?? String(error) }, { status: 500 });
+    return NextResponse.json({ success: true, url: uploadResponse.url, fileId: uploadResponse.fileId });
+  } catch (err: unknown) {
+    console.error("Image upload failed:", err);
+
+    const errorMessage =
+      err instanceof Error ? err.message : typeof err === "string" ? err : "Unknown error";
+
+    return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   }
 }
