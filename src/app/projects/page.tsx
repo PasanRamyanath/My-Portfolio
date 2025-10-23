@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, getDocs, DocumentData } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -21,7 +21,7 @@ interface Project {
   type?: string;
   media?: (string | MediaItem)[];
   techStacks?: string[];
-  [key: string]: any; // legacy fields like media0, media1
+  [key: string]: string | string[] | (string | MediaItem)[] | MediaItem | undefined; // legacy fields
 }
 
 export default function ProjectsSection() {
@@ -34,10 +34,10 @@ export default function ProjectsSection() {
     const fetchProjects = async () => {
       const col = collection(db, "projects");
       const snapshot = await getDocs(col);
-      const projectsData = snapshot.docs.map((doc) => ({
+      const projectsData: Project[] = snapshot.docs.map((doc) => ({
+        ...(doc.data() as Project),
         id: doc.id,
-        ...doc.data(),
-      })) as Project[];
+      }));
 
       setProjects(projectsData);
 
@@ -48,35 +48,39 @@ export default function ProjectsSection() {
     fetchProjects();
   }, []);
 
-  const getMediaFromProject = (p: Project): string[] => {
-    if (!p) return [];
-    if (p.media && Array.isArray(p.media) && p.media.length > 0) {
-      return p.media.map((v) => (typeof v === "string" ? v : v.url)).filter(Boolean);
+  const getMediaFromProject = (project: Project): string[] => {
+    if (!project) return [];
+
+    if (project.media && Array.isArray(project.media) && project.media.length > 0) {
+      return project.media.map((v) => (typeof v === "string" ? v : v.url)).filter(Boolean);
     }
 
-    // legacy keys: media0, media1, ...
-    const keys = Object.keys(p)
+    // legacy media keys: media0, media1, ...
+    const legacyKeys = Object.keys(project)
       .filter((k) => /^media\d+$/.test(k))
       .sort((a, b) => parseInt(a.replace("media", ""), 10) - parseInt(b.replace("media", ""), 10));
 
-    const legacyUrls = keys
+    const legacyUrls = legacyKeys
       .map((k) => {
-        const val = p[k];
+        const val = project[k];
         if (!val) return null;
-        return typeof val === "string" ? val : (val as MediaItem).url;
+        if (typeof val === "string") return val;
+        if (Array.isArray(val)) return null;
+        return (val as MediaItem).url;
       })
       .filter(Boolean) as string[];
 
     if (legacyUrls.length > 0) return legacyUrls;
 
-    if (p.image) return [typeof p.image === "string" ? p.image : p.image.url];
+    if (project.image) return [typeof project.image === "string" ? project.image : project.image.url];
+
     return [];
   };
 
-  const getTechListFromProject = (p: Project): string[] => {
-    const techField: string[] | string | undefined =
-      p["tech-stacks"] ?? p.techStacks ?? p.tech;
-    if (Array.isArray(techField)) return techField;
+  const getTechListFromProject = (project: Project): string[] => {
+    const techField: string | string[] | (string | MediaItem)[] | MediaItem | undefined =
+      project["tech-stacks"] ?? project.techStacks ?? project.tech;
+    if (Array.isArray(techField)) return techField.filter((item): item is string => typeof item === "string");
     if (typeof techField === "string") return techField.split(",").map((s) => s.trim()).filter(Boolean);
     return [];
   };
@@ -88,15 +92,14 @@ export default function ProjectsSection() {
     const delay = 2500;
 
     useEffect(() => {
-      if (!media || media.length === 0) return;
-      if (isPaused) return;
+      if (!media.length || isPaused) return;
       const id = setInterval(() => setIndex((i) => (i + 1) % media.length), delay);
       return () => clearInterval(id);
     }, [media, isPaused]);
 
     useEffect(() => setIndex(0), [project.id]);
 
-    const src = media.length > 0 ? media[index] : typeof project.image === "string" ? project.image : project.image?.url;
+    const currentSrc = media.length > 0 ? media[index] : typeof project.image === "string" ? project.image : project.image?.url;
 
     return (
       <div
@@ -105,22 +108,19 @@ export default function ProjectsSection() {
         onMouseLeave={() => setIsPaused(false)}
         className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-200"
       >
-        {media && media.length > 0 ? (
+        {currentSrc ? (
           <div className="relative w-full h-40 sm:h-44 md:h-48 bg-gray-100 overflow-hidden">
             {media.map((m, i) => (
               <div
                 key={i}
-                className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${i === index ? "opacity-100 z-10" : "opacity-0 z-0"}`}
+                className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                  i === index ? "opacity-100 z-10" : "opacity-0 z-0"
+                }`}
               >
                 {m.endsWith(".mp4") || m.endsWith(".webm") ? (
                   <video src={m} className="w-full h-full object-cover" preload="metadata" muted playsInline />
                 ) : (
-                  <Image
-                    src={m}
-                    alt={`${project.title}-${i}`}
-                    fill
-                    className="object-cover object-center"
-                  />
+                  <Image src={m} alt={`${project.title}-${i}`} fill className="object-cover object-center" />
                 )}
               </div>
             ))}
@@ -181,7 +181,7 @@ export default function ProjectsSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">Projects</h2>
-          <p className="text-gray-600 text-lg">Things I've built over time</p>
+          <p className="text-gray-600 text-lg">Things I&apos;ve built over time</p>
         </div>
 
         {projectTypes.length > 0 && (
