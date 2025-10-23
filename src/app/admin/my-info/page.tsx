@@ -39,7 +39,11 @@ export default function AdminMyInfoPage() {
     return () => unsub();
   }, []);
 
-  const loadInfo = useCallback(async () => {
+  useEffect(() => {
+    loadInfo();
+  }, []);
+
+  async function loadInfo() {
     setLoading(true);
     setError(null);
     try {
@@ -72,11 +76,7 @@ export default function AdminMyInfoPage() {
     } finally {
       setLoading(false);
     }
-  }, [fields]);
-
-  useEffect(() => {
-    loadInfo();
-  }, [loadInfo]);
+  }
 
   const handleFieldChange = (k: string, v: any) => {
     setFields((prev: any) => ({ ...prev, [k]: v }));
