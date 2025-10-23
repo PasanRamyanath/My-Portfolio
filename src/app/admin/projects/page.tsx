@@ -173,8 +173,8 @@ export default function AdminProjectsPage() {
 
         // If the document already stores a `media` array, update that directly
         if (Array.isArray(current.media)) {
-          const remainingUrls = remaining.map((m: any) => (typeof m === 'string' ? m : m?.url)).filter(Boolean);
-          await updateDoc(docRef, { media: remainingUrls });
+          // keep media as objects (url + fileId) when possible so we can later delete by fileId
+          await updateDoc(docRef, { media: remaining });
         } else {
           // legacy: reindex media0..mediaN fields and delete leftovers
           const existingKeys = Object.keys(current).filter((k) => /^media\d+$/.test(k));
@@ -233,7 +233,8 @@ export default function AdminProjectsPage() {
 
       // attach media as a single array of URL strings (preferred format)
       if (Array.isArray((form as any).media)) {
-        payload.media = (form as any).media.map((m: any) => (typeof m === 'string' ? m : m?.url)).filter(Boolean);
+        // store the media array as-is (objects with url + fileId when available)
+        payload.media = (form as any).media;
       }
 
       if (editingId) {
