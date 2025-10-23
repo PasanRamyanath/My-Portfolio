@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 
 const Profile3D = dynamic(() => import("../components/Profile3D"), { ssr: false });
 const me = "/me.glb";
@@ -10,10 +11,6 @@ export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
-
-  const scrollToSection = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-  };
 
   return (
     <section
@@ -43,12 +40,12 @@ export default function HeroSection() {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <a
+              <Link
                 href="/projects"
                 className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transform hover:scale-105 transition-all shadow-lg hover:shadow-xl"
               >
                 View Projects
-              </a>
+              </Link>
               <a
                 href="#about"
                 className="px-8 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transform hover:scale-105 transition-all"
@@ -78,7 +75,6 @@ export default function HeroSection() {
             <div className="relative w-56 h-56 sm:w-72 sm:h-72 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-white shadow-2xl">
               {mounted && <Profile3D modelPath={me} />}
 
-              {/* Decorative background layers behind the 3D canvas so the model stays fully visible */}
               <div
                 className="absolute inset-0 rounded-full pointer-events-none -z-20 blur-md"
                 style={{
@@ -96,7 +92,6 @@ export default function HeroSection() {
                 }}
               />
 
-              {/* Subtle glow ring between the gradients and the canvas for extra depth */}
               <div
                 className="absolute inset-0 rounded-full pointer-events-none -z-5"
                 style={{

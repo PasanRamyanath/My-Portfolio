@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export default function AboutSection() {
   const skills = ["React", "Next.js", "TypeScript", "Node.js", "Tailwind CSS", "Firebase"];
   const passions = [
@@ -12,30 +14,28 @@ export default function AboutSection() {
   return (
     <section id="about" className="py-24 bg-gradient-to-br from-slate-50 via-white to-blue-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-block mb-4">
             <span className="text-sm font-semibold text-blue-600 tracking-wider uppercase bg-blue-50 px-4 py-1.5 rounded-full">
               About Me
             </span>
           </div>
-          
+
           <p className="text-gray-600 text-lg max-w-3xl mx-auto leading-relaxed mb-8">
             I&apos;m focused on building accessible, fast, and delightful web applications. 
             I enjoy turning ideas into products and learning new web technologies along the way.
           </p>
-          
-          {/* CTA Buttons */}
+
           <div className="flex gap-4 justify-center flex-wrap">
-            <a 
-              href="/projects" 
+            <Link 
+              href="/projects"
               className="group inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
             >
               <span>See My Work</span>
               <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
-            </a>
+            </Link>
             <a
               href="/cv.pdf"
               download
@@ -49,9 +49,7 @@ export default function AboutSection() {
           </div>
         </div>
 
-        {/* Content Grid */}
         <div className="grid md:grid-cols-2 gap-10 mt-16">
-          {/* Skills Card */}
           <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
@@ -76,7 +74,6 @@ export default function AboutSection() {
             </div>
           </div>
 
-          {/* Passions Card */}
           <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">

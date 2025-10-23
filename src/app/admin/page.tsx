@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import Login from "./Login";
 
 export default function AdminPage() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -31,9 +31,9 @@ export default function AdminPage() {
   if (!user) {
     return (
       <Login
-        onLogin={(u?: any) => {
+        onLogin={(u?: User) => {
           setUser(u ?? auth.currentUser);
-          // The effect above will handle redirect automatically
+          // Redirect effect above will handle navigation
         }}
       />
     );

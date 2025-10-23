@@ -1,13 +1,11 @@
-import HeroSection from "./components/HeroSection"
-import AboutSection from "./components/AboutSection"
-import Link from "next/link"
+import HeroSection from "./components/HeroSection";
+import AboutSection from "./components/AboutSection";
 
 export default function Home() {
   return (
     <main>
       <HeroSection />
-      
       <AboutSection />
     </main>
-  )
+  );
 }
