@@ -1,5 +1,5 @@
 import HeroSection from "./components/HeroSection"
-import ContactSection from "./components/ContactSection"
+import AboutSection from "./components/AboutSection"
 import Link from "next/link"
 
 export default function Home() {
@@ -7,7 +7,7 @@ export default function Home() {
     <main>
       <HeroSection />
       
-      <ContactSection />
+      <AboutSection />
     </main>
   )
 }

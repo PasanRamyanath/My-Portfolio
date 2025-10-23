@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "ImageKit upload failed, no url returned", raw: uploadResponse }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, url: uploadResponse.url });
+  return NextResponse.json({ success: true, url: uploadResponse.url, fileId: uploadResponse.fileId });
   } catch (error: any) {
     console.error("Image upload failed:", error);
     return NextResponse.json({ success: false, error: error.message ?? String(error) }, { status: 500 });
