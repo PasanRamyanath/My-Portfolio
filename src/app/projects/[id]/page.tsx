@@ -1,8 +1,6 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import type { Metadata } from "next";
 import ProjectMediaViewerClient from "../ProjectMediaViewer";
 import Link from "next/link";
 
@@ -25,47 +23,44 @@ interface ProjectDetail {
   github?: string;
   demo?: string;
   linkedin_post?: string;
-  [key: string]: any;
+  [key: string]: string | string[] | (string | MediaObject)[] | MediaObject | undefined;
 }
 
-interface ProjectDetailPageProps {
-  params: { id: string };
+interface ProjectPageParams {
+  id: string;
 }
 
-export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
-  const [project, setProject] = useState<ProjectDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+// Metadata must be in a server component
+export async function generateMetadata({ params }: { params?: Promise<ProjectPageParams> }): Promise<Metadata> {
+  try {
+    const resolvedParams = params ? await params : undefined;
+    if (!resolvedParams?.id) return { title: "Project", description: "Project details" };
+    const snapshot = await getDoc(doc(db, "projects", resolvedParams.id));
+    const data = snapshot.exists() ? (snapshot.data() as ProjectDetail) : null;
 
-  useEffect(() => {
-    const fetchProject = async () => {
-      setLoading(true);
-      try {
-        const snapshot = await getDoc(doc(db, "projects", params.id));
-        if (snapshot.exists()) {
-          setProject(snapshot.data() as ProjectDetail);
-        } else {
-          setProject(null);
-        }
-      } catch (err) {
-        console.error("Error fetching project:", err);
-        setProject(null);
-      } finally {
-        setLoading(false);
-      }
+    return {
+      title: data?.title ? `${data.title} — Project` : "Project",
+      description: data?.["long-description"] ?? data?.longDescription ?? data?.description ?? "Project details",
     };
+  } catch {
+    return { title: "Project", description: "Project details" };
+  }
+}
 
-    fetchProject();
-  }, [params.id]);
-
-  if (loading) {
+export default async function ProjectDetailPage({ params }: { params?: Promise<ProjectPageParams> }) {
+  const resolvedParams = params ? await params : undefined;
+  if (!resolvedParams?.id) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <p>Loading project...</p>
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold">Project not found</h1>
+          <p className="text-gray-600 mt-2">The project you&apos;re looking for doesn&apos;t exist.</p>
+        </div>
       </main>
     );
   }
-
-  if (!project) {
+  const snapshot = await getDoc(doc(db, "projects", resolvedParams.id));
+  if (!snapshot.exists()) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -78,17 +73,19 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     );
   }
 
-  const buildMediaArray = (p: ProjectDetail) => {
+  const project = snapshot.data() as ProjectDetail;
+
+  const buildMediaArray = (p: ProjectDetail): string[] => {
     if (!p) return [];
     if (Array.isArray(p.media) && p.media.length > 0)
-      return p.media.map((v) => (typeof v === "string" ? v : v.url)).filter(Boolean);
+      return p.media.map((v) => (typeof v === "string" ? v : v.url)).filter(Boolean) as string[];
 
     const keys = Object.keys(p)
       .filter((k) => /^media\d+$/.test(k))
       .sort((a, b) => parseInt(a.replace("media", ""), 10) - parseInt(b.replace("media", ""), 10));
 
     const values = keys.map((k) => p[k]).filter(Boolean) as (string | MediaObject)[];
-    const urls = values.map((v) => (typeof v === "string" ? v : v.url)).filter(Boolean);
+    const urls = values.map((v) => (typeof v === "string" ? v : v.url)).filter(Boolean) as string[];
     if (urls.length > 0) return urls;
 
     if (p.image) return [typeof p.image === "string" ? p.image : p.image.url];
