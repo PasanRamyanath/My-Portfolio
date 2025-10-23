@@ -303,28 +303,39 @@ export default function AdminProjectsPage() {
       const snap = await getDoc(docRef);
       const data = snap.exists() ? (snap.data() as any) : {};
 
-      // collect media fields (media0..mediaN)
+
+      // collect fileIds from several possible shapes:
+      // - new `media` array where entries may be {url, fileId}
+      // - legacy mediaN fields (media0, media1, ...)
+      // - legacy single `image` field which may be an object {url, fileId}
+      const fileIds: string[] = [];
+
+      // new media array
+      if (Array.isArray(data.media)) {
+        data.media.forEach((m: any) => {
+          if (m && typeof m === 'object' && m.fileId) fileIds.push(m.fileId);
+        });
+      }
+
+      // collect media0..mediaN (legacy)
       const mediaKeys = Object.keys(data).filter((k) => /^media\d+$/.test(k)).sort((a, b) => {
         const na = parseInt(a.replace("media", ""), 10);
         const nb = parseInt(b.replace("media", ""), 10);
         return (isNaN(na) ? 0 : na) - (isNaN(nb) ? 0 : nb);
       });
-
-      // helper to extract fileId if present
-      const extractFileId = (val: any) => (val && typeof val === 'object' ? val.fileId : null);
-
-      const fileIds: string[] = [];
       mediaKeys.forEach((k) => {
         const v = data[k];
-        const fid = extractFileId(v);
-        if (fid) fileIds.push(fid);
+        if (v && typeof v === 'object' && v.fileId) fileIds.push(v.fileId);
       });
 
       // legacy single image field might be an object {url, fileId}
       if (data.image && typeof data.image === 'object' && data.image.fileId) fileIds.push(data.image.fileId);
 
-      // call delete API for each fileId
-      for (const fid of fileIds) {
+      // deduplicate fileIds
+      const uniqueFileIds = Array.from(new Set(fileIds));
+
+      // call delete API for each unique fileId
+      for (const fid of uniqueFileIds) {
         try {
           await fetch(`/api/upload/delete`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ fileId: fid }) });
         } catch (err) {
