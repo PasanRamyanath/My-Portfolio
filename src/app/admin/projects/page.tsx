@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, ChangeEvent, KeyboardEvent, FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { db, auth } from "@/lib/firebase";
 import {
@@ -12,8 +12,14 @@ import {
   updateDoc,
   getDoc,
   deleteField,
+  DocumentData,
 } from "firebase/firestore";
 import { signOut, onAuthStateChanged } from "firebase/auth";
+
+interface MediaItem {
+  url: string;
+  fileId?: string;
+}
 
 interface Project {
   id: string;
@@ -22,38 +28,55 @@ interface Project {
   github?: string;
   demo?: string;
   image?: string;
-  [key: string]: any;
-  type?: string;
+  media?: MediaItem[];
+  "long-description"?: string;
+  "tech-stacks"?: string[];
+  type?: "own" | "private" | "group" | string;
+  [key: string]: unknown;
+}
+
+interface ProjectForm {
+  title: string;
+  description: string;
+  media: MediaItem[];
+  longDescription: string;
+  techStacks: string[];
+  github: string;
+  demo: string;
+  type: "own" | "private" | "group";
 }
 
 export default function AdminProjectsPage() {
+  const ADMIN_EMAIL = "pjramyanath@gmail.com";
+
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
-  const [selectedType, setSelectedType] = useState("all");
+
   const [projectTypes, setProjectTypes] = useState<string[]>([]);
-  const [form, setForm] = useState({
+  const [selectedType, setSelectedType] = useState("all");
+
+  const [form, setForm] = useState<ProjectForm>({
     title: "",
     description: "",
-    media: [] as Array<{ url: string; fileId?: string }>,
+    media: [],
     longDescription: "",
-    techStacks: [] as string[],
+    techStacks: [],
     github: "",
     demo: "",
     type: "own",
   });
+
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
-  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadingMedia, setUploadingMedia] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
-
-  const ADMIN_EMAIL = "pjramyanath@gmail.com";
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -71,29 +94,31 @@ export default function AdminProjectsPage() {
     setLoadingProjects(true);
     try {
       const snap = await getDocs(collection(db, "projects"));
-      const data = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Project[];
+      const data: Project[] = snap.docs.map((d) => ({ id: d.id, ...(d.data() as DocumentData) })) as Project[];
       setProjects(data);
       const types = Array.from(new Set(data.map((p) => p.type).filter(Boolean))) as string[];
       setProjectTypes(types);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Failed to fetch projects:", err);
     } finally {
       setLoadingProjects(false);
     }
   }
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleTechKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleTechKey = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
       const val = (e.target as HTMLInputElement).value.trim();
       if (!val) return;
-      setForm((prev: any) => ({ ...prev, techStacks: Array.from(new Set([...(prev.techStacks || []), val])) }));
+      setForm((prev) => ({
+        ...prev,
+        techStacks: Array.from(new Set([...prev.techStacks, val])),
+      }));
       (e.target as HTMLInputElement).value = "";
     }
   };
@@ -108,35 +133,28 @@ export default function AdminProjectsPage() {
     setSuccess("");
 
     try {
-      const uploaded: Array<{ url: string; fileId?: string }> = [];
+      const uploaded: MediaItem[] = [];
       for (const file of mediaFiles) {
         const fd = new FormData();
         fd.append("file", file);
-
         const res = await fetch("/api/upload", { method: "POST", body: fd });
         const data = await res.json();
         if (!data.success) throw new Error(data.error || "Failed to upload media");
         uploaded.push({ url: data.url, fileId: data.fileId });
       }
-
-      setForm((prev: any) => ({ ...prev, media: [...(prev.media || []), ...uploaded] }));
+      setForm((prev) => ({ ...prev, media: [...prev.media, ...uploaded] }));
       setSuccess(`Uploaded ${uploaded.length} file(s)`);
       setMediaFiles([]);
       if (fileInputRef.current) fileInputRef.current.value = "";
-    } catch (err: any) {
-      setError(err.message || "Media upload failed");
+    } catch (err) {
+      setError((err as Error).message || "Media upload failed");
     } finally {
       setUploadingMedia(false);
     }
   };
 
-  const clearSelectedFiles = () => {
-    setMediaFiles([]);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
   const removeMediaAt = async (index: number) => {
-    const item = form.media?.[index];
+    const item = form.media[index];
     const fileId = item?.fileId ?? null;
 
     if (editingId) {
@@ -148,24 +166,27 @@ export default function AdminProjectsPage() {
             body: JSON.stringify({ fileId }),
           });
         }
-        const remaining = form.media.filter((_: any, i: number) => i !== index);
+
+        const remaining = form.media.filter((_, i) => i !== index);
         const docRef = doc(db, "projects", editingId);
         const snap = await getDoc(docRef);
-        const current = snap.exists() ? (snap.data() as any) : {};
+        const current = snap.exists() ? (snap.data() as DocumentData) : {};
+
         if (Array.isArray(current.media)) {
-          await updateDoc(docRef, { media: remaining.map((m) => (typeof m === "string" ? m : m?.url)) });
+          await updateDoc(docRef, { media: remaining.map((m) => m.url) });
         } else {
           const keys = Object.keys(current).filter((k) => /^media\d+$/.test(k));
-          const updateObj: any = {};
+          const updateObj: Record<string, unknown> = {};
           remaining.forEach((m, i) => (updateObj[`media${i}`] = m));
           keys.forEach((k, i) => { if (i >= remaining.length) updateObj[k] = deleteField(); });
           await updateDoc(docRef, updateObj);
         }
-        setForm((prev: any) => ({ ...prev, media: remaining }));
+
+        setForm((prev) => ({ ...prev, media: remaining }));
         await fetchProjects();
         setSuccess("Media removed");
-      } catch (err: any) {
-        setError(err.message || "Failed to remove media");
+      } catch (err) {
+        setError((err as Error).message || "Failed to remove media");
       }
     } else {
       try {
@@ -176,22 +197,22 @@ export default function AdminProjectsPage() {
             body: JSON.stringify({ fileId }),
           });
         }
-        setForm((prev: any) => ({ ...prev, media: prev.media.filter((_: any, i: number) => i !== index) }));
+        setForm((prev) => ({ ...prev, media: prev.media.filter((_, i) => i !== index) }));
         setSuccess("Media removed");
-      } catch (err: any) {
-        setError(err.message || "Failed to remove media");
+      } catch (err) {
+        setError((err as Error).message || "Failed to remove media");
       }
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess("");
 
     try {
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         title: form.title,
         description: form.description,
         github: form.github,
@@ -200,7 +221,7 @@ export default function AdminProjectsPage() {
       };
       if (form.longDescription) payload["long-description"] = form.longDescription;
       if (form.techStacks.length) payload["tech-stacks"] = form.techStacks.filter(Boolean);
-      if (form.media.length) payload.media = form.media.map((m) => (typeof m === "string" ? m : m.url)).filter(Boolean);
+      if (form.media.length) payload.media = form.media.map((m) => m.url).filter(Boolean);
 
       if (editingId) await updateDoc(doc(db, "projects", editingId), payload);
       else await addDoc(collection(db, "projects"), payload);
@@ -210,26 +231,27 @@ export default function AdminProjectsPage() {
       setEditingId(null);
       await fetchProjects();
       setSuccess(editingId ? "Project updated" : "Project added");
-    } catch (err: any) {
-      setError(err.message || "Error saving project");
+    } catch (err) {
+      setError((err as Error).message || "Error saving project");
     } finally {
       setLoading(false);
     }
   };
 
   const handleEdit = (p: Project) => {
-    const normalizedMedia = Array.isArray(p.media) && p.media.length > 0
-      ? p.media.map((v: any) => (typeof v === "string" ? { url: v } : v))
-      : p.image ? [typeof p.image === "string" ? { url: p.image } : p.image] : [];
+    const normalizedMedia: MediaItem[] = Array.isArray(p.media) && p.media.length > 0
+      ? p.media.map((v) => (typeof v === "string" ? { url: v } : v as MediaItem))
+      : p.image ? [{ url: typeof p.image === "string" ? p.image : (p.image as MediaItem).url }] : [];
+
     setForm({
       title: p.title || "",
       description: p.description || "",
       media: normalizedMedia,
-      longDescription: p["long-description"] ?? p.longDescription ?? "",
-      techStacks: p["tech-stacks"] ?? p.techStacks ?? [],
+      longDescription: p["long-description"] ?? "",
+      techStacks: p["tech-stacks"] ?? [],
       github: p.github || "",
       demo: p.demo || "",
-      type: p.type || "own",
+      type: (p.type as "own" | "private" | "group") || "own",
     });
     setEditingId(p.id);
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
@@ -237,15 +259,16 @@ export default function AdminProjectsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure?")) return;
+
     try {
       const docRef = doc(db, "projects", id);
       const snap = await getDoc(docRef);
-      const data = snap.exists() ? (snap.data() as any) : {};
-      const mediaItems: any[] = [];
+      const data = snap.exists() ? (snap.data() as DocumentData) : {};
+      const mediaItems: MediaItem[] = [];
 
-      if (Array.isArray(data.media)) mediaItems.push(...data.media);
-      else Object.keys(data).filter((k) => /^media\d+$/.test(k)).forEach((k) => mediaItems.push(data[k]));
-      if (data.image) mediaItems.push(data.image);
+      if (Array.isArray(data.media)) mediaItems.push(...data.media as MediaItem[]);
+      else Object.keys(data).filter((k) => /^media\d+$/.test(k)).forEach((k) => mediaItems.push(data[k] as MediaItem));
+      if (data.image) mediaItems.push(typeof data.image === "string" ? { url: data.image } : data.image as MediaItem);
 
       for (const item of mediaItems) {
         if (item?.fileId) {
@@ -256,12 +279,19 @@ export default function AdminProjectsPage() {
       await deleteDoc(docRef);
       setSuccess("Project deleted");
       await fetchProjects();
-    } catch (err: any) {
-      setError(err.message || "Failed to delete project");
+    } catch (err) {
+      setError((err as Error).message || "Failed to delete project");
     }
   };
 
   const handleLogout = async () => await signOut(auth);
+
+  const getMediaFromProject = (p: Project) => {
+    if (!p) return [];
+    if (Array.isArray(p.media) && p.media.length > 0) return p.media.map((v) => v.url).filter(Boolean);
+    if (p.image) return [typeof p.image === "string" ? p.image : (p.image as MediaItem).url];
+    return [];
+  };
 
   if (loadingUser) return <p>Loading...</p>;
   if (userEmail !== ADMIN_EMAIL)
@@ -276,22 +306,15 @@ export default function AdminProjectsPage() {
       </div>
     );
 
-  const getMediaFromProject = (p: Project) => {
-    if (!p) return [];
-    if (Array.isArray(p.media) && p.media.length > 0) return p.media.map((v) => (typeof v === "string" ? v : v?.url)).filter(Boolean);
-    if (p.image) return [typeof p.image === "string" ? p.image : (p.image as any)?.url];
-    return [];
-  };
-
   return (
     <div className="max-w-5xl mx-auto py-8">
-      {/* ... keep all form and project listing JSX unchanged ... */}
+      {/* Keep all form and project listing JSX unchanged */}
 
       {typeof window !== "undefined" && selectedProject &&
         createPortal(
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setSelectedProject(null)}>
             <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
-              {/* modal content ... same as before ... */}
+              {/* modal content ... */}
             </div>
           </div>,
           document.body
