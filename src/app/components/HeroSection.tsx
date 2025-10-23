@@ -18,9 +18,9 @@ export default function HeroSection() {
   return (
     <section
       id="home"
-      className="min-h-[80vh] md:min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-16"
+      className="min-h-[80vh] md:min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-20 md:pt-0"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0 -mt-16 md:-mt-30">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div
@@ -43,18 +43,18 @@ export default function HeroSection() {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <button
-                onClick={() => scrollToSection("projects")}
+              <a
+                href="/projects"
                 className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transform hover:scale-105 transition-all shadow-lg hover:shadow-xl"
               >
                 View Projects
-              </button>
-              <button
-                onClick={() => scrollToSection("contact")}
+              </a>
+              <a
+                href="#about"
                 className="px-8 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transform hover:scale-105 transition-all"
               >
-                Contact Me
-              </button>
+                About Me
+              </a>
             </div>
 
             <div className="flex gap-6 pt-4">
@@ -77,7 +77,33 @@ export default function HeroSection() {
           >
             <div className="relative w-56 h-56 sm:w-72 sm:h-72 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-white shadow-2xl">
               {mounted && <Profile3D modelPath={me} />}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full blur-2xl opacity-30 animate-pulse pointer-events-none" />
+
+              {/* Decorative background layers behind the 3D canvas so the model stays fully visible */}
+              <div
+                className="absolute inset-0 rounded-full pointer-events-none -z-20 blur-md"
+                style={{
+                  background:
+                    "conic-gradient(from 180deg at 50% 50%, rgba(99,102,241,0.10), rgba(59,130,246,0.06), rgba(167,139,250,0.10))",
+                  opacity: 0.18,
+                }}
+              />
+
+              <div
+                className="absolute inset-0 rounded-full pointer-events-none -z-10"
+                style={{
+                  background:
+                    "radial-gradient(circle at 28% 22%, rgba(59,130,246,0.20) 0%, rgba(167,139,250,0.14) 35%, rgba(255,255,255,0) 65%)",
+                }}
+              />
+
+              {/* Subtle glow ring between the gradients and the canvas for extra depth */}
+              <div
+                className="absolute inset-0 rounded-full pointer-events-none -z-5"
+                style={{
+                  boxShadow:
+                    "0 18px 60px rgba(99,102,241,0.10), inset 0 6px 20px rgba(255,255,255,0.06)",
+                }}
+              />
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { Metadata } from "next";
+import ProjectMediaViewer from "../ProjectMediaViewer";
 
 interface ProjectDetail {
   id: string;
@@ -10,7 +11,7 @@ interface ProjectDetail {
   github?: string;
   demo?: string;
   linkedin_post?: string;
-  image?: string;
+  image?: string | { url: string; fileId?: string };
 }
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     const data = snapshot.exists() ? (snapshot.data() as any) : null;
     return {
       title: data?.title ? `${data.title} — Project` : "Project",
-      description: data?.description ?? "Project details",
+      description: data?.["long-description"] ?? data?.longDescription ?? data?.description ?? "Project details",
     };
   } catch (e) {
     return { title: "Project", description: "Project details" };
@@ -41,6 +42,30 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
 
   const project = snapshot.data() as ProjectDetail;
 
+  // build media array: prefer `media` array, fall back to legacy media0..mediaN or image
+  const buildMediaArray = (p: any) => {
+    if (!p) return [] as string[];
+    if (Array.isArray(p.media) && p.media.length > 0) return p.media.map((v: any) => (typeof v === 'string' ? v : v?.url)).filter(Boolean) as string[];
+    const keys = Object.keys(p).filter((k) => /^media\d+$/.test(k)).sort((a, b) => {
+      const na = parseInt(a.replace("media", ""), 10);
+      const nb = parseInt(b.replace("media", ""), 10);
+      return (isNaN(na) ? 0 : na) - (isNaN(nb) ? 0 : nb);
+    });
+    const values = keys.map((k) => p[k]).filter(Boolean) as any[];
+    const urls = values.map((v) => (typeof v === 'string' ? v : v?.url)).filter(Boolean) as string[];
+    if (urls.length > 0) return urls;
+    if (p.image) return [typeof p.image === 'string' ? p.image : p.image?.url];
+    return [] as string[];
+  };
+  const media = buildMediaArray(project);
+  // normalize tech field: prefer 'tech-stacks' or 'techStacks', otherwise support 'tech' array or CSV string
+  const techField = (project as any)['tech-stacks'] ?? (project as any).techStacks ?? project.tech;
+  const techList: string[] = Array.isArray(techField)
+    ? (techField as string[])
+    : typeof techField === 'string'
+    ? (techField as string).split(',').map((s: string) => s.trim()).filter(Boolean)
+    : [];
+
   return (
     <main className="min-h-screen py-12 bg-white">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
@@ -50,35 +75,23 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           </a>
         </div>
 
-        <div className="flex flex-col gap-8 items-start">
-          {/* Image block (full width) */}
-          <div className="w-full">
-            {project.image ? (
-              <div className="w-full bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  className="w-full h-64 sm:h-80 md:h-[420px] lg:h-[520px] object-contain bg-white"
-                />
-              </div>
-            ) : (
-              <div className="w-full h-64 sm:h-80 md:h-[420px] lg:h-[520px] bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 border border-gray-200">
-                No image
-              </div>
-            )}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
+          {/* Image column (larger on md+) */}
+          <div className="md:col-span-3">
+            <ProjectMediaViewer media={media} title={project.title} />
           </div>
 
-          {/* Content block */}
-          <div className="w-full">
+          {/* Content column */}
+          <div className="md:col-span-1">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">{project.title}</h1>
-            <p className="text-gray-700 mb-6 whitespace-pre-line">{project.description}</p>
+            <p className="text-gray-700 mb-6 whitespace-pre-line">{(project as any)["long-description"] ?? (project as any).longDescription ?? project.description}</p>
 
             {/* Normalize tech: allow string CSV or array */}
-            {project.tech && project.tech.length > 0 && (
+            {techList.length > 0 && (
               <section className="mb-6">
                 <h2 className="text-lg font-semibold mb-3">Tech</h2>
                 <ul className="flex flex-wrap gap-2">
-                  {project.tech.map((t) => (
+                  {techList.map((t) => (
                     <li key={t} className="px-3 py-1 bg-gray-100 rounded text-sm">
                       {t}
                     </li>
