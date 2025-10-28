@@ -102,7 +102,7 @@ export default async function ProjectDetailPage({ params }: { params?: Promise<P
     : [];
 
   return (
-    <main className="min-h-screen py-12 bg-white">
+    <main className="min-h-screen py-12 static-bg">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="mb-6">
           <Link href="/projects" className="text-sm text-blue-600 hover:underline">

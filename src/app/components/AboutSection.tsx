@@ -42,7 +42,7 @@ export default function AboutSection() {
   }, []);
 
   return (
-    <section id="about" className="relative py-24 animated-bg overflow-hidden">
+    <section id="about" className="relative py-24 static-bg overflow-hidden">
     
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         {/* <div className="absolute -left-20 -top-10 w-72 h-72 bg-indigo-300/30 rounded-full blur-3xl transform rotate-12 animate-pulse" />

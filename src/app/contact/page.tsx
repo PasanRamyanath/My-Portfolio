@@ -134,7 +134,7 @@ export default function StylishContactPage() {
   }, []);
 
   return (
-  <div className="min-h-screen animated-bg">
+  <div className="min-h-screen static-bg">
       <main className="relative py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">

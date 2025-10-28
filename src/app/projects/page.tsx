@@ -106,9 +106,9 @@ export default function ProjectsSection() {
         onClick={onOpen}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
-        className="group cursor-pointer rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105"
+        className="group cursor-pointer rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 bg-white/30 text-gray-900 backdrop-blur-md border border-white/20 shadow-lg"
       >
-        <div className="relative w-full h-44 sm:h-52 md:h-56 bg-gray-100 overflow-hidden rounded-2xl shadow-lg">
+        <div className="relative w-full h-44 sm:h-52 md:h-56 bg-white/5 overflow-hidden rounded-t-2xl">
           {currentSrc ? (
             media.map((m, i) => (
               <div
@@ -125,17 +125,17 @@ export default function ProjectsSection() {
               </div>
             ))
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">No image</div>
+            <div className="w-full h-full flex items-center justify-center text-gray-500">No image</div>
           )}
 
-          {/* gradient overlay + title */}
-          <div className="absolute left-0 bottom-0 right-0 p-4 bg-gradient-to-t from-black/60 via-black/20 to-transparent text-white">
-            <h3 className="text-lg font-semibold">{project.title}</h3>
-            <p className="text-xs text-gray-200 line-clamp-2">{project.description}</p>
+          {/* gradient overlay + title (light glass style) */}
+          <div className="absolute left-0 bottom-0 right-0 p-4 bg-gradient-to-t from-white/90 via-white/70 to-transparent">
+            <h3 className="text-lg font-semibold text-gray-900">{project.title}</h3>
+            <p className="text-xs text-gray-700 line-clamp-2">{project.description}</p>
           </div>
         </div>
 
-        <div className="mt-4 p-4 bg-gradient-to-br from-white/5 to-white/2 bg-clip-padding backdrop-blur-sm border border-white/10 rounded-xl">
+        <div className="mt-4 p-4 bg-white/40 bg-clip-padding backdrop-blur-sm border border-white/10 rounded-b-xl">
           {getTechListFromProject(project).length > 0 && (
             <div className="flex gap-2 flex-wrap mb-3">
               {getTechListFromProject(project).map((t) => (
@@ -148,17 +148,17 @@ export default function ProjectsSection() {
 
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
-              <p className="text-sm text-gray-700 mb-2 line-clamp-3">{project.description}</p>
+              <p className="text-sm text-gray-800 mb-2 line-clamp-3">{project.description}</p>
             </div>
 
             <div className="flex-shrink-0 flex flex-col gap-2">
               {project.github && (
-                <a onClick={(e) => e.stopPropagation()} href={project.github} target="_blank" rel="noopener noreferrer" className="px-3 py-1 text-sm text-gray-900 hover:text-gray-700 font-medium transition-colors underline">
+                <a onClick={(e) => e.stopPropagation()} href={project.github} target="_blank" rel="noopener noreferrer" className="px-3 py-1 text-sm text-indigo-700 hover:text-indigo-900 font-medium transition-colors underline">
                   GitHub →
                 </a>
               )}
               {project.demo && (
-                <a onClick={(e) => e.stopPropagation()} href={project.demo} target="_blank" rel="noopener noreferrer" className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors underline">
+                <a onClick={(e) => e.stopPropagation()} href={project.demo} target="_blank" rel="noopener noreferrer" className="px-3 py-1 text-sm text-indigo-700 hover:text-indigo-900 font-medium transition-colors underline">
                   Live →
                 </a>
               )}
@@ -172,7 +172,7 @@ export default function ProjectsSection() {
   const filteredProjects = selectedType === "all" ? projects : projects.filter((p) => p.type === selectedType);
 
   return (
-    <section id="projects" className="relative py-5 animated-bg overflow-hidden">
+    <section id="projects" className="relative py-5 static-bg overflow-hidden">
       
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute left-0 top-8 w-72 h-72 bg-teal-200/30 rounded-full blur-3xl transform -rotate-12 animate-slow-float" />
