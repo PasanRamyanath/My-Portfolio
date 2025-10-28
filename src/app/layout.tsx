@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
   return (
     <html lang="en">
-      <body className="font-sans bg-white text-gray-800">
+      <body className="font-sans text-gray-800">
         {showShell && <Navbar />}
 
         {/* Add top padding so fixed navbar doesn't overlap content on small screens */}

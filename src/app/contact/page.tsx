@@ -134,7 +134,7 @@ export default function StylishContactPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+  <div className="min-h-screen animated-bg">
       <main className="relative py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
@@ -149,7 +149,7 @@ export default function StylishContactPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Contact Info Sidebar */}
             <div className="lg:col-span-1 space-y-4">
-              <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 hover:shadow-2xl transition-all duration-300">
+              <div className="bg-gradient-to-br from-white/5 to-white/2 bg-clip-padding backdrop-blur-lg backdrop-saturate-150 rounded-2xl p-6 shadow-lg border border-white/10 ring-1 ring-white/5 hover:shadow-2xl hover:from-white/10 hover:to-white/5 transition-all duration-300">
                 <h2 className="text-2xl font-bold text-gray-800 mb-3">Get in Touch</h2>
                 <p className="text-gray-600 mb-6">
                   Available for freelance work, contract roles, and collaborations.
@@ -205,7 +205,7 @@ export default function StylishContactPage() {
 
             {/* Contact Form */}
             <div className="lg:col-span-2">
-              <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/20">
+              <div className="bg-gradient-to-br from-white/5 to-white/2 bg-clip-padding backdrop-blur-lg backdrop-saturate-150 rounded-2xl p-8 shadow-lg border border-white/10 ring-1 ring-white/5 hover:shadow-2xl hover:from-white/10 hover:to-white/5 transition-all duration-300">
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold text-gray-800 mb-2">Send a Message</h2>
                   <p className="text-gray-600">Fill out the form below and it will open your mail client with the message prefilled.</p>

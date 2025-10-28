@@ -1,18 +1,64 @@
 "use client";
 
 import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import { collection, getDocs, DocumentData } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function AboutSection() {
   const skills = ["React", "Next.js", "TypeScript", "Node.js", "Tailwind CSS", "Firebase"];
-  const passions = [
+  // fallback passions if Firestore doesn't provide any
+  const defaultPassions = [
     "Building intuitive user experiences",
     "Open-source contribution",
     "Performance optimization",
     "3D & web graphics",
   ];
 
+  const [passions, setPassions] = useState<string[]>(defaultPassions);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadInfo() {
+      try {
+        const snap = await getDocs(collection(db, "my-information"));
+        if (!mounted) return;
+        if (snap.empty) return;
+        const docData = snap.docs[0].data() as DocumentData;
+        if (Array.isArray(docData.passions) && docData.passions.length > 0) {
+          setPassions(docData.passions as string[]);
+        }
+      } catch (err) {
+        // silently ignore - keep fallback passions
+        console.warn("Failed to load passions from Firestore", err);
+      }
+    }
+
+    loadInfo();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
-    <section id="about" className="py-24 bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <section id="about" className="relative py-24 animated-bg overflow-hidden">
+    
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        {/* <div className="absolute -left-20 -top-10 w-72 h-72 bg-indigo-300/30 rounded-full blur-3xl transform rotate-12 animate-pulse" />
+
+        <div className="absolute -right-28 top-24 w-96 h-96 bg-pink-300/25 rounded-full blur-2xl transform -rotate-6" /> */}
+
+        <svg className="absolute inset-0 w-full h-full opacity-5" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+          <defs>
+            <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1.5" fill="#ffffff" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#dots)" />
+        </svg>
+      </div>
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <div className="inline-block mb-4">
@@ -50,7 +96,7 @@ export default function AboutSection() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-10 mt-16">
-          <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+          <div className="bg-gradient-to-br from-white/5 to-white/2 bg-clip-padding backdrop-blur-lg backdrop-saturate-150 rounded-2xl p-8 shadow-lg border border-white/10 ring-1 ring-white/5 hover:shadow-2xl hover:from-white/10 hover:to-white/5 transition-all duration-300">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -74,7 +120,7 @@ export default function AboutSection() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+          <div className="bg-gradient-to-br from-white/5 to-white/2 bg-clip-padding backdrop-blur-lg backdrop-saturate-150 rounded-2xl p-8 shadow-lg border border-white/10 ring-1 ring-white/5 hover:shadow-2xl hover:from-white/10 hover:to-white/5 transition-all duration-300">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
                 <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">

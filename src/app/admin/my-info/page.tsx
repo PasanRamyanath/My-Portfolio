@@ -27,6 +27,7 @@ export default function AdminMyInfoPage() {
     location: "",
     portfolio: "",
     techStacks: [] as string[],
+    passions: [] as string[],
   });
 
   const ADMIN_EMAIL = "pjramyanath@gmail.com";
@@ -68,6 +69,7 @@ export default function AdminMyInfoPage() {
           location: data.location ?? "",
           portfolio: data.portfolio ?? "",
           techStacks: Array.isArray(data.techStacks) ? data.techStacks : [],
+          passions: Array.isArray(data.passions) ? data.passions : [],
         });
       }
     } catch (err: any) {
@@ -89,6 +91,28 @@ export default function AdminMyInfoPage() {
 
   const removeTech = (i: number) => {
     setFields((prev: any) => ({ ...prev, techStacks: (prev.techStacks || []).filter((_: any, idx: number) => idx !== i) }));
+  };
+
+  const addPassion = (p: string) => {
+    if (!p) return;
+    const newPassions = [...(fields.passions || []), p];
+    setFields((prev: any) => ({ ...prev, passions: newPassions }));
+    // persist immediately if we have a docId
+    if (docId) {
+      updateDoc(doc(db, "my-information", docId), { passions: newPassions }).catch((err) => {
+        console.warn("Failed to persist passions immediately:", err);
+      });
+    }
+  };
+
+  const removePassion = (i: number) => {
+    const newPassions = (fields.passions || []).filter((_: any, idx: number) => idx !== i);
+    setFields((prev: any) => ({ ...prev, passions: newPassions }));
+    if (docId) {
+      updateDoc(doc(db, "my-information", docId), { passions: newPassions }).catch((err) => {
+        console.warn("Failed to persist passions immediately:", err);
+      });
+    }
   };
 
   const handleSave = async () => {
@@ -192,9 +216,25 @@ export default function AdminMyInfoPage() {
                 ))}
               </div>
 
+              
               <div className="mt-3 flex gap-2">
                 <input id="newTech" placeholder="Add tech (e.g. node)" className="flex-1 border px-3 py-2 rounded" />
                 <button onClick={() => { const el = document.getElementById("newTech") as HTMLInputElement | null; if (el) { addTech(el.value.trim()); el.value = ""; } }} className="px-4 py-2 bg-indigo-600 text-white rounded">Add</button>
+              </div>
+
+              <span className="text-sm font-medium">Passions</span>
+              <div className="mt-2 flex gap-2 flex-wrap">
+                {(fields.passions || []).map((p: string, i: number) => (
+                  <span key={i} className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">
+                    <span>{p}</span>
+                    <button type="button" onClick={() => removePassion(i)} className="text-sm text-indigo-600">×</button>
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-3 flex gap-2">
+                <input id="newPassion" placeholder="Add passion (e.g. music)" className="flex-1 border px-3 py-2 rounded" />
+                <button onClick={() => { const el = document.getElementById("newPassion") as HTMLInputElement | null; if (el) { addPassion(el.value.trim()); el.value = ""; } }} className="px-4 py-2 bg-indigo-600 text-white rounded">Add</button>
               </div>
             </div>
 

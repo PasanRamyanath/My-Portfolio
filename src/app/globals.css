@@ -5,6 +5,43 @@ html, body {
   margin: 0;
   font-family: system-ui, sans-serif;
 }
+/* You can add global styles to this file, and also import other CSS files */
+
+/* Tailwind base/utilities are included from the framework config */
+
+/* Animated background utility: gentle left-to-right pan */
+.animated-bg {
+  background: linear-gradient(90deg, rgba(248,250,252,1) 0%, rgba(224,242,254,1) 25%, rgba(238,242,255,1) 50%, rgba(240,249,255,1) 75%, rgba(238,242,255,1) 100%);
+  background-size: 200% 100%;
+  animation: bg-pan 10s linear infinite;
+}
+
+@keyframes bg-pan {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animated-bg {
+    animation: none;
+    background-size: cover;
+  }
+}
+@import "tailwindcss";
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
 
 * {
   box-sizing: border-box;

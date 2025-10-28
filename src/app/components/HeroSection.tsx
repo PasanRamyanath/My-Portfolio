@@ -15,7 +15,7 @@ export default function HeroSection() {
   return (
     <section
       id="home"
-      className="min-h-[80vh] md:min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-20 md:pt-0"
+      className="min-h-[80vh] md:min-h-screen flex items-center justify-center animated-bg pt-20 md:pt-0"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0 -mt-16 md:-mt-30">
         <div className="grid md:grid-cols-2 gap-12 items-center">

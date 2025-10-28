@@ -106,11 +106,11 @@ export default function ProjectsSection() {
         onClick={onOpen}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
-        className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-200"
+        className="group cursor-pointer rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105"
       >
-        {currentSrc ? (
-          <div className="relative w-full h-40 sm:h-44 md:h-48 bg-gray-100 overflow-hidden">
-            {media.map((m, i) => (
+        <div className="relative w-full h-44 sm:h-52 md:h-56 bg-gray-100 overflow-hidden rounded-2xl shadow-lg">
+          {currentSrc ? (
+            media.map((m, i) => (
               <div
                 key={i}
                 className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
@@ -120,54 +120,49 @@ export default function ProjectsSection() {
                 {m.endsWith(".mp4") || m.endsWith(".webm") ? (
                   <video src={m} className="w-full h-full object-cover" preload="metadata" muted playsInline />
                 ) : (
-                  <Image src={m} alt={`${project.title}-${i}`} fill className="object-cover object-center" />
+                  <Image src={m} alt={`${project.title}-${i}`} fill className="object-cover object-center transition-transform duration-700 group-hover:scale-105" />
                 )}
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="w-full h-40 sm:h-44 md:h-48 bg-gray-100 flex items-center justify-center text-gray-400">
-            <span className="text-sm">No image</span>
-          </div>
-        )}
+            ))
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400">No image</div>
+          )}
 
-        <div className="p-5">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">{project.title}</h3>
-          <p className="text-gray-600 mb-2 line-clamp-3">{project.description}</p>
+          {/* gradient overlay + title */}
+          <div className="absolute left-0 bottom-0 right-0 p-4 bg-gradient-to-t from-black/60 via-black/20 to-transparent text-white">
+            <h3 className="text-lg font-semibold">{project.title}</h3>
+            <p className="text-xs text-gray-200 line-clamp-2">{project.description}</p>
+          </div>
+        </div>
 
+        <div className="mt-4 p-4 bg-gradient-to-br from-white/5 to-white/2 bg-clip-padding backdrop-blur-sm border border-white/10 rounded-xl">
           {getTechListFromProject(project).length > 0 && (
             <div className="flex gap-2 flex-wrap mb-3">
               {getTechListFromProject(project).map((t) => (
-                <span key={t} className="px-2 py-1 bg-gray-100 rounded text-sm">
+                <span key={t} className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-sm font-medium">
                   {t}
                 </span>
               ))}
             </div>
           )}
 
-          <div className="flex gap-3">
-            {project.github && (
-              <a
-                onClick={(e) => e.stopPropagation()}
-                href={project.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 text-gray-900 hover:text-gray-700 font-medium transition-colors underline"
-              >
-                GitHub →
-              </a>
-            )}
-            {project.demo && (
-              <a
-                onClick={(e) => e.stopPropagation()}
-                href={project.demo}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium transition-colors underline"
-              >
-                Live Demo →
-              </a>
-            )}
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1">
+              <p className="text-sm text-gray-700 mb-2 line-clamp-3">{project.description}</p>
+            </div>
+
+            <div className="flex-shrink-0 flex flex-col gap-2">
+              {project.github && (
+                <a onClick={(e) => e.stopPropagation()} href={project.github} target="_blank" rel="noopener noreferrer" className="px-3 py-1 text-sm text-gray-900 hover:text-gray-700 font-medium transition-colors underline">
+                  GitHub →
+                </a>
+              )}
+              {project.demo && (
+                <a onClick={(e) => e.stopPropagation()} href={project.demo} target="_blank" rel="noopener noreferrer" className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors underline">
+                  Live →
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -177,34 +172,40 @@ export default function ProjectsSection() {
   const filteredProjects = selectedType === "all" ? projects : projects.filter((p) => p.type === selectedType);
 
   return (
-    <section id="projects" className="py-20 bg-gray-50">
+    <section id="projects" className="relative py-5 animated-bg overflow-hidden">
+      
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute left-0 top-8 w-72 h-72 bg-teal-200/30 rounded-full blur-3xl transform -rotate-12 animate-slow-float" />
+        <div className="absolute right-0 -top-6 w-96 h-96 bg-indigo-200/20 rounded-full blur-2xl transform rotate-6" />
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">Projects</h2>
-          <p className="text-gray-600 text-lg">Things I&apos;ve built over time</p>
+        <div className="mb-10 text-center">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-3">Selected Projects</h2>
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto">Curated work that highlights problem solving, design, and engineering.</p>
         </div>
 
         {projectTypes.length > 0 && (
-          <div className="mb-10">
+          <div className="mb-8 flex justify-center">
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => setSelectedType("all")}
-                className={`px-6 py-3 rounded-lg font-semibold text-base transition-all ${
+                className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 ${
                   selectedType === "all"
-                    ? "bg-gray-900 text-white shadow-md"
-                    : "bg-white text-gray-700 hover:bg-gray-100 border-2 border-gray-200"
+                    ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
+                    : "bg-white text-gray-700 border-gray-200 hover:shadow-sm"
                 }`}
               >
-                All Projects
+                All
               </button>
               {projectTypes.map((type) => (
                 <button
                   key={type}
                   onClick={() => setSelectedType(type)}
-                  className={`px-6 py-3 rounded-lg font-semibold text-base transition-all ${
+                  className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 ${
                     selectedType === type
-                      ? "bg-gray-900 text-white shadow-md"
-                      : "bg-white text-gray-700 hover:bg-gray-100 border-2 border-gray-200"
+                      ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
+                      : "bg-white text-gray-700 border-gray-200 hover:shadow-sm"
                   }`}
                 >
                   {type}
@@ -215,17 +216,13 @@ export default function ProjectsSection() {
         )}
 
         {projects.length === 0 ? (
-          <div className="text-gray-500 text-lg">Loading...</div>
+          <div className="text-gray-500 text-lg text-center">Loading...</div>
         ) : filteredProjects.length === 0 ? (
-          <div className="text-gray-500 text-lg">No projects in this category yet.</div>
+          <div className="text-gray-500 text-lg text-center">No projects in this category yet.</div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredProjects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onOpen={() => router.push(`/projects/${project.id}`)}
-              />
+              <ProjectCard key={project.id} project={project} onOpen={() => router.push(`/projects/${project.id}`)} />
             ))}
           </div>
         )}
