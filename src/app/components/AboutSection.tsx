@@ -42,7 +42,7 @@ export default function AboutSection() {
   }, []);
 
   return (
-    <section id="about" className="relative py-24 static-bg overflow-hidden">
+  <section id="about" className="relative py-10 static-bg ">
     
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         {/* <div className="absolute -left-20 -top-10 w-72 h-72 bg-indigo-300/30 rounded-full blur-3xl transform rotate-12 animate-pulse" />
@@ -59,8 +59,8 @@ export default function AboutSection() {
         </svg>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+  <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div className="text-center mb-8">
           <div className="inline-block mb-4">
             <span className="text-sm font-semibold text-blue-600 tracking-wider uppercase bg-blue-50 px-4 py-1.5 rounded-full">
               About Me
@@ -95,7 +95,7 @@ export default function AboutSection() {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-10 mt-16">
+  <div className="grid md:grid-cols-2 gap-8 mt-10">
           <div className="bg-gradient-to-br from-white/5 to-white/2 bg-clip-padding backdrop-blur-lg backdrop-saturate-150 rounded-2xl p-8 shadow-lg border border-white/10 ring-1 ring-white/5 hover:shadow-2xl hover:from-white/10 hover:to-white/5 transition-all duration-300">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">

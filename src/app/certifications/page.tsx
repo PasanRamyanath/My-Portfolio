@@ -35,10 +35,10 @@ export default async function CertificationsPage() {
   const certs: Cert[] = snapshot.docs.map(mapCertDoc);
 
   return (
-    <main className="min-h-screen py-16 static-bg">
+    <main className="min-h-screen py-5 static-bg">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold">Certifications</h1>
+          <h1 className="text-5xl sm:text-3xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">Certifications</h1>
           <p className="text-gray-600 mt-2">
             Selected professional certifications and course badges.
           </p>

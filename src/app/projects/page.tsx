@@ -146,20 +146,29 @@ export default function ProjectsSection() {
             </div>
           )}
 
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1">
-              <p className="text-sm text-gray-800 mb-2 line-clamp-3">{project.description}</p>
-            </div>
-
-            <div className="flex-shrink-0 flex flex-col gap-2">
+          <div className="flex flex-col gap-3 mt-2">
+            <p className="text-sm text-gray-800 mb-2 line-clamp-3">{project.description}</p>
+            <div className="flex gap-2">
               {project.github && (
-                <a onClick={(e) => e.stopPropagation()} href={project.github} target="_blank" rel="noopener noreferrer" className="px-3 py-1 text-sm text-indigo-700 hover:text-indigo-900 font-medium transition-colors underline">
-                  GitHub →
+                <a
+                  onClick={(e) => e.stopPropagation()}
+                  href={project.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 px-3 py-2 text-sm rounded-full bg-gray-500 text-white hover:bg-gray-400 font-medium transition-colors text-center"
+                >
+                  GitHub
                 </a>
               )}
               {project.demo && (
-                <a onClick={(e) => e.stopPropagation()} href={project.demo} target="_blank" rel="noopener noreferrer" className="px-3 py-1 text-sm text-indigo-700 hover:text-indigo-900 font-medium transition-colors underline">
-                  Live →
+                <a
+                  onClick={(e) => e.stopPropagation()}
+                  href={project.demo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 px-3 py-2 text-sm rounded-full bg-emerald-600 text-white hover:bg-emerald-700 font-medium transition-colors text-center"
+                >
+                  Live
                 </a>
               )}
             </div>
@@ -181,7 +190,7 @@ export default function ProjectsSection() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-10 text-center">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-3">Selected Projects</h2>
+          <h2 className="text-5xl sm:text-4xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">Selected Projects</h2>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">Curated work that highlights problem solving, design, and engineering.</p>
         </div>
 

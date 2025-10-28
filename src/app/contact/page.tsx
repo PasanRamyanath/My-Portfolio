@@ -135,10 +135,10 @@ export default function StylishContactPage() {
 
   return (
   <div className="min-h-screen static-bg">
-      <main className="relative py-20 px-4 sm:px-6 lg:px-8">
+      <main className="relative py-5 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h1 className="text-5xl sm:text-6xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+          <div className="text-center mb-5">
+            <h1 className="text-5xl sm:text-4xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
               Let&apos;s Connect
             </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
