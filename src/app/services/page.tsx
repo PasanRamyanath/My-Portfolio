@@ -31,7 +31,7 @@ export default function Services() {
           <h1 className="text-5xl sm:text-4xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">Services</h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
             I help teams and founders ship quality web products. Below are some of the services I offer — if
-            you don't see exactly what you need, reach out and we'll craft a custom plan.
+            you don&apos;t see exactly what you need, reach out and we&apos;ll craft a custom plan.
           </p>
         </div>
 
