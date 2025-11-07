@@ -13,7 +13,7 @@ export default function Profile3D({ modelPath }: Profile3DProps) {
 
   return (
     <Canvas
-      camera={{ position: [0, 0.6, 1.5], fov: 35 }}
+      camera={{ position: [0, 0.45, 1.7], fov: 35 }}
       className="rounded-full"
     >
       {/* stronger ambient + a hemisphere for nicer fill */}
@@ -21,7 +21,7 @@ export default function Profile3D({ modelPath }: Profile3DProps) {
   <hemisphereLight args={[0xffffff, 0x444444, 0.4]} />
       <directionalLight position={[4, 6, 2]} intensity={1.6} castShadow />
       <Suspense fallback={null}>
-        <primitive object={scene} scale={1.12} />
+  <primitive object={scene} scale={1.12} position={[0, -0.38, 0]} />
         <Environment preset="city" />
       </Suspense>
       <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={1.25} />

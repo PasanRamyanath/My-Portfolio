@@ -106,9 +106,9 @@ export default function ProjectsSection() {
         onClick={onOpen}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
-        className="group cursor-pointer rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 bg-white/30 text-gray-900 backdrop-blur-md border border-white/20 shadow-lg"
+  className="group cursor-pointer rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 bg-slate-800/40 text-slate-200 backdrop-blur-md border border-white/10 shadow-lg"
       >
-        <div className="relative w-full h-44 sm:h-52 md:h-56 bg-white/5 overflow-hidden rounded-t-2xl">
+  <div className="relative w-full h-44 sm:h-52 md:h-56 bg-black/20 overflow-hidden rounded-t-2xl">
           {currentSrc ? (
             media.map((m, i) => (
               <div
@@ -129,17 +129,17 @@ export default function ProjectsSection() {
           )}
 
           {/* gradient overlay + title (light glass style) */}
-          <div className="absolute left-0 bottom-0 right-0 p-4 bg-gradient-to-t from-white/90 via-white/70 to-transparent">
-            <h3 className="text-lg font-semibold text-gray-900">{project.title}</h3>
-            <p className="text-xs text-gray-700 line-clamp-2">{project.description}</p>
+          <div className="absolute left-0 bottom-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+            <h3 className="text-lg font-semibold text-slate-100">{project.title}</h3>
+            <p className="text-xs text-slate-300 line-clamp-2">{project.description}</p>
           </div>
         </div>
 
-        <div className="mt-4 p-4 bg-white/40 bg-clip-padding backdrop-blur-sm border border-white/10 rounded-b-xl">
+        <div className="mt-4 p-4 bg-slate-800/40 bg-clip-padding backdrop-blur-sm border border-white/10 rounded-b-xl">
           {getTechListFromProject(project).length > 0 && (
             <div className="flex gap-2 flex-wrap mb-3">
               {getTechListFromProject(project).map((t) => (
-                <span key={t} className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-sm font-medium">
+                <span key={t} className="px-3 py-1 rounded-full bg-indigo-900/30 text-indigo-300 text-sm font-medium border border-indigo-800/40">
                   {t}
                 </span>
               ))}
@@ -147,7 +147,7 @@ export default function ProjectsSection() {
           )}
 
           <div className="flex flex-col gap-3 mt-2">
-            <p className="text-sm text-gray-800 mb-2 line-clamp-3">{project.description}</p>
+            <p className="text-sm text-slate-300 mb-2 line-clamp-3">{project.description}</p>
             <div className="flex gap-2">
               {project.github && (
                 <a
@@ -155,7 +155,7 @@ export default function ProjectsSection() {
                   href={project.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 px-3 py-2 text-sm rounded-full bg-gray-500 text-white hover:bg-gray-400 font-medium transition-colors text-center"
+                  className="flex-1 px-3 py-2 text-sm rounded-full bg-slate-600 text-white hover:bg-slate-500 font-medium transition-colors text-center"
                 >
                   GitHub
                 </a>
@@ -166,7 +166,7 @@ export default function ProjectsSection() {
                   href={project.demo}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 px-3 py-2 text-sm rounded-full bg-emerald-600 text-white hover:bg-emerald-700 font-medium transition-colors text-center"
+                  className="flex-1 px-3 py-2 text-sm rounded-full bg-emerald-600 text-white hover:bg-emerald-500 font-medium transition-colors text-center"
                 >
                   Live
                 </a>
@@ -191,7 +191,7 @@ export default function ProjectsSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-10 text-center">
           <h2 className="text-5xl sm:text-4xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">Selected Projects</h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">Curated work that highlights problem solving, design, and engineering.</p>
+          <p className="text-slate-300 text-lg max-w-2xl mx-auto">Curated work that highlights problem solving, design, and engineering.</p>
         </div>
 
         {projectTypes.length > 0 && (
@@ -202,7 +202,7 @@ export default function ProjectsSection() {
                 className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 ${
                   selectedType === "all"
                     ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
-                    : "bg-white text-gray-700 border-gray-200 hover:shadow-sm"
+                    : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
                 }`}
               >
                 All
@@ -214,7 +214,7 @@ export default function ProjectsSection() {
                   className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 ${
                     selectedType === type
                       ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
-                      : "bg-white text-gray-700 border-gray-200 hover:shadow-sm"
+                      : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
                   }`}
                 >
                   {type}
@@ -225,9 +225,9 @@ export default function ProjectsSection() {
         )}
 
         {projects.length === 0 ? (
-          <div className="text-gray-500 text-lg text-center">Loading...</div>
+          <div className="text-slate-400 text-lg text-center">Loading...</div>
         ) : filteredProjects.length === 0 ? (
-          <div className="text-gray-500 text-lg text-center">No projects in this category yet.</div>
+          <div className="text-slate-400 text-lg text-center">No projects in this category yet.</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredProjects.map((project) => (

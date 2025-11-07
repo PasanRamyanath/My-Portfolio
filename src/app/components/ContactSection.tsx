@@ -51,13 +51,13 @@ export default function ContactSection() {
   ];
 
   return (
-    <section id="contact" className="py-20 bg-white">
+    <section id="contact" className="py-20 static-bg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-slate-100 mb-4">
             Get In Touch
           </h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          <p className="text-slate-300 text-lg max-w-2xl mx-auto">
             Have a project in mind or want to collaborate? Feel free to reach
             out. I&apos;d love to hear from you!
           </p>
@@ -66,10 +66,10 @@ export default function ContactSection() {
         <div className="grid md:grid-cols-2 gap-12">
           <div className="space-y-8">
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">
+              <h3 className="text-2xl font-bold text-slate-100 mb-6">
                 Contact Information
               </h3>
-              <p className="text-gray-600 mb-8">
+              <p className="text-slate-300 mb-8">
                 Feel free to reach out through any of these channels. I typically
                 respond within 24 hours.
               </p>
@@ -82,14 +82,14 @@ export default function ContactSection() {
                   href={info.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
+                  className="flex items-center gap-4 p-4 bg-slate-800/60 rounded-lg hover:bg-slate-700 transition-colors group border border-white/10"
                 >
                   <div className="text-3xl">{info.icon}</div>
                   <div>
-                    <p className="text-sm text-gray-500 font-medium">
+                    <p className="text-sm text-slate-400 font-medium">
                       {info.title}
                     </p>
-                    <p className="text-gray-900 group-hover:text-blue-600 transition-colors">
+                    <p className="text-slate-200 group-hover:text-blue-300 transition-colors">
                       {info.value}
                     </p>
                   </div>
@@ -98,7 +98,7 @@ export default function ContactSection() {
             </div>
 
             <div className="pt-8">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+              <h4 className="text-lg font-semibold text-slate-100 mb-4">
                 Follow Me
               </h4>
               <div className="flex gap-4">
@@ -117,12 +117,12 @@ export default function ContactSection() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-2xl">
+          <div className="bg-gradient-to-br from-white/5 to-white/2 p-8 rounded-2xl border border-white/10 backdrop-blur-md">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-slate-300 mb-2"
                 >
                   Your Name
                 </label>
@@ -133,7 +133,7 @@ export default function ContactSection() {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3 bg-slate-900/40 text-slate-200 placeholder-slate-400 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                   placeholder="John Doe"
                 />
               </div>
@@ -141,7 +141,7 @@ export default function ContactSection() {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-slate-300 mb-2"
                 >
                   Your Email
                 </label>
@@ -152,7 +152,7 @@ export default function ContactSection() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3 bg-slate-900/40 text-slate-200 placeholder-slate-400 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                   placeholder="john@example.com"
                 />
               </div>
@@ -160,7 +160,7 @@ export default function ContactSection() {
               <div>
                 <label
                   htmlFor="message"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-slate-300 mb-2"
                 >
                   Your Message
                 </label>
@@ -171,7 +171,7 @@ export default function ContactSection() {
                   onChange={handleChange}
                   required
                   rows={5}
-                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none transition-all"
+                  className="w-full px-4 py-3 bg-slate-900/40 text-slate-200 placeholder-slate-400 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none transition-all"
                   placeholder="Tell me about your project..."
                 />
               </div>
@@ -181,7 +181,7 @@ export default function ContactSection() {
                 disabled={isSubmitting}
                 className={`w-full py-3 rounded-lg font-semibold text-white transition-all transform hover:scale-105 ${
                   isSubmitting
-                    ? "bg-gray-400 cursor-not-allowed"
+                    ? "bg-slate-600 cursor-not-allowed"
                     : "bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg"
                 }`}
               >
@@ -189,7 +189,7 @@ export default function ContactSection() {
               </button>
 
               {submitStatus === "success" && (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-center">
+                <div className="p-4 bg-emerald-900/20 border border-emerald-800/50 rounded-lg text-emerald-300 text-center">
                   ✓ Message sent successfully! I&apos;ll get back to you soon.
                 </div>
               )}

@@ -41,8 +41,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const showShell = !(isAdminPath && (loadingAuth || authorized));
 
   return (
-    <html lang="en">
-      <body className="font-sans text-gray-800">
+    <html lang="en" className="dark">
+      <body className="font-sans bg-slate-950 text-slate-200 antialiased min-h-screen">
         {showShell && <Navbar />}
 
         {/* Add top padding so fixed navbar doesn't overlap content on small screens */}

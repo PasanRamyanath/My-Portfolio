@@ -25,10 +25,10 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-white/20 backdrop-blur-lg shadow-lg"
-          : " bg-blue-50 backdrop-blur-lg shadow-lg"
+          ? "bg-slate-900/70 backdrop-blur-lg shadow-lg border-b border-white/5"
+          : "bg-slate-950/40 backdrop-blur-lg border-b border-white/5"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
@@ -36,7 +36,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link
             href="/"
-            className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:scale-105 transition-transform"
+            className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent hover:scale-105 transition-transform"
           >
             Portfolio
           </Link>
@@ -47,10 +47,10 @@ export default function Navbar() {
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-gray-700 hover:text-blue-600 transition-colors font-medium relative group"
+                className="text-slate-200 hover:text-blue-400 transition-colors font-medium relative group"
               >
                 {link.name}
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full" />
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-400 transition-all group-hover:w-full" />
               </Link>
             ))}
           </div>
@@ -58,22 +58,22 @@ export default function Navbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="md:hidden p-2 rounded-lg hover:bg-slate-800 transition-colors"
             aria-label="Toggle menu"
           >
             <div className="w-6 h-5 flex flex-col justify-between">
               <span
-                className={`w-full h-0.5 bg-gray-700 transition-all ${
+                className={`w-full h-0.5 bg-slate-200 transition-all ${
                   mobileMenuOpen ? "rotate-45 translate-y-2" : ""
                 }`}
               />
               <span
-                className={`w-full h-0.5 bg-gray-700 transition-all ${
+                className={`w-full h-0.5 bg-slate-200 transition-all ${
                   mobileMenuOpen ? "opacity-0" : ""
                 }`}
               />
               <span
-                className={`w-full h-0.5 bg-gray-700 transition-all ${
+                className={`w-full h-0.5 bg-slate-200 transition-all ${
                   mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
                 }`}
               />
@@ -88,13 +88,13 @@ export default function Navbar() {
           mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         } absolute left-0 right-0 top-16 z-40`}
       >
-        <div className="px-4 py-4 bg-white/95 backdrop-blur-lg shadow-lg">
+        <div className="px-4 py-4 bg-slate-900/95 backdrop-blur-lg shadow-lg border-t border-white/5">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
               onClick={() => setMobileMenuOpen(false)}
-              className="block py-3 text-gray-700 hover:text-blue-600 transition-colors font-medium"
+              className="block py-3 text-slate-200 hover:text-blue-400 transition-colors font-medium"
             >
               {link.name}
             </Link>

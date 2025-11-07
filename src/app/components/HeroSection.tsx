@@ -26,14 +26,14 @@ export default function HeroSection() {
             }`}
           >
             <div className="space-y-1">
-              <p className="text-blue-600 font-semibold text-sm sm:text-base">Hi, I&apos;m</p>
-              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-900">Your Name</h1>
-              <h2 className="text-xl sm:text-2xl md:text-4xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <p className="text-blue-400 font-semibold text-sm sm:text-base">Hi, I&apos;m</p>
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-slate-100">Your Name</h1>
+              <h2 className="text-xl sm:text-2xl md:text-4xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                 Full Stack Developer
               </h2>
             </div>
 
-            <p className="text-gray-600 text-lg leading-relaxed">
+            <p className="text-slate-300 text-lg leading-relaxed">
               I craft beautiful, functional websites and applications that solve
               real-world problems. Specializing in modern web technologies and
               user-centered design.
@@ -42,13 +42,13 @@ export default function HeroSection() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/projects"
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transform hover:scale-105 transition-all shadow-lg hover:shadow-xl"
+                className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-500 transform hover:scale-105 transition-all shadow-lg hover:shadow-blue-900/50"
               >
                 View Projects
               </Link>
               <a
                 href="#about"
-                className="px-8 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transform hover:scale-105 transition-all"
+                className="px-8 py-3 border-2 border-blue-400 text-blue-300 rounded-lg font-semibold hover:bg-blue-950/40 transform hover:scale-105 transition-all"
               >
                 About Me
               </a>
@@ -58,9 +58,9 @@ export default function HeroSection() {
               {["React", "Next.js", "TypeScript", "Node.js"].map((tech) => (
                 <div
                   key={tech}
-                  className="px-4 py-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                  className="px-4 py-2 bg-slate-800/80 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-white/5"
                 >
-                  <span className="text-sm font-medium text-gray-700">{tech}</span>
+                  <span className="text-sm font-medium text-slate-200">{tech}</span>
                 </div>
               ))}
             </div>
@@ -72,7 +72,7 @@ export default function HeroSection() {
               mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
             }`}
           >
-            <div className="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-white shadow-2xl flex-shrink-0">
+            <div className="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-slate-800 shadow-2xl flex-shrink-0">
               {mounted && <Profile3D modelPath={me} />}
 
               <div
