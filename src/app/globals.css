@@ -1,9 +1,25 @@
 @import "tailwindcss";
 
+/* Base reset */
 html, body {
   height: 100%;
   margin: 0;
   font-family: system-ui, sans-serif;
+}
+
+/* Dark theme as the default */
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background-color: #0b1220; /* near slate-950 */
+  color: #e5e7eb; /* gray-200 */
+}
+
+/* Subtle dark gradient for sections opting into a static background */
+.static-bg {
+  background: linear-gradient(180deg, #0b1220 0%, #0a0f1a 100%);
 }
 
 * {

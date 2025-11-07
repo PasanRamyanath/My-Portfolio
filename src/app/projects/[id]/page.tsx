@@ -4,27 +4,40 @@ import type { Metadata } from "next";
 import ProjectMediaViewerClient from "../ProjectMediaViewer";
 import Link from "next/link";
 
+interface MediaObject {
+  url: string;
+  fileId?: string;
+}
+
 interface ProjectDetail {
   id: string;
   title: string;
-  description: string;
+  description?: string;
+  "long-description"?: string;
+  longDescription?: string;
   tech?: string[];
+  "tech-stacks"?: string[] | string;
+  techStacks?: string[] | string;
+  image?: string | MediaObject;
+  media?: (string | MediaObject)[];
   github?: string;
   demo?: string;
   linkedin_post?: string;
-  image?: string | { url: string; fileId?: string };
-  media?: (string | { url: string })[];
-  "long-description"?: string;
-  longDescription?: string;
-  "tech-stacks"?: string[] | string;
-  techStacks?: string[] | string;
-  [key: string]: any;
+  [key: string]: string | string[] | (string | MediaObject)[] | MediaObject | undefined;
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+interface ProjectPageParams {
+  id: string;
+}
+
+// Metadata must be in a server component
+export async function generateMetadata({ params }: { params?: Promise<ProjectPageParams> }): Promise<Metadata> {
   try {
-    const snapshot = await getDoc(doc(db, "projects", params.id));
+    const resolvedParams = params ? await params : undefined;
+    if (!resolvedParams?.id) return { title: "Project", description: "Project details" };
+    const snapshot = await getDoc(doc(db, "projects", resolvedParams.id));
     const data = snapshot.exists() ? (snapshot.data() as ProjectDetail) : null;
+
     return {
       title: data?.title ? `${data.title} — Project` : "Project",
       description: data?.["long-description"] ?? data?.longDescription ?? data?.description ?? "Project details",
@@ -34,14 +47,27 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   }
 }
 
-export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
-  const snapshot = await getDoc(doc(db, "projects", params.id));
+export default async function ProjectDetailPage({ params }: { params?: Promise<ProjectPageParams> }) {
+  const resolvedParams = params ? await params : undefined;
+  if (!resolvedParams?.id) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold">Project not found</h1>
+          <p className="text-gray-600 mt-2">The project you&apos;re looking for doesn&apos;t exist.</p>
+        </div>
+      </main>
+    );
+  }
+  const snapshot = await getDoc(doc(db, "projects", resolvedParams.id));
   if (!snapshot.exists()) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-semibold">Project not found</h1>
-          <p className="text-gray-600 mt-2">The project you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mt-2">
+            The project you&apos;re looking for doesn&apos;t exist.
+          </p>
         </div>
       </main>
     );
@@ -49,8 +75,8 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
 
   const project = snapshot.data() as ProjectDetail;
 
-  const buildMediaArray = (p: ProjectDetail) => {
-    if (!p) return [] as string[];
+  const buildMediaArray = (p: ProjectDetail): string[] => {
+    if (!p) return [];
     if (Array.isArray(p.media) && p.media.length > 0)
       return p.media.map((v) => (typeof v === "string" ? v : v.url)).filter(Boolean) as string[];
 
@@ -58,7 +84,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
       .filter((k) => /^media\d+$/.test(k))
       .sort((a, b) => parseInt(a.replace("media", ""), 10) - parseInt(b.replace("media", ""), 10));
 
-    const values = keys.map((k) => p[k]).filter(Boolean) as (string | { url: string })[];
+    const values = keys.map((k) => p[k]).filter(Boolean) as (string | MediaObject)[];
     const urls = values.map((v) => (typeof v === "string" ? v : v.url)).filter(Boolean) as string[];
     if (urls.length > 0) return urls;
 
@@ -76,11 +102,11 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     : [];
 
   return (
-    <main className="min-h-screen py-12 bg-white">
+    <main className="min-h-screen py-12 static-bg">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="mb-6">
           <Link href="/projects" className="text-sm text-blue-600 hover:underline">
-            ← Back to projects
+            &larr; Back to projects
           </Link>
         </div>
 

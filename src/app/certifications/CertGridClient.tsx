@@ -83,7 +83,7 @@ export default function CertGridClient({ certs }: Props) {
           <button
             key={c.id}
             onClick={() => setSelected(c)}
-            className="bg-white rounded-lg shadow p-6 flex flex-col items-start text-left hover:shadow-lg transition"
+              className="rounded-lg p-6 flex flex-col items-start text-left transition shadow-lg border border-white/20 bg-white/30 backdrop-blur-md hover:bg-white/40 hover:shadow-xl"
           >
             {c.image && (
               <div className="w-full h-40 mb-4 overflow-hidden rounded relative">
@@ -114,9 +114,24 @@ export default function CertGridClient({ certs }: Props) {
           >
             <div
               ref={modalRef}
-              className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl"
+              className="rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl border border-white/20 bg-white/30 backdrop-blur-md glass-scrollbar"
               onClick={(e) => e.stopPropagation()}
             >
+            <style jsx>{`
+              .glass-scrollbar::-webkit-scrollbar {
+                width: 12px;
+                background: transparent;
+              }
+              .glass-scrollbar::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,0.3);
+                border-radius: 8px;
+                border: 2px solid rgba(255,255,255,0.2);
+                backdrop-filter: blur(4px);
+              }
+              .glass-scrollbar::-webkit-scrollbar-track {
+                background: transparent;
+              }
+            `}</style>
               <div className="flex justify-end p-4">
                 <button
                   ref={closeBtnRef}
