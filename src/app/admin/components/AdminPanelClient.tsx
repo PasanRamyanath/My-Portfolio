@@ -1,10 +1,11 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { db, auth } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { signOut, onAuthStateChanged } from "firebase/auth";
+import ConfirmModal from "@/app/admin/components/ConfirmModal";
 
 export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }) {
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -16,10 +17,13 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
     image: "",
     github: "",
     demo: "",
-    type: "own",
+    type: "private",
+    selected: false,
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [imageFileId, setImageFileId] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
@@ -68,13 +72,44 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
         throw new Error(data.error || "Failed to upload image");
       }
 
-      setForm((prev) => ({ ...prev, image: data.url }));
-      setSuccess("Image uploaded successfully!");
+  setForm((prev) => ({ ...prev, image: data.url }));
+  if (data.fileId) setImageFileId(data.fileId);
+  setSuccess("Image uploaded successfully!");
+  // clear the file input selection after successful upload
+  setImageFile(null);
+  if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err: any) {
       setError(err.message || "Image upload failed");
     } finally {
       setUploadingImage(false);
     }
+  };
+
+  const removeImage = async () => {
+    // centralized remove logic: delete remote file if present, then clear local state
+    setError("");
+    setSuccess("");
+    if (imageFileId) {
+      try {
+        const res = await fetch("/api/upload/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fileId: imageFileId }),
+        });
+        const j = await res.json();
+        if (!j.success) throw new Error(j.error || "Failed to delete image");
+        setSuccess("Image removed from server");
+      } catch (err: any) {
+        setError(err?.message || "Failed to delete image from server");
+        // continue to clear local state
+      }
+    }
+
+    // clear selected file and uploaded preview locally
+    setImageFile(null);
+    setImageFileId(null);
+    setForm((prev) => ({ ...prev, image: "" }));
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -91,10 +126,12 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
         github: form.github,
         demo: form.demo,
         type: form.type,
+        selected: !!form.selected,
       });
-  setSuccess("Project added successfully!");
-  setForm({ title: "", description: "", image: "", github: "", demo: "", type: "own" });
-      setImageFile(null);
+    setSuccess("Project added successfully!");
+  setForm({ title: "", description: "", image: "", github: "", demo: "", type: "private", selected: false });
+  setImageFile(null);
+  setImageFileId(null);
     } catch (err: any) {
       setError(err.message || "Error adding project");
     } finally {
@@ -102,9 +139,15 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
     }
   };
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    if (onLogout) onLogout();
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const performLogout = async () => {
+    try {
+      await signOut(auth);
+      if (onLogout) onLogout();
+    } finally {
+      setShowConfirm(false);
+    }
   };
 
   if (loadingUser)
@@ -121,9 +164,18 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
           <div className="font-semibold mb-2">Access Denied</div>
           <div className="text-sm mb-4">You are not authorized to view this page.</div>
           <div>
-            <button onClick={handleLogout} className="px-4 py-2 bg-rose-600 text-white rounded-lg">
-              Logout
-            </button>
+                <ConfirmModal
+                  open={showConfirm}
+                  title="Log out"
+                  message="Are you sure you want to log out?"
+                  confirmLabel="Log out"
+                  cancelLabel="Cancel"
+                  onConfirm={performLogout}
+                  onCancel={() => setShowConfirm(false)}
+                />
+                <button onClick={() => setShowConfirm(true)} className="px-4 py-2 bg-rose-600 text-white rounded-lg">
+                  Logout
+                </button>
           </div>
         </div>
       </div>
@@ -133,7 +185,16 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
   return (
     <div className="max-w-xl mx-auto bg-slate-900/60 rounded-xl shadow-lg p-8 mt-8 border border-white/5 text-slate-100">
       <div className="flex justify-end mb-4">
-        <button onClick={handleLogout} className="px-4 py-2 bg-rose-600 text-white rounded-lg">
+        <ConfirmModal
+          open={showConfirm}
+          title="Log out"
+          message="Are you sure you want to log out?"
+          confirmLabel="Log out"
+          cancelLabel="Cancel"
+          onConfirm={performLogout}
+          onCancel={() => setShowConfirm(false)}
+        />
+        <button onClick={() => setShowConfirm(true)} className="px-4 py-2 bg-rose-600 text-white rounded-lg">
           Logout
         </button>
       </div>
@@ -153,16 +214,15 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
         {/* Type Dropdown */}
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-1">Project type</label>
-          <select
-            name="type"
-            value={form.type}
-            onChange={handleChange}
-            className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100"
-          >
-            <option value="own">own</option>
-            <option value="private">private</option>
-            <option value="group">group</option>
-          </select>
+            <select
+              name="type"
+              value={form.type}
+              onChange={handleChange}
+              className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100"
+            >
+              <option value="private">Private</option>
+              <option value="university">University</option>
+            </select>
         </div>
 
         <textarea
@@ -176,26 +236,52 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
 
         {/* Image Upload Section */}
         <div className="space-y-2">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-            className="text-slate-200"
-          />
-          <button
-            type="button"
-            onClick={handleImageUpload}
-            disabled={!imageFile || uploadingImage}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-          >
-            {uploadingImage ? "Uploading..." : "Upload Image"}
-          </button>
+          <div className="flex items-center gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+              className="text-slate-200"
+            />
+            <button
+              type="button"
+              onClick={handleImageUpload}
+              disabled={!imageFile || uploadingImage}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            >
+              {uploadingImage ? "Uploading..." : "Upload Image"}
+            </button>
+            <button
+              type="button"
+              onClick={removeImage}
+              disabled={!imageFile && !form.image}
+              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 transition"
+            >
+              Clear
+            </button>
+          </div>
 
           {form.image && (
-            <div className="mt-2">
+            <div className="mt-2 relative">
               <img src={form.image} alt="Preview" className="w-full h-40 object-cover rounded border border-white/10" />
+              <button
+                type="button"
+                aria-label="Remove uploaded image"
+                onClick={removeImage}
+                className="absolute top-2 right-2 w-8 h-8 rounded-full bg-rose-600 text-white flex items-center justify-center hover:bg-rose-500"
+              >
+                ×
+              </button>
             </div>
           )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          <label className="inline-flex items-center gap-2">
+            <input type="checkbox" name="selected" checked={(form as any).selected || false} onChange={(e) => setForm((prev: any) => ({ ...prev, selected: e.target.checked }))} />
+            <span className="text-sm text-slate-300">Selected / Featured</span>
+          </label>
         </div>
 
         <input

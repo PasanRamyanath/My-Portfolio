@@ -39,9 +39,21 @@ export default function Login({ onLogin }: Props) {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
+      if (!user || !user.email) {
+        // Unexpected: no user/email returned from Google
+        setError("Google login failed: no account information returned");
+        try {
+          await auth.signOut();
+        } catch (_) {}
+        return;
+      }
+
       if (user.email !== ADMIN_EMAIL) {
-        await auth.signOut();
-        setError("Login failed: unauthorized Google account");
+        // Signed in with a Google account, but not the admin email
+        try {
+          await auth.signOut();
+        } catch (_) {}
+        setError(`Login failed: unauthorized Google account (${user.email})`);
         return;
       }
 

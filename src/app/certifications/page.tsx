@@ -15,6 +15,7 @@ interface Cert {
   description?: string;
   linkedin?: string;
   image?: string;
+  type?: "university" | "external";
 }
 
 // Strongly typed Firestore document
@@ -27,6 +28,10 @@ function mapCertDoc(doc: QueryDocumentSnapshot<DocumentData>): Cert {
     description: typeof data.description === "string" ? data.description : undefined,
     linkedin: typeof data.linkedin === "string" ? data.linkedin : undefined,
     image: typeof data.image === "string" ? data.image : undefined,
+    // support legacy 'academic' value by mapping it to 'university'
+    type: typeof data.type === "string"
+      ? (data.type === "academic" ? "university" : (data.type as "university" | "external"))
+      : undefined,
   };
 }
 

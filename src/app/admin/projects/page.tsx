@@ -15,6 +15,7 @@ import {
   deleteField,
 } from "firebase/firestore";
 import { signOut, onAuthStateChanged } from "firebase/auth";
+import ConfirmModal from "@/app/admin/components/ConfirmModal";
 
 interface Project {
   id: string;
@@ -47,7 +48,8 @@ export default function AdminProjectsPage() {
     techStacks: [] as string[],
     github: "",
     demo: "",
-    type: "own",
+    type: "private",
+    selected: false,
   });
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -79,7 +81,10 @@ export default function AdminProjectsPage() {
     setLoadingProjects(true);
     try {
       const snap = await getDocs(collection(db, "projects"));
-      const data = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Project[];
+      const raw = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Project[];
+      // normalize types: only 'university' or 'private' are allowed
+      const normalizeType = (t: any) => (t === "university" ? "university" : "private");
+      const data = raw.map((p) => ({ ...p, type: normalizeType(p.type) })) as Project[];
       setProjects(data);
       const types = Array.from(new Set(data.map((p) => p.type).filter(Boolean))) as string[];
       setProjectTypes(types);
@@ -225,6 +230,7 @@ export default function AdminProjectsPage() {
         github: (form as any).github,
         demo: (form as any).demo,
         type: (form as any).type,
+        selected: !!(form as any).selected,
       };
 
       // attach long-description and tech-stacks using hyphenated keys
@@ -245,7 +251,7 @@ export default function AdminProjectsPage() {
         setSuccess("Project added successfully!");
       }
 
-    setForm({ title: "", description: "", media: [], longDescription: "", techStacks: [], github: "", demo: "", type: "own" });
+    setForm({ title: "", description: "", media: [], longDescription: "", techStacks: [], github: "", demo: "", type: "private", selected: false });
       setMediaFiles([]);
       setEditingId(null);
       await fetchProjects();
@@ -282,6 +288,7 @@ export default function AdminProjectsPage() {
         : p.image ? [typeof p.image === 'string' ? { url: p.image } : p.image] : [];
     }
 
+    const normalizeType = (t: any) => (t === "university" ? "university" : "private");
     setForm({
       title: p.title || "",
       description: p.description || "",
@@ -290,7 +297,8 @@ export default function AdminProjectsPage() {
       techStacks: (p as any)["tech-stacks"] ?? (p as any).techStacks ?? [],
       github: p.github || "",
       demo: p.demo || "",
-      type: p.type || "own",
+      type: normalizeType(p.type),
+      selected: !!(p as any).selected,
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -390,8 +398,18 @@ export default function AdminProjectsPage() {
     return [] as string[];
   };
 
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const handleLogout = async () => {
-    await signOut(auth);
+    setShowConfirm(true);
+  };
+
+  const performLogout = async () => {
+    try {
+      await signOut(auth);
+    } finally {
+      setShowConfirm(false);
+    }
   };
 
   if (loadingUser) return (
@@ -410,6 +428,15 @@ export default function AdminProjectsPage() {
         <div className="bg-slate-900/60 p-6 rounded-lg border border-white/10 text-center max-w-sm">
           <div className="font-semibold mb-2">Access Denied</div>
           <p className="text-sm mb-4">You are not authorized to view this page.</p>
+          <ConfirmModal
+            open={showConfirm}
+            title="Log out"
+            message="Are you sure you want to log out?"
+            confirmLabel="Log out"
+            cancelLabel="Cancel"
+            onConfirm={performLogout}
+            onCancel={() => setShowConfirm(false)}
+          />
           <button onClick={handleLogout} className="px-4 py-2 bg-rose-600 text-white rounded-lg">Logout</button>
         </div>
       </div>
@@ -424,7 +451,7 @@ export default function AdminProjectsPage() {
         <h2 className="text-2xl font-bold mb-4 text-slate-100">{editingId ? "Edit Project" : "Add New Project"}</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
+            <input
             name="title"
             value={form.title}
             onChange={handleChange}
@@ -435,11 +462,10 @@ export default function AdminProjectsPage() {
 
           {/* Type Dropdown */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">Project type</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1">Project category</label>
             <select name="type" value={form.type} onChange={handleChange} className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100">
-              <option value="own">own</option>
-              <option value="private">private</option>
-              <option value="group">group</option>
+              <option value="private">Private</option>
+              <option value="university">University</option>
             </select>
           </div>
 
@@ -483,6 +509,13 @@ export default function AdminProjectsPage() {
             </div>
           </div>
 
+          <div className="flex items-center gap-3">
+            <label className="inline-flex items-center gap-2">
+              <input type="checkbox" name="selected" checked={(form as any).selected || false} onChange={(e) => setForm((prev: any) => ({ ...prev, selected: e.target.checked }))} />
+              <span className="text-sm text-slate-300">Selected / Featured</span>
+            </label>
+          </div>
+
           {/* Media Upload Section (supports multiple images/videos) */}
           <div className="space-y-2">
             <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple onChange={(e) => setMediaFiles(Array.from(e.target.files || []))} />
@@ -520,7 +553,7 @@ export default function AdminProjectsPage() {
               {loading ? "Saving..." : editingId ? "Update Project" : "Add Project"}
             </button>
             {editingId && (
-              <button type="button" onClick={() => { setEditingId(null); setForm({ title: "", description: "", media: [], github: "", demo: "", type: "own", longDescription: "", techStacks: [] }); }} className="px-4 py-2 bg-slate-700 text-slate-200 rounded hover:bg-slate-600">
+              <button type="button" onClick={() => { setEditingId(null); setForm({ title: "", description: "", media: [], github: "", demo: "", type: "private", selected: false, longDescription: "", techStacks: [] }); }} className="px-4 py-2 bg-slate-700 text-slate-200 rounded hover:bg-slate-600">
                 Cancel Edit
               </button>
             )}
@@ -658,7 +691,8 @@ export default function AdminProjectsPage() {
                       );
                     })()}
                     <p className="text-xs text-slate-400 mb-4">Type: {selectedProject.type}</p>
-                    <div className="prose max-w-none text-slate-300 mb-4">{selectedProject.description}</div>
+        <p className="text-xs text-slate-400 mb-2">Selected: {(selectedProject as any).selected ? "Yes" : "No"}</p>
+        <div className="prose max-w-none text-slate-300 mb-4">{selectedProject.description}</div>
 
                     {/* Long description and tech stacks */}
                     {((selectedProject as any)["long-description"] || (selectedProject as any).longDescription) && (

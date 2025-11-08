@@ -21,12 +21,13 @@ interface Project {
   type?: string;
   media?: (string | MediaItem)[];
   techStacks?: string[];
-  [key: string]: string | string[] | (string | MediaItem)[] | MediaItem | undefined; // legacy fields
+  selected?: boolean;
+  [key: string]: any; // legacy fields (allow mixed types like selected:boolean)
 }
 
 export default function ProjectsSection() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedType, setSelectedType] = useState<string>("all");
+  const [selectedType, setSelectedType] = useState<string>("selected");
   const [projectTypes, setProjectTypes] = useState<string[]>([]);
   const router = useRouter();
 
@@ -39,9 +40,12 @@ export default function ProjectsSection() {
         id: doc.id,
       }));
 
-      setProjects(projectsData);
+      // normalize types so only 'university' and 'private' are used
+      const normalizeType = (t: any) => (t === "university" ? "university" : "private");
+      const normalized = projectsData.map((p) => ({ ...p, type: normalizeType(p.type), selected: !!(p as any).selected }));
+      setProjects(normalized);
 
-      const types = Array.from(new Set(projectsData.map((p) => p.type).filter(Boolean))) as string[];
+      const types = Array.from(new Set(normalized.map((p) => p.type).filter(Boolean))) as string[];
       setProjectTypes(types);
     };
 
@@ -80,7 +84,7 @@ export default function ProjectsSection() {
   const getTechListFromProject = (project: Project): string[] => {
     const techField: string | string[] | (string | MediaItem)[] | MediaItem | undefined =
       project["tech-stacks"] ?? project.techStacks ?? project.tech;
-    if (Array.isArray(techField)) return techField.filter((item): item is string => typeof item === "string");
+    if (Array.isArray(techField)) return techField.map((item) => (typeof item === "string" ? item : "")).filter(Boolean);
     if (typeof techField === "string") return techField.split(",").map((s) => s.trim()).filter(Boolean);
     return [];
   };
@@ -178,7 +182,13 @@ export default function ProjectsSection() {
     );
   }
 
-  const filteredProjects = selectedType === "all" ? projects : projects.filter((p) => p.type === selectedType);
+  const selectedProjects = projects.filter((p) => !!(p as any).selected);
+  const filteredProjects =
+    selectedType === "all"
+      ? projects
+      : selectedType === "selected"
+      ? projects.filter((p) => !!p.selected)
+      : projects.filter((p) => p.type === selectedType);
 
   return (
     <section id="projects" className="relative py-5 static-bg overflow-hidden">
@@ -198,6 +208,39 @@ export default function ProjectsSection() {
           <div className="mb-8 flex justify-center">
             <div className="flex flex-wrap gap-3">
               <button
+                onClick={() => setSelectedType("selected")}
+                className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 ${
+                  selectedType === "selected"
+                    ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
+                    : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
+                }`}
+              >
+                Selected
+              </button>
+
+              <button
+                onClick={() => setSelectedType("university")}
+                className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 ${
+                  selectedType === "university"
+                    ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
+                    : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
+                }`}
+              >
+                University
+              </button>
+
+              <button
+                onClick={() => setSelectedType("private")}
+                className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 ${
+                  selectedType === "private"
+                    ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
+                    : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
+                }`}
+              >
+                Private
+              </button>
+
+              <button
                 onClick={() => setSelectedType("all")}
                 className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 ${
                   selectedType === "all"
@@ -207,32 +250,43 @@ export default function ProjectsSection() {
               >
                 All
               </button>
-              {projectTypes.map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setSelectedType(type)}
-                  className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 ${
-                    selectedType === type
-                      ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
-                      : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
-                  }`}
-                >
-                  {type}
-                </button>
-              ))}
             </div>
           </div>
         )}
 
         {projects.length === 0 ? (
           <div className="text-slate-400 text-lg text-center">Loading...</div>
+        ) : selectedType === "all" ? (
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-100 mb-4">All Projects</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {projects
+                  .slice()
+                  .sort((a, b) => {
+                    // selected first
+                    if (!!a.selected && !b.selected) return -1;
+                    if (!a.selected && !!b.selected) return 1;
+                    // then by type: private before university
+                    const rank = (t?: string) => (t === 'private' ? 0 : t === 'university' ? 1 : 2);
+                    return rank(a.type) - rank(b.type);
+                  })
+                  .map((project) => (
+                    <ProjectCard key={project.id} project={project} onOpen={() => router.push(`/projects/${project.id}`)} />
+                  ))}
+              </div>
+            </div>
+          </div>
         ) : filteredProjects.length === 0 ? (
           <div className="text-slate-400 text-lg text-center">No projects in this category yet.</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} onOpen={() => router.push(`/projects/${project.id}`)} />
-            ))}
+            {filteredProjects
+              .slice()
+              .sort((a, b) => ((b.selected ? 1 : 0) - (a.selected ? 1 : 0)))
+              .map((project) => (
+                <ProjectCard key={project.id} project={project} onOpen={() => router.push(`/projects/${project.id}`)} />
+              ))}
           </div>
         )}
       </div>

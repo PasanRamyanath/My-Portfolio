@@ -103,68 +103,88 @@ export default async function ProjectDetailPage({ params }: { params?: Promise<P
 
   return (
     <main className="min-h-screen py-12 static-bg">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <Link href="/projects" className="text-sm text-blue-600 hover:underline">
-            &larr; Back to projects
+          <Link
+            href="/projects"
+            className="inline-flex items-center gap-2 text-sm text-indigo-300 hover:text-indigo-200 transition-colors"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to projects
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
-          <div className="md:col-span-3">
-            <ProjectMediaViewerClient media={media} title={project.title} />
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+          {/* Media area */}
+          <div className="md:col-span-7 lg:col-span-8">
+            <div className="bg-gradient-to-br from-white/5 to-white/2 bg-clip-padding backdrop-blur-lg backdrop-saturate-150 rounded-2xl p-2 sm:p-3 border border-white/10 ring-1 ring-white/5 shadow-xl">
+              <div className="overflow-hidden rounded-xl">
+                <ProjectMediaViewerClient media={media} title={project.title} />
+              </div>
+            </div>
           </div>
 
-          <div className="md:col-span-1">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">{project.title}</h1>
-            <p className="text-gray-700 mb-6 whitespace-pre-line">
-              {project["long-description"] ?? project.longDescription ?? project.description}
-            </p>
+          {/* Info panel */}
+          <div className="md:col-span-5 lg:col-span-4">
+            <div className="bg-gradient-to-br from-white/5 to-white/2 bg-clip-padding backdrop-blur-lg backdrop-saturate-150 rounded-2xl p-6 sm:p-8 border border-white/10 ring-1 ring-white/5 shadow-xl">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-100 mb-4">{project.title}</h1>
+              <p className="text-slate-300 leading-relaxed mb-6 whitespace-pre-line">
+                {project["long-description"] ?? project.longDescription ?? project.description}
+              </p>
 
-            {techList.length > 0 && (
-              <section className="mb-6">
-                <h2 className="text-lg font-semibold mb-3">Tech</h2>
-                <ul className="flex flex-wrap gap-2">
-                  {techList.map((t) => (
-                    <li key={t} className="px-3 py-1 bg-gray-100 rounded text-sm">
-                      {t}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
+              {techList.length > 0 && (
+                <section className="mb-6">
+                  <h2 className="text-sm font-semibold tracking-wide text-indigo-300 uppercase mb-3">Tech</h2>
+                  <ul className="flex flex-wrap gap-2">
+                    {techList.map((t) => (
+                      <li
+                        key={t}
+                        className="px-3 py-1 rounded-full text-xs font-medium bg-indigo-900/30 text-indigo-300 border border-indigo-800/40"
+                      >
+                        {t}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
 
-            <div className="flex flex-wrap gap-3 mt-4">
-              {project.github && (
-                <a
-                  href={project.github}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2 bg-gray-900 text-white rounded"
-                >
-                  GitHub
-                </a>
-              )}
-              {project.demo && (
-                <a
-                  href={project.demo}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2 bg-blue-600 text-white rounded"
-                >
-                  Live Demo
-                </a>
-              )}
-              {project.linkedin_post && (
-                <a
-                  href={project.linkedin_post}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded"
-                >
-                  LinkedIn Post
-                </a>
-              )}
+              <div className="flex flex-wrap gap-3 mt-4">
+                {project.demo && (
+                  <a
+                    href={project.demo}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  >
+                    <span>Live Demo</span>
+                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5-5 5M6 12h12" />
+                    </svg>
+                  </a>
+                )}
+                {project.github && (
+                  <a
+                    href={project.github}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-800/80 text-slate-200 rounded-xl font-semibold border-2 border-slate-700 hover:border-blue-400 hover:text-blue-300 transition-all duration-300 shadow-md hover:shadow-lg"
+                  >
+                    GitHub
+                  </a>
+                )}
+                {project.linkedin_post && (
+                  <a
+                    href={project.linkedin_post}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600/80 text-white rounded-xl font-semibold border-2 border-indigo-500/60 hover:border-indigo-300 transition-all duration-300 shadow-md hover:shadow-lg"
+                  >
+                    LinkedIn Post
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>

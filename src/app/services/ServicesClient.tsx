@@ -45,11 +45,17 @@ export default function Services() {
   }, []);
 
   return (
-    <main className="min-h-screen static-bg py-16">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
+    <main className="relative min-h-screen static-bg overflow-hidden py-5">
+      {/* subtle background accents to match theme */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute left-0 top-8 w-72 h-72 bg-teal-200/30 rounded-full blur-3xl transform -rotate-12 animate-slow-float" />
+        <div className="absolute right-0 -top-6 w-96 h-96 bg-indigo-200/20 rounded-full blur-2xl transform rotate-6" />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-10">
           <h1 className="text-5xl sm:text-4xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">Services</h1>
-          <p className="text-slate-300 max-w-2xl mx-auto">
+          <p className="text-slate-300 text-lg max-w-2xl mx-auto">
             I help teams and founders ship quality web products. Below are some of the services I offer — if
             you don&apos;t see exactly what you need, reach out and we&apos;ll craft a custom plan.
           </p>
@@ -60,7 +66,7 @@ export default function Services() {
         ) : error ? (
           <div className="text-center text-rose-400">{error}</div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {services.map((s) => (
               <article
                 key={s.id}

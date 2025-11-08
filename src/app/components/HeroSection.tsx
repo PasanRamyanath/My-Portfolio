@@ -17,17 +17,17 @@ export default function HeroSection() {
   return (
     <section
       id="home"
-      className="min-h-[60vh] md:min-h-[70vh] flex items-center justify-center static-bg pt-0"
+      className="min-h-screen flex items-center justify-center static-bg pt-0"
     >
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0">
-        <div className="grid md:grid-cols-2 gap-8 items-center">
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-0 h-full flex items-center">
+  <div className="grid md:grid-cols-[1fr_auto] gap-12 items-center w-full md:items-start md:transform md:-translate-y-8">
           {/* Left Content */}
           <div
-            className={`space-y-4 transition-all duration-1000 ${
+            className={`space-y-12 text-center md:text-left md:max-w-none mx-auto md:mx-0 transition-all duration-1000 ${
               mounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"
             }`}
           >
-            <div className="space-y-1">
+            <div className="space-y-4">
               {loading ? (
                 <div className="space-y-3">
                   <div className="w-24 h-4 bg-slate-700 rounded-full animate-pulse" />
@@ -39,7 +39,7 @@ export default function HeroSection() {
                   <p className="text-blue-400 font-semibold text-sm sm:text-base">Hi, I&apos;m</p>
                   <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-slate-100">{info?.displayName ?? info?.initialName ?? "Pasan Ramyanath"}</h1>
                   <h2 className="text-xl sm:text-2xl md:text-4xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                    {info?.description ? info.description.split(". ")[0] : "Tech Enthusiast"}
+                    {info?.shortDescription ?? (info?.description ? info.description.split(". ")[0] : "Tech Enthusiast")}
                   </h2>
                 </>
               )}
@@ -52,51 +52,44 @@ export default function HeroSection() {
                 <div className="w-2/3 h-4 bg-slate-700 rounded-md animate-pulse" />
               </div>
             ) : (
-              <p className="text-slate-300 text-lg leading-relaxed">
-                {info?.description ?? "I craft beautiful, functional websites and applications that solve real-world problems. Specializing in modern web technologies and user-centered design."}
+              <p className="text-slate-300 text-lg leading-relaxed max-w-xl mx-auto md:mx-0">
+                {info?.description ?? info?.aboutMeDescription ?? "I craft beautiful, functional websites and applications that solve real-world problems. Specializing in modern web technologies and user-centered design."}
               </p>
             )}
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex gap-4 flex-wrap justify-center md:justify-start">
               <Link
                 href="/projects"
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-500 transform hover:scale-105 transition-all shadow-lg hover:shadow-blue-900/50"
+                className="group inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
-                View Projects
+                <span>See My Work</span>
+                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
               </Link>
+
               <a
-                href="#about"
-                className="px-8 py-3 border-2 border-blue-400 text-blue-300 rounded-lg font-semibold hover:bg-blue-950/40 transform hover:scale-105 transition-all"
+                href="/cv.pdf"
+                download
+                className="group inline-flex items-center gap-2 px-8 py-3.5 bg-slate-800/80 text-slate-200 rounded-xl font-semibold border-2 border-slate-700 hover:border-blue-400 hover:text-blue-300 transition-all duration-300 shadow-md hover:shadow-lg"
               >
-                About Me
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Download CV</span>
               </a>
             </div>
 
-            <div className="flex gap-4 pt-2 flex-wrap">
-              {loading ? (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="w-20 h-8 bg-slate-700 rounded-md animate-pulse" />
-                ))
-              ) : (
-                (info?.techStacks && info.techStacks.length > 0 ? info.techStacks : ["React", "Next.js", "TypeScript", "Node.js"]).map((tech) => (
-                  <div
-                    key={tech}
-                    className="px-4 py-2 bg-slate-800/80 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-white/5"
-                  >
-                    <span className="text-sm font-medium text-slate-200">{tech}</span>
-                  </div>
-                ))
-              )}
-            </div>
+            {/* Tech stacks moved to dedicated TechStacksSection */}
           </div>
 
           {/* Right Content - 3D Model */}
           <div
-            className={`flex justify-center items-center transition-all duration-1000 delay-300 ${
+            className={`flex justify-center items-center transition-all duration-1000 delay-300 gap-1 ${
               mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
             }`}
           >
-            <div className="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-slate-800 shadow-2xl flex-shrink-0">
+            <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-[420px] md:h-[420px] rounded-full overflow-hidden border-4 border-slate-800 shadow-2xl">
               {mounted && <Profile3D modelPath={me} />}
 
               <div

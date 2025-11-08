@@ -4,6 +4,8 @@ import { db } from "@/lib/firebase";
 
 export interface SiteInfo {
   description?: string;
+  shortDescription?: string;
+  aboutMeDescription?: string;
   displayName?: string;
   email?: string;
   facebook?: string;
@@ -15,7 +17,10 @@ export interface SiteInfo {
   location?: string;
   passions?: string[];
   portfolio?: string;
+  // Flat list (legacy compatibility for components expecting an array)
   techStacks?: string[];
+  // Categorized tech stacks: { category: [tech, ...] }
+  techStacksByCategory?: Record<string, string[]>;
 }
 
 let cachedInfo: SiteInfo | null = null;
@@ -30,8 +35,25 @@ async function fetchSiteInfoOnce(): Promise<SiteInfo | null> {
       const snap = await getDocs(collection(db, "my-information"));
       if (snap.empty) return null;
       const data = snap.docs[0].data() as Record<string, unknown>;
+      // derive tech stacks in both shapes
+      let flatTech: string[] = [];
+      let categorizedTech: Record<string, string[]> | undefined = undefined;
+      if (Array.isArray(data.techStacks)) {
+        flatTech = data.techStacks as string[];
+        categorizedTech = { General: flatTech };
+      } else if (data.techStacks && typeof data.techStacks === 'object') {
+        categorizedTech = data.techStacks as Record<string, string[]>;
+        try {
+          flatTech = Object.values(categorizedTech).flat();
+        } catch {
+          // fallback if flat isn't available (older runtimes)
+          flatTech = ([] as string[]).concat(...Object.values(categorizedTech));
+        }
+      }
       const info: SiteInfo = {
         description: typeof data.description === "string" ? data.description : undefined,
+        shortDescription: typeof data.shortDescription === "string" ? data.shortDescription : undefined,
+        aboutMeDescription: typeof data.aboutMeDescription === "string" ? data.aboutMeDescription : undefined,
         displayName: typeof data.displayName === "string" ? data.displayName : undefined,
         email: typeof data.email === "string" ? data.email : undefined,
         facebook: typeof data.facebook === "string" ? data.facebook : undefined,
@@ -43,7 +65,8 @@ async function fetchSiteInfoOnce(): Promise<SiteInfo | null> {
         location: typeof data.location === "string" ? data.location : undefined,
         passions: Array.isArray(data.passions) ? (data.passions as string[]) : [],
         portfolio: typeof data.portfolio === "string" ? data.portfolio : undefined,
-        techStacks: Array.isArray(data.techStacks) ? (data.techStacks as string[]) : [],
+        techStacks: flatTech,
+        techStacksByCategory: categorizedTech,
       };
       cachedInfo = info;
       return info;

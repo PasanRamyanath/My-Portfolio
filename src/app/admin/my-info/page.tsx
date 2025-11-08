@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { db, auth } from "@/lib/firebase";
 import { collection, getDocs, doc, updateDoc, addDoc } from "firebase/firestore";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import ConfirmModal from "@/app/admin/components/ConfirmModal";
 
 export default function AdminMyInfoPage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -26,9 +27,15 @@ export default function AdminMyInfoPage() {
     linkedin: "",
     location: "",
     portfolio: "",
-    techStacks: [] as string[],
+    shortDescription: "",
+    aboutMeDescription: "",
+    techStacks: {} as Record<string, string[]>,
     passions: [] as string[],
   });
+
+  const [selectedTechCategory, setSelectedTechCategory] = useState<string>("__new__");
+  const [newTechValue, setNewTechValue] = useState<string>("");
+  const [newTechCategory, setNewTechCategory] = useState<string>("");
 
   const ADMIN_EMAIL = "pjramyanath@gmail.com";
 
@@ -49,7 +56,7 @@ export default function AdminMyInfoPage() {
     setError(null);
     try {
       const snap = await getDocs(collection(db, "my-information"));
-      if (snap.empty) {
+        if (snap.empty) {
         // create empty doc
         const ref = await addDoc(collection(db, "my-information"), fields);
         setDocId(ref.id);
@@ -57,8 +64,20 @@ export default function AdminMyInfoPage() {
         const d = snap.docs[0];
         setDocId(d.id);
         const data = d.data() as any;
+        // normalize techStacks: if legacy array, move into default 'General' category
+        let techStacks: Record<string, string[]> = {};
+        if (Array.isArray(data.techStacks)) {
+          techStacks = { General: data.techStacks };
+        } else if (data.techStacks && typeof data.techStacks === 'object') {
+          techStacks = data.techStacks as Record<string, string[]>;
+        } else {
+          techStacks = {};
+        }
+
         setFields({
           description: data.description ?? "",
+          shortDescription: data.shortDescription ?? "",
+          aboutMeDescription: data.aboutMeDescription ?? "",
           email: data.email ?? "",
           facebook: data.facebook ?? "",
           fullName: data.fullName ?? "",
@@ -68,9 +87,13 @@ export default function AdminMyInfoPage() {
           linkedin: data.linkedin ?? "",
           location: data.location ?? "",
           portfolio: data.portfolio ?? "",
-          techStacks: Array.isArray(data.techStacks) ? data.techStacks : [],
+          techStacks,
           passions: Array.isArray(data.passions) ? data.passions : [],
         });
+
+  // set default selected category (if none, default to creating a new one)
+  const cats = Object.keys(techStacks);
+  setSelectedTechCategory(cats.length > 0 ? cats[0] : '__new__');
       }
     } catch (err: any) {
       console.error("Failed to load my-infomation:", err);
@@ -86,11 +109,28 @@ export default function AdminMyInfoPage() {
 
   const addTech = (t: string) => {
     if (!t) return;
-    setFields((prev: any) => ({ ...prev, techStacks: [...(prev.techStacks || []), t] }));
+  const cat = selectedTechCategory === '__new__' ? (newTechCategory.trim() || 'General') : selectedTechCategory;
+    setFields((prev: any) => {
+      const current: Record<string, string[]> = prev.techStacks || {};
+      const updated = { ...current };
+      if (!updated[cat]) updated[cat] = [];
+      updated[cat] = [...updated[cat], t];
+      return { ...prev, techStacks: updated };
+    });
+    setNewTechValue('');
+    setNewTechCategory('');
   };
 
-  const removeTech = (i: number) => {
-    setFields((prev: any) => ({ ...prev, techStacks: (prev.techStacks || []).filter((_: any, idx: number) => idx !== i) }));
+  const removeTech = (category: string, i: number) => {
+    setFields((prev: any) => {
+      const current: Record<string, string[]> = prev.techStacks || {};
+      const updated = { ...current };
+      if (!updated[category]) return prev;
+      updated[category] = updated[category].filter((_: any, idx: number) => idx !== i);
+      // if category become empty, remove the category
+      if (updated[category].length === 0) delete updated[category];
+      return { ...prev, techStacks: updated };
+    });
   };
 
   const addPassion = (p: string) => {
@@ -130,7 +170,18 @@ export default function AdminMyInfoPage() {
   };
 
   const handleLogout = async () => {
-    await signOut(auth);
+    // replaced by popup flow
+    setShowConfirm(true);
+  };
+
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const performLogout = async () => {
+    try {
+      await signOut(auth);
+    } finally {
+      setShowConfirm(false);
+    }
   };
 
   if (loadingUser) return (
@@ -149,7 +200,16 @@ export default function AdminMyInfoPage() {
         <div className="bg-slate-900/60 p-6 rounded-lg border border-white/10 text-center max-w-sm">
           <div className="font-semibold mb-2">Access Denied</div>
           <p className="text-sm mb-4">You are not authorized to view this page.</p>
-          <button onClick={handleLogout} className="px-4 py-2 bg-rose-600 text-white rounded-lg">Logout</button>
+          <ConfirmModal
+            open={showConfirm}
+            title="Log out"
+            message="Are you sure you want to log out?"
+            confirmLabel="Log out"
+            cancelLabel="Cancel"
+            onConfirm={performLogout}
+            onCancel={() => setShowConfirm(false)}
+          />
+          <button onClick={() => setShowConfirm(true)} className="px-4 py-2 bg-rose-600 text-white rounded-lg">Logout</button>
         </div>
       </div>
     );
@@ -214,21 +274,83 @@ export default function AdminMyInfoPage() {
               <textarea value={fields.description} onChange={(e) => handleFieldChange("description", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" rows={4} />
             </label>
 
+            <label className="block">
+              <span className="text-sm font-medium text-slate-300">Short description</span>
+              <input value={fields.shortDescription} onChange={(e) => handleFieldChange("shortDescription", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
+            </label>
+
+            <label className="block">
+              <span className="text-sm font-medium text-slate-300">About me description</span>
+              <textarea value={fields.aboutMeDescription} onChange={(e) => handleFieldChange("aboutMeDescription", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" rows={6} />
+            </label>
+
             <div>
               <span className="text-sm font-medium">Tech stacks</span>
-              <div className="mt-2 flex gap-2 flex-wrap">
-                {(fields.techStacks || []).map((t: string, i: number) => (
-                  <span key={i} className="inline-flex items-center gap-2 bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-600/30">
-                    <span>{t}</span>
-                    <button type="button" onClick={() => removeTech(i)} className="text-sm text-indigo-600">×</button>
-                  </span>
-                ))}
+              <div className="mt-2 space-y-3">
+                {Object.keys(fields.techStacks || {}).length === 0 ? (
+                  <div className="text-sm text-slate-400">No tech stacks yet.</div>
+                ) : (
+                  Object.entries((fields.techStacks || {}) as Record<string, string[]>).map(([cat, items]) => (
+                    <div key={cat}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm font-semibold text-slate-200">{cat}</div>
+                        <div className="text-xs text-slate-400">{items.length} item{items.length !== 1 ? 's' : ''}</div>
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        {items.map((t: string, i: number) => (
+                          <span key={t + i} className="inline-flex items-center gap-2 bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-600/30">
+                            <span>{t}</span>
+                            <button type="button" onClick={() => removeTech(cat, i)} className="text-sm text-indigo-600">×</button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
 
-              
-              <div className="mt-3 flex gap-2">
-                <input id="newTech" placeholder="Add tech (e.g. node)" className="flex-1 bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100 placeholder-slate-400" />
-                <button onClick={() => { const el = document.getElementById("newTech") as HTMLInputElement | null; if (el) { addTech(el.value.trim()); el.value = ""; } }} className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500">Add</button>
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 items-center">
+                <input
+                  value={newTechValue}
+                  onChange={(e) => setNewTechValue(e.target.value)}
+                  placeholder="Add tech (e.g. node)"
+                  className="col-span-2 w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400"
+                />
+
+                <div className="flex items-center gap-2">
+                  <select
+                    value={selectedTechCategory}
+                    onChange={(e) => setSelectedTechCategory(e.target.value)}
+                    className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100"
+                  >
+                    {Object.keys(fields.techStacks || {}).map((c) => (
+                      <option value={c} key={c}>{c}</option>
+                    ))}
+                    <option value="__new__">Create new category...</option>
+                  </select>
+                </div>
+
+                {selectedTechCategory === '__new__' && (
+                  <input
+                    value={newTechCategory}
+                    onChange={(e) => setNewTechCategory(e.target.value)}
+                    placeholder="New category name"
+                    className="col-span-3 w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400"
+                  />
+                )}
+
+                <div className="col-span-3 flex justify-end">
+                  <button
+                    onClick={() => {
+                      if (!newTechValue.trim()) return;
+                      const tech = newTechValue.trim();
+                      addTech(tech);
+                    }}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500"
+                  >
+                    Add
+                  </button>
+                </div>
               </div>
 
               <span className="text-sm font-medium">Passions</span>

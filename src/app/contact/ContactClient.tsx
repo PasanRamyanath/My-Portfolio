@@ -24,34 +24,66 @@ interface Info {
 export default function StylishContactPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [regarding, setRegarding] = useState("");
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [showMailtoConfirm, setShowMailtoConfirm] = useState(false);
+  const [mailtoHref, setMailtoHref] = useState<string | null>(null);
+  const [sendMethod, setSendMethod] = useState<string | null>(null); // 'server' | 'mailto'
   const [info, setInfo] = useState<Info | null>(null);
   const [loadingInfo, setLoadingInfo] = useState(true);
   const [infoError, setInfoError] = useState<string | null>(null);
 
   const handleSubmit = () => {
-    setError(null);
+    (async () => {
+      setError(null);
+      if (!name.trim() || !email.trim() || !message.trim() || !regarding.trim()) {
+        setError("Please fill in all fields.");
+        return;
+      }
 
-    if (!name.trim() || !email.trim() || !message.trim()) {
-      setError("Please fill in all fields.");
-      return;
-    }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        setError("Please enter a valid email address.");
+        return;
+      }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
+      setSending(true);
 
-    const subject = encodeURIComponent(`Message from ${name} via portfolio`);
-    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
-    const mailto = `mailto:pjramyanath@gmail.com?subject=${subject}&body=${body}`;
-
-    window.location.href = mailto;
-    setSent(true);
+      try {
+        const res = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, regarding, message }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setSent(true);
+          setError(null);
+          setSendMethod('server');
+          // reset form after successful server send
+          setName('');
+          setEmail('');
+          setRegarding('');
+          setMessage('');
+        } else {
+          // fallback: prepare mailto and show confirmation modal so we can detect cancel
+          const subject = encodeURIComponent(`Contact Form Submission - Regarding: ${regarding ?? 'General'}`);
+          const body = encodeURIComponent(`My Name: ${name}\nMy Email Address: ${email}\nRegarding: ${regarding ?? 'General'}\n\nMessage:\n${message}`);
+          const mailto = `mailto:pjramyanath@gmail.com?subject=${subject}&body=${body}`;
+          setMailtoHref(mailto);
+          setShowMailtoConfirm(true);
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        setError(msg || 'Failed to send message');
+      } finally {
+        setSending(false);
+      }
+    })();
   };
 
   const handleReset = () => {
@@ -118,7 +150,11 @@ export default function StylishContactPage() {
             linkedin: docData.linkedin,
             location: docData.location,
             portfolio: docData.portfolio,
-            techStacks: Array.isArray(docData.techStacks) ? docData.techStacks : [],
+            techStacks: Array.isArray(docData.techStacks)
+              ? docData.techStacks
+              : docData.techStacks && typeof docData.techStacks === 'object'
+              ? Object.values(docData.techStacks).flat()
+              : [],
           });
         }
       } catch (err) {
@@ -243,6 +279,19 @@ export default function StylishContactPage() {
                   </div>
 
                   <div className="relative">
+                    <label className="block text-sm font-semibold text-slate-300 mb-2">Regarding</label>
+                    <input
+                      type="text"
+                      value={regarding}
+                      onChange={(e) => setRegarding(e.target.value)}
+                      onFocus={() => setFocusedField('regarding')}
+                      onBlur={() => setFocusedField(null)}
+                      className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 bg-slate-900/40 text-slate-200 placeholder-slate-400 ${focusedField === 'regarding' ? 'border-indigo-500 shadow-lg shadow-indigo-900/30' : 'border-slate-700 hover:border-slate-600'} focus:outline-none`}
+                      placeholder="Project, job, collaboration..."
+                    />
+                  </div>
+
+                  <div className="relative">
                     <label className="block text-sm font-semibold text-slate-300 mb-2">Your Message</label>
                     <textarea
                       value={message}
@@ -256,7 +305,11 @@ export default function StylishContactPage() {
                   </div>
 
                   {error && <div className="flex items-center gap-2 p-4 bg-red-900/20 border border-red-800/50 rounded-xl text-red-300 text-sm font-medium">{error}</div>}
-                  {sent && !error && <div className="flex items-center gap-2 p-4 bg-emerald-900/20 border border-emerald-800/50 rounded-xl text-emerald-300 text-sm font-medium"><CheckCircle2 className="w-5 h-5" />Opening your mail client...</div>}
+                  {sent && !error && sendMethod === 'server' && (
+                    <div className="flex items-center gap-2 p-4 bg-emerald-900/20 border border-emerald-800/50 rounded-xl text-emerald-300 text-sm font-medium">
+                      <CheckCircle2 className="w-5 h-5" />Message sent — thank you!
+                    </div>
+                  )}
 
                   <div className="flex flex-col sm:flex-row gap-4">
                     <button onClick={handleSubmit} className="flex-1 group relative overflow-hidden px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
@@ -275,6 +328,44 @@ export default function StylishContactPage() {
           </div>
         </div>
       </main>
+      {/* Mailto confirmation modal */}
+      {showMailtoConfirm && mailtoHref && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60" onClick={() => { setShowMailtoConfirm(false); setError('Email sending canceled by user.'); }} />
+          <div className="relative bg-slate-900 rounded-2xl p-6 max-w-lg w-full mx-4 border border-white/10 shadow-2xl">
+            <h3 className="text-lg font-semibold text-slate-100 mb-2">Open your mail client?</h3>
+            <p className="text-sm text-slate-300 mb-4">Your default mail application will open with the prepared message. If you cancel there, the message will not be sent.</p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  // Cancel - treat as discarded
+                  setShowMailtoConfirm(false);
+                  setError('Email sending canceled by user.');
+                }}
+                className="px-4 py-2 rounded-md bg-slate-800 text-slate-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  // Open mail client (best-effort). Do not show a sent/opening banner.
+                  window.location.href = mailtoHref;
+                  // reset form fields as requested
+                  setName('');
+                  setEmail('');
+                  setRegarding('');
+                  setMessage('');
+                  setShowMailtoConfirm(false);
+                }}
+                className="px-4 py-2 rounded-md bg-indigo-600 text-white"
+              >
+                Open Mail Client
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

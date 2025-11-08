@@ -11,6 +11,7 @@ interface Cert {
   description?: string;
   linkedin?: string;
   image?: string;
+  type?: "university" | "external";
 }
 
 interface Props {
@@ -21,6 +22,7 @@ export default function CertGridClient({ certs }: Props) {
   const [selected, setSelected] = useState<Cert | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
+  const [filterType, setFilterType] = useState<"all" | "university" | "external">("all");
 
   useEffect(() => {
     document.body.style.overflow = selected ? "hidden" : "";
@@ -78,8 +80,42 @@ export default function CertGridClient({ certs }: Props) {
 
   return (
     <>
+      <div className="mb-6 flex justify-center">
+        <div className="flex gap-3">
+          <button
+            onClick={() => setFilterType("all")}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${filterType === "all" ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg" : "bg-white/10 text-white border border-white/10"}`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setFilterType("university")}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${filterType === "university" ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg" : "bg-white/10 text-white border border-white/10"}`}
+          >
+            University
+          </button>
+          <button
+            onClick={() => setFilterType("external")}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${filterType === "external" ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg" : "bg-white/10 text-white border border-white/10"}`}
+          >
+            External
+          </button>
+        </div>
+      </div>
+
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {certs.map((c) => (
+        {certs
+          .filter((c) => (filterType === "all" ? true : (c.type ?? "university") === filterType))
+          .sort((a, b) => {
+            // external certificates should appear first
+            const ta = a.type ?? "university";
+            const tb = b.type ?? "university";
+            if (ta === tb) return 0;
+            if (ta === "external") return -1;
+            if (tb === "external") return 1;
+            return 0;
+          })
+          .map((c) => (
           <button
             key={c.id}
             onClick={() => setSelected(c)}
@@ -96,7 +132,10 @@ export default function CertGridClient({ certs }: Props) {
                 />
               </div>
             )}
-            <h3 className="text-lg font-semibold">{c.cert_name ?? "Certification"}</h3>
+            <div className="flex items-center gap-3 w-full justify-between">
+              <h3 className="text-lg font-semibold">{c.cert_name ?? "Certification"}</h3>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-white border border-white/6">{((c.type ?? "university").charAt(0).toUpperCase() + (c.type ?? "university").slice(1))}</span>
+            </div>
             {c.issuer && <p className="text-sm text-gray-500">{c.issuer}</p>}
           </button>
         ))}
@@ -114,7 +153,7 @@ export default function CertGridClient({ certs }: Props) {
           >
             <div
               ref={modalRef}
-              className="rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl border border-white/20 bg-white/30 backdrop-blur-md glass-scrollbar"
+              className="rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl border border-white/20 bg-white/40 backdrop-blur-md glass-scrollbar"
               onClick={(e) => e.stopPropagation()}
             >
             <style jsx>{`
@@ -136,14 +175,14 @@ export default function CertGridClient({ certs }: Props) {
                 <button
                   ref={closeBtnRef}
                   onClick={() => setSelected(null)}
-                  className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                  className="px-3 py-1 bg-slate-700 text-slate-200 rounded hover:bg-slate-600"
                   aria-label="Close certificate dialog"
                 >
                   Close
                 </button>
               </div>
 
-              <div className="px-6 pb-8">
+              <div className="px-6 pb-8 text-center">
                 {selected.image && (
                   <div className="w-full mb-6 flex justify-center relative h-[70vh]">
                     <Image
@@ -156,14 +195,14 @@ export default function CertGridClient({ certs }: Props) {
                   </div>
                 )}
 
-                <h2 className="text-2xl font-bold mb-2">{selected.cert_name ?? "Certification"}</h2>
-                {selected.issuer && <p className="text-sm text-gray-500 mb-4">{selected.issuer}</p>}
+                <h2 className="text-2xl font-bold mb-2 text-slate-100 text-center">{selected.cert_name ?? "Certification"}</h2>
+                {selected.issuer && <p className="text-sm text-slate-300 mb-4 text-center">{selected.issuer}</p>}
 
                 {selected.description && (
-                  <div className="prose max-w-none text-gray-700 mb-4">{selected.description}</div>
+                  <div className="prose mx-auto max-w-prose text-slate-200 mb-4 text-center">{selected.description}</div>
                 )}
 
-                <div className="flex gap-3 mt-4">
+                <div className="flex gap-3 mt-4 justify-center">
                   {selected.linkedin && (
                     <a
                       href={selected.linkedin}

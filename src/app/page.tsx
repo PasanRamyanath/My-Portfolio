@@ -1,4 +1,5 @@
 import HeroSection from "./components/HeroSection";
+import TechStacksSection from "./components/TechStacksSection";
 import AboutSection from "./components/AboutSection";
 import { Metadata } from "next";
 
@@ -12,6 +13,7 @@ export default function Home() {
   return (
     <main>
       <HeroSection />
+      <TechStacksSection />
       <AboutSection />
     </main>
   );

@@ -6,6 +6,8 @@ import { LayoutDashboard, Folder, LogOut, User, Computer } from "lucide-react";
 import clsx from "clsx";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import ConfirmModal from "@/app/admin/components/ConfirmModal";
+import { useState } from "react";
 
 interface SidebarProps {
 	isOpen: boolean;
@@ -63,18 +65,33 @@ export default function AdminSidebar({ isOpen }: SidebarProps) {
 
 function LogoutButton({ isOpen }: { isOpen: boolean }) {
 	const router = useRouter();
-	const handleLogout = async () => {
+	const [showConfirm, setShowConfirm] = useState(false);
+
+	const performLogout = async () => {
 		try {
 			await signOut(auth);
 		} finally {
+			setShowConfirm(false);
 			router.push("/admin");
 		}
 	};
 
 	return (
-		<button onClick={handleLogout} className="flex items-center w-full px-4 py-2 rounded-md hover:bg-gray-800 transition-colors">
-			<LogOut size={20} />
-			{isOpen && <span className="ml-3 text-sm">Logout</span>}
-		</button>
+		<>
+			<ConfirmModal
+				open={showConfirm}
+				title="Log out"
+				message="Are you sure you want to log out?"
+				confirmLabel="Log out"
+				cancelLabel="Cancel"
+				onConfirm={performLogout}
+				onCancel={() => setShowConfirm(false)}
+			/>
+
+			<button onClick={() => setShowConfirm(true)} className="flex items-center w-full px-4 py-2 rounded-md hover:bg-gray-800 transition-colors">
+				<LogOut size={20} />
+				{isOpen && <span className="ml-3 text-sm">Logout</span>}
+			</button>
+		</>
 	);
 }
