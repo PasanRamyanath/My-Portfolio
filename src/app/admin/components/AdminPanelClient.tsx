@@ -107,30 +107,38 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
     if (onLogout) onLogout();
   };
 
-  if (loadingUser) return <p>Loading...</p>;
+  if (loadingUser)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-64 h-4 bg-slate-700 rounded animate-pulse" />
+      </div>
+    );
 
   if (userEmail !== ADMIN_EMAIL) {
     return (
-      <div className="text-center mt-20 text-red-500">
-        Access Denied. You are not authorized to view this page.
-        <div className="mt-4">
-          <button onClick={handleLogout} className="px-4 py-2 bg-red-600 text-white rounded-lg">
-            Logout
-          </button>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center mt-0 text-rose-400 bg-slate-900/60 p-6 rounded-lg border border-white/5">
+          <div className="font-semibold mb-2">Access Denied</div>
+          <div className="text-sm mb-4">You are not authorized to view this page.</div>
+          <div>
+            <button onClick={handleLogout} className="px-4 py-2 bg-rose-600 text-white rounded-lg">
+              Logout
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-xl mx-auto bg-white rounded-xl shadow-lg p-8 mt-8">
+    <div className="max-w-xl mx-auto bg-slate-900/60 rounded-xl shadow-lg p-8 mt-8 border border-white/5 text-slate-100">
       <div className="flex justify-end mb-4">
-        <button onClick={handleLogout} className="px-4 py-2 bg-red-600 text-white rounded-lg">
+        <button onClick={handleLogout} className="px-4 py-2 bg-rose-600 text-white rounded-lg">
           Logout
         </button>
       </div>
 
-      <h2 className="text-2xl font-bold mb-6">Add New Project</h2>
+      <h2 className="text-2xl font-bold mb-6 text-slate-100">Add New Project</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
@@ -138,18 +146,18 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
           value={form.title}
           onChange={handleChange}
           placeholder="Title"
-          className="w-full border px-4 py-2 rounded"
+          className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100 placeholder-slate-400"
           required
         />
 
         {/* Type Dropdown */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Project type</label>
+          <label className="block text-sm font-medium text-slate-300 mb-1">Project type</label>
           <select
             name="type"
             value={form.type}
             onChange={handleChange}
-            className="w-full border px-4 py-2 rounded"
+            className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100"
           >
             <option value="own">own</option>
             <option value="private">private</option>
@@ -162,7 +170,7 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
           value={form.description}
           onChange={handleChange}
           placeholder="Description"
-          className="w-full border px-4 py-2 rounded"
+          className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100 placeholder-slate-400"
           required
         />
 
@@ -172,6 +180,7 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
             type="file"
             accept="image/*"
             onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+            className="text-slate-200"
           />
           <button
             type="button"
@@ -184,7 +193,7 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
 
           {form.image && (
             <div className="mt-2">
-              <img src={form.image} alt="Preview" className="w-full h-40 object-cover rounded" />
+              <img src={form.image} alt="Preview" className="w-full h-40 object-cover rounded border border-white/10" />
             </div>
           )}
         </div>
@@ -194,7 +203,7 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
           value={form.github}
           onChange={handleChange}
           placeholder="GitHub URL"
-          className="w-full border px-4 py-2 rounded"
+          className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100 placeholder-slate-400"
         />
 
         <input
@@ -202,19 +211,19 @@ export default function AdminPanelClient({ onLogout }: { onLogout?: () => void }
           value={form.demo}
           onChange={handleChange}
           placeholder="Live Demo URL"
-          className="w-full border px-4 py-2 rounded"
+          className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100 placeholder-slate-400"
         />
 
         <button
           type="submit"
-          className="w-full bg-green-600 text-white py-2 rounded font-semibold hover:bg-green-700 transition"
+          className="w-full bg-emerald-600 text-white py-2 rounded font-semibold hover:bg-emerald-700 transition disabled:opacity-60"
           disabled={loading}
         >
           {loading ? "Adding..." : "Add Project"}
         </button>
 
-        {success && <div className="text-green-600 text-center">{success}</div>}
-        {error && <div className="text-red-600 text-center">{error}</div>}
+        {success && <div className="text-emerald-300 text-center">{success}</div>}
+        {error && <div className="text-rose-400 text-center">{error}</div>}
       </form>
     </div>
   );

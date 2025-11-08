@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import useSiteInfo from "@/lib/useSiteInfo";
 
 const Profile3D = dynamic(() => import("../components/Profile3D"), { ssr: false });
 const me = "/me.glb";
 
 export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
+  const { info, loading } = useSiteInfo();
 
   useEffect(() => setMounted(true), []);
 
@@ -26,18 +28,34 @@ export default function HeroSection() {
             }`}
           >
             <div className="space-y-1">
-              <p className="text-blue-400 font-semibold text-sm sm:text-base">Hi, I&apos;m</p>
-              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-slate-100">Your Name</h1>
-              <h2 className="text-xl sm:text-2xl md:text-4xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Full Stack Developer
-              </h2>
+              {loading ? (
+                <div className="space-y-3">
+                  <div className="w-24 h-4 bg-slate-700 rounded-full animate-pulse" />
+                  <div className="w-72 h-10 bg-slate-700 rounded-md animate-pulse" />
+                  <div className="w-48 h-6 bg-slate-700 rounded-md animate-pulse" />
+                </div>
+              ) : (
+                <>
+                  <p className="text-blue-400 font-semibold text-sm sm:text-base">Hi, I&apos;m</p>
+                  <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-slate-100">{info?.displayName ?? info?.initialName ?? "Pasan Ramyanath"}</h1>
+                  <h2 className="text-xl sm:text-2xl md:text-4xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                    {info?.description ? info.description.split(". ")[0] : "Tech Enthusiast"}
+                  </h2>
+                </>
+              )}
             </div>
 
-            <p className="text-slate-300 text-lg leading-relaxed">
-              I craft beautiful, functional websites and applications that solve
-              real-world problems. Specializing in modern web technologies and
-              user-centered design.
-            </p>
+            {loading ? (
+              <div className="space-y-2 mt-4">
+                <div className="w-full h-4 bg-slate-700 rounded-md animate-pulse" />
+                <div className="w-5/6 h-4 bg-slate-700 rounded-md animate-pulse" />
+                <div className="w-2/3 h-4 bg-slate-700 rounded-md animate-pulse" />
+              </div>
+            ) : (
+              <p className="text-slate-300 text-lg leading-relaxed">
+                {info?.description ?? "I craft beautiful, functional websites and applications that solve real-world problems. Specializing in modern web technologies and user-centered design."}
+              </p>
+            )}
 
             <div className="flex flex-wrap gap-3">
               <Link
@@ -55,14 +73,20 @@ export default function HeroSection() {
             </div>
 
             <div className="flex gap-4 pt-2 flex-wrap">
-              {["React", "Next.js", "TypeScript", "Node.js"].map((tech) => (
-                <div
-                  key={tech}
-                  className="px-4 py-2 bg-slate-800/80 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-white/5"
-                >
-                  <span className="text-sm font-medium text-slate-200">{tech}</span>
-                </div>
-              ))}
+              {loading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="w-20 h-8 bg-slate-700 rounded-md animate-pulse" />
+                ))
+              ) : (
+                (info?.techStacks && info.techStacks.length > 0 ? info.techStacks : ["React", "Next.js", "TypeScript", "Node.js"]).map((tech) => (
+                  <div
+                    key={tech}
+                    className="px-4 py-2 bg-slate-800/80 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-white/5"
+                  >
+                    <span className="text-sm font-medium text-slate-200">{tech}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 

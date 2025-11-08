@@ -26,8 +26,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   // flashing the admin chrome briefly.
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-gray-600">Loading...</div>
+      <div className="flex items-center justify-center h-screen bg-slate-950 text-slate-300">
+        <div className="space-y-3 w-64">
+          <div className="h-4 bg-slate-800 rounded animate-pulse" />
+          <div className="h-4 bg-slate-800 rounded animate-pulse" />
+          <div className="h-4 bg-slate-800 rounded animate-pulse" />
+        </div>
       </div>
     );
   }
@@ -36,34 +40,33 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   // If not authorized, render children only (Login page will be shown there).
   if (!authorized) {
-    return <div className="min-h-screen bg-gray-100">{children}</div>;
+    return <div className="min-h-screen bg-slate-950 text-slate-200 flex items-center justify-center">{children}</div>;
   }
 
   return (
-    <div className="bg-gray-100 text-gray-900 flex h-screen overflow-hidden">
+    <div className="bg-slate-950 text-slate-200 flex h-screen overflow-hidden">
       <AdminSidebar isOpen={isSidebarOpen} />
 
       {/* Mobile hamburger: appears fixed in top-left on small screens so the toggle is accessible from the navbar area */}
       <button
         aria-label="Toggle sidebar"
         onClick={() => setIsSidebarOpen((s) => !s)}
-        className="lg:hidden fixed top-4 left-4 z-50 bg-white/90 backdrop-blur-sm p-2 rounded-md shadow-md text-gray-700"
+        className="lg:hidden fixed top-4 left-4 z-50 bg-slate-800/80 backdrop-blur-sm p-2 rounded-md shadow-md text-slate-200 border border-white/10"
       >
         <Menu size={20} />
       </button>
 
       <div className="flex flex-col flex-1 transition-all duration-300">
-        <header className="flex items-center justify-between bg-white shadow-md px-6 py-4">
+        <header className="flex items-center justify-between bg-slate-900/70 backdrop-blur-md shadow-md px-6 py-4 border-b border-white/10">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="text-gray-700 hover:text-gray-900"
+            className="text-slate-300 hover:text-white"
           >
             <Menu size={24} />
           </button>
-          <h1 className="font-semibold text-lg">Admin Dashboard</h1>
+          <h1 className="font-semibold text-lg text-slate-100">Admin Dashboard</h1>
         </header>
-
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6 bg-slate-950/40">{children}</main>
       </div>
     </div>
   );

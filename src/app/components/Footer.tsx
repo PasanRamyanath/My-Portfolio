@@ -1,4 +1,7 @@
+import useSiteInfo from "@/lib/useSiteInfo";
+
 export default function Footer() {
+  const { info } = useSiteInfo();
   const currentYear = new Date().getFullYear();
 
   const quickLinks = [
@@ -8,8 +11,8 @@ export default function Footer() {
   ];
 
   const socialLinks = [
-    { name: "GitHub", href: "https://github.com/yourusername" },
-    { name: "LinkedIn", href: "https://linkedin.com/in/yourprofile" },
+    { name: "GitHub", href: info?.github ? `https://${info.github}` : "https://github.com/yourusername" },
+    { name: "LinkedIn", href: info?.linkedin ? `https://${info.linkedin}` : "https://linkedin.com/in/yourprofile" },
     { name: "Twitter", href: "https://twitter.com/yourusername" },
   ];
 
@@ -20,11 +23,10 @@ export default function Footer() {
           {/* Brand Section */}
           <div>
             <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
-              Your Name
+              {info?.displayName ?? info?.initialName ?? "Your Name"}
             </h3>
             <p className="text-gray-400 leading-relaxed">
-              Full Stack Developer passionate about creating beautiful and
-              functional web experiences.
+              {info?.description ?? "Full Stack Developer passionate about creating beautiful and functional web experiences."}
             </p>
           </div>
 
@@ -69,7 +71,7 @@ export default function Footer() {
         <div className="pt-8 border-t border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm">
-              © {currentYear} Your Name. All rights reserved.
+              © {currentYear} {info?.displayName ?? info?.initialName ?? "Your Name"}. All rights reserved.
             </p>
             <p className="text-gray-400 text-sm">
               Built with ❤️ using Next.js & Tailwind CSS

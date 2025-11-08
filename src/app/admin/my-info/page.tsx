@@ -133,83 +133,92 @@ export default function AdminMyInfoPage() {
     await signOut(auth);
   };
 
-  if (loadingUser) return <p>Loading...</p>;
+  if (loadingUser) return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-950">
+      <div className="space-y-3 w-64">
+        <div className="h-4 bg-slate-800 rounded animate-pulse" />
+        <div className="h-4 bg-slate-800 rounded animate-pulse" />
+        <div className="h-4 bg-slate-800 rounded animate-pulse" />
+      </div>
+    </div>
+  );
 
   if (userEmail !== ADMIN_EMAIL) {
     return (
-      <div className="text-center mt-20 text-red-500">
-        Access Denied. You are not authorized to view this page.
-        <div className="mt-4">
-          <button onClick={handleLogout} className="px-4 py-2 bg-red-600 text-white rounded-lg">Logout</button>
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-rose-400">
+        <div className="bg-slate-900/60 p-6 rounded-lg border border-white/10 text-center max-w-sm">
+          <div className="font-semibold mb-2">Access Denied</div>
+          <p className="text-sm mb-4">You are not authorized to view this page.</p>
+          <button onClick={handleLogout} className="px-4 py-2 bg-rose-600 text-white rounded-lg">Logout</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-8">
-      <div className="bg-white rounded-xl shadow p-6">
-        <h2 className="text-2xl font-semibold mb-4">Edit My Information</h2>
+    <div className="max-w-3xl mx-auto py-8 text-slate-100">
+      <div className="bg-slate-900/70 rounded-xl shadow p-6 border border-white/10 backdrop-blur-md">
+        <h2 className="text-2xl font-semibold mb-4 text-slate-100">Edit My Information</h2>
 
         {loading ? (
           <div>Loading information...</div>
         ) : (
           <div className="space-y-4">
             <label className="block">
-              <span className="text-sm font-medium">Full name</span>
-              <input value={fields.fullName} onChange={(e) => handleFieldChange("fullName", e.target.value)} className="w-full border px-3 py-2 rounded mt-1" />
+              <span className="text-sm font-medium text-slate-300">Full name</span>
+              <input value={fields.fullName} onChange={(e) => handleFieldChange("fullName", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium">Initial name</span>
-              <input value={fields.initialName} onChange={(e) => handleFieldChange("initialName", e.target.value)} className="w-full border px-3 py-2 rounded mt-1" />
+              <span className="text-sm font-medium text-slate-300">Initial name</span>
+              <input value={fields.initialName} onChange={(e) => handleFieldChange("initialName", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium">Email</span>
-              <input value={fields.email} onChange={(e) => handleFieldChange("email", e.target.value)} className="w-full border px-3 py-2 rounded mt-1" />
+              <span className="text-sm font-medium text-slate-300">Email</span>
+              <input value={fields.email} onChange={(e) => handleFieldChange("email", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium">Location</span>
-              <input value={fields.location} onChange={(e) => handleFieldChange("location", e.target.value)} className="w-full border px-3 py-2 rounded mt-1" />
+              <span className="text-sm font-medium text-slate-300">Location</span>
+              <input value={fields.location} onChange={(e) => handleFieldChange("location", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium">Portfolio</span>
-              <input value={fields.portfolio} onChange={(e) => handleFieldChange("portfolio", e.target.value)} className="w-full border px-3 py-2 rounded mt-1" />
+              <span className="text-sm font-medium text-slate-300">Portfolio</span>
+              <input value={fields.portfolio} onChange={(e) => handleFieldChange("portfolio", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium">GitHub</span>
-              <input value={fields.github} onChange={(e) => handleFieldChange("github", e.target.value)} className="w-full border px-3 py-2 rounded mt-1" />
+              <span className="text-sm font-medium text-slate-300">GitHub</span>
+              <input value={fields.github} onChange={(e) => handleFieldChange("github", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium">LinkedIn</span>
-              <input value={fields.linkedin} onChange={(e) => handleFieldChange("linkedin", e.target.value)} className="w-full border px-3 py-2 rounded mt-1" />
+              <span className="text-sm font-medium text-slate-300">LinkedIn</span>
+              <input value={fields.linkedin} onChange={(e) => handleFieldChange("linkedin", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium">Instagram</span>
-              <input value={fields.instagram} onChange={(e) => handleFieldChange("instagram", e.target.value)} className="w-full border px-3 py-2 rounded mt-1" />
+              <span className="text-sm font-medium text-slate-300">Instagram</span>
+              <input value={fields.instagram} onChange={(e) => handleFieldChange("instagram", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium">Facebook</span>
-              <input value={fields.facebook} onChange={(e) => handleFieldChange("facebook", e.target.value)} className="w-full border px-3 py-2 rounded mt-1" />
+              <span className="text-sm font-medium text-slate-300">Facebook</span>
+              <input value={fields.facebook} onChange={(e) => handleFieldChange("facebook", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium">Description</span>
-              <textarea value={fields.description} onChange={(e) => handleFieldChange("description", e.target.value)} className="w-full border px-3 py-2 rounded mt-1" rows={4} />
+              <span className="text-sm font-medium text-slate-300">Description</span>
+              <textarea value={fields.description} onChange={(e) => handleFieldChange("description", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" rows={4} />
             </label>
 
             <div>
               <span className="text-sm font-medium">Tech stacks</span>
               <div className="mt-2 flex gap-2 flex-wrap">
                 {(fields.techStacks || []).map((t: string, i: number) => (
-                  <span key={i} className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">
+                  <span key={i} className="inline-flex items-center gap-2 bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-600/30">
                     <span>{t}</span>
                     <button type="button" onClick={() => removeTech(i)} className="text-sm text-indigo-600">×</button>
                   </span>
@@ -218,14 +227,14 @@ export default function AdminMyInfoPage() {
 
               
               <div className="mt-3 flex gap-2">
-                <input id="newTech" placeholder="Add tech (e.g. node)" className="flex-1 border px-3 py-2 rounded" />
-                <button onClick={() => { const el = document.getElementById("newTech") as HTMLInputElement | null; if (el) { addTech(el.value.trim()); el.value = ""; } }} className="px-4 py-2 bg-indigo-600 text-white rounded">Add</button>
+                <input id="newTech" placeholder="Add tech (e.g. node)" className="flex-1 bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100 placeholder-slate-400" />
+                <button onClick={() => { const el = document.getElementById("newTech") as HTMLInputElement | null; if (el) { addTech(el.value.trim()); el.value = ""; } }} className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500">Add</button>
               </div>
 
               <span className="text-sm font-medium">Passions</span>
               <div className="mt-2 flex gap-2 flex-wrap">
                 {(fields.passions || []).map((p: string, i: number) => (
-                  <span key={i} className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">
+                  <span key={i} className="inline-flex items-center gap-2 bg-pink-500/20 text-pink-300 px-3 py-1 rounded-full border border-pink-600/30">
                     <span>{p}</span>
                     <button type="button" onClick={() => removePassion(i)} className="text-sm text-indigo-600">×</button>
                   </span>
@@ -233,17 +242,17 @@ export default function AdminMyInfoPage() {
               </div>
 
               <div className="mt-3 flex gap-2">
-                <input id="newPassion" placeholder="Add passion (e.g. music)" className="flex-1 border px-3 py-2 rounded" />
-                <button onClick={() => { const el = document.getElementById("newPassion") as HTMLInputElement | null; if (el) { addPassion(el.value.trim()); el.value = ""; } }} className="px-4 py-2 bg-indigo-600 text-white rounded">Add</button>
+                <input id="newPassion" placeholder="Add passion (e.g. music)" className="flex-1 bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100 placeholder-slate-400" />
+                <button onClick={() => { const el = document.getElementById("newPassion") as HTMLInputElement | null; if (el) { addPassion(el.value.trim()); el.value = ""; } }} className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500">Add</button>
               </div>
             </div>
 
             <div className="mt-4 flex gap-3">
-              <button onClick={handleSave} disabled={saving} className="px-4 py-2 bg-green-600 text-white rounded">{saving ? "Saving..." : "Save"}</button>
-              <button onClick={loadInfo} className="px-4 py-2 bg-gray-200 rounded">Reload</button>
+              <button onClick={handleSave} disabled={saving} className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-500 disabled:opacity-60">{saving ? "Saving..." : "Save"}</button>
+              <button onClick={loadInfo} className="px-4 py-2 bg-slate-700 text-slate-200 rounded hover:bg-slate-600">Reload</button>
             </div>
 
-            {error && <div className="text-red-600 mt-2">{error}</div>}
+            {error && <div className="text-rose-400 mt-2">{error}</div>}
           </div>
         )}
       </div>

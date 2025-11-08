@@ -53,22 +53,22 @@ export default function Login({ onLogin }: Props) {
   };
 
   return (
-    <div className="max-w-md mx-auto py-20">
+    <div className="max-w-md mx-auto py-20 text-slate-100">
       <h1 className="text-3xl font-bold mb-6 text-center">Admin Login</h1>
       {error && (
-        <p className="text-red-500 mb-4 text-center font-semibold">{error}</p>
+        <p className="text-rose-400 mb-4 text-center font-semibold">{error}</p>
       )}
 
       <form
         onSubmit={handleEmailLogin}
-        className="space-y-4 bg-white p-6 rounded-lg shadow-md"
+        className="space-y-4 bg-slate-900/70 p-6 rounded-lg shadow-md border border-white/10 backdrop-blur-md"
       >
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 border rounded"
+          className="w-full p-3 bg-slate-800/60 border border-white/10 rounded text-slate-100 placeholder-slate-400"
           required
         />
         <input
@@ -76,22 +76,22 @@ export default function Login({ onLogin }: Props) {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-3 border rounded"
+          className="w-full p-3 bg-slate-800/60 border border-white/10 rounded text-slate-100 placeholder-slate-400"
           required
         />
         <button
           type="submit"
-          className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-500 transition-colors"
         >
           Login with Email
         </button>
       </form>
 
-      <div className="text-center my-4">OR</div>
+      <div className="text-center my-4 text-slate-400">OR</div>
 
       <button
         onClick={handleGoogleLogin}
-        className="w-full py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
+        className="w-full py-3 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-500 transition-colors"
       >
         Login with Google
       </button>

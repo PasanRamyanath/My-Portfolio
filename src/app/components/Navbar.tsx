@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import useSiteInfo from "@/lib/useSiteInfo";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { info } = useSiteInfo();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,7 +40,7 @@ export default function Navbar() {
             href="/"
             className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent hover:scale-105 transition-transform"
           >
-            Portfolio
+            {info?.displayName ?? info?.initialName ?? "Portfolio"}
           </Link>
 
           {/* Desktop Navigation */}

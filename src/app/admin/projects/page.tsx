@@ -394,27 +394,34 @@ export default function AdminProjectsPage() {
     await signOut(auth);
   };
 
-  if (loadingUser) return <p>Loading...</p>;
+  if (loadingUser) return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-950">
+      <div className="space-y-3 w-64">
+        <div className="h-4 bg-slate-800 rounded animate-pulse" />
+        <div className="h-4 bg-slate-800 rounded animate-pulse" />
+        <div className="h-4 bg-slate-800 rounded animate-pulse" />
+      </div>
+    </div>
+  );
 
   if (userEmail !== ADMIN_EMAIL) {
     return (
-      <div className="text-center mt-20 text-red-500">
-        Access Denied. You are not authorized to view this page.
-        <div className="mt-4">
-          <button onClick={handleLogout} className="px-4 py-2 bg-red-600 text-white rounded-lg">
-            Logout
-          </button>
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-rose-400">
+        <div className="bg-slate-900/60 p-6 rounded-lg border border-white/10 text-center max-w-sm">
+          <div className="font-semibold mb-2">Access Denied</div>
+          <p className="text-sm mb-4">You are not authorized to view this page.</p>
+          <button onClick={handleLogout} className="px-4 py-2 bg-rose-600 text-white rounded-lg">Logout</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-8">
+    <div className="max-w-5xl mx-auto py-8 text-slate-100">
       
 
-      <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-        <h2 className="text-2xl font-bold mb-4">{editingId ? "Edit Project" : "Add New Project"}</h2>
+      <div className="bg-slate-900/70 rounded-xl shadow-lg p-8 mb-8 border border-white/10 backdrop-blur-md">
+        <h2 className="text-2xl font-bold mb-4 text-slate-100">{editingId ? "Edit Project" : "Add New Project"}</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -422,14 +429,14 @@ export default function AdminProjectsPage() {
             value={form.title}
             onChange={handleChange}
             placeholder="Title"
-            className="w-full border px-4 py-2 rounded"
+            className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100 placeholder-slate-400"
             required
           />
 
           {/* Type Dropdown */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Project type</label>
-            <select name="type" value={form.type} onChange={handleChange} className="w-full border px-4 py-2 rounded">
+            <label className="block text-sm font-medium text-slate-300 mb-1">Project type</label>
+            <select name="type" value={form.type} onChange={handleChange} className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100">
               <option value="own">own</option>
               <option value="private">private</option>
               <option value="group">group</option>
@@ -441,36 +448,36 @@ export default function AdminProjectsPage() {
             value={form.description}
             onChange={handleChange}
             placeholder="Description"
-            className="w-full border px-4 py-2 rounded"
+            className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100 placeholder-slate-400"
             required
           />
 
           {/* Long Description (multi-paragraph) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Long Description</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1">Long Description</label>
             <textarea
               name="longDescription"
               value={(form as any).longDescription}
               onChange={handleChange}
               placeholder="Long description / full details"
-              className="w-full border px-4 py-2 rounded h-32"
+              className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded h-32 text-slate-100 placeholder-slate-400"
             />
           </div>
 
           {/* Tech stacks input as tags (press Enter to add) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tech Stacks</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1">Tech Stacks</label>
             <input
               type="text"
               placeholder="Type a tech and press Enter"
               onKeyDown={handleTechKey}
-              className="w-full border px-4 py-2 rounded"
+              className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100 placeholder-slate-400"
             />
             <div className="flex gap-2 flex-wrap mt-2">
               {(form as any).techStacks?.map((t: string, idx: number) => (
-                <span key={t + idx} className="px-2 py-1 bg-gray-100 rounded-full text-sm flex items-center gap-2">
+                <span key={t + idx} className="px-2 py-1 bg-indigo-500/20 border border-indigo-600/30 rounded-full text-xs flex items-center gap-2 text-indigo-300">
                   {t}
-                  <button type="button" onClick={() => setForm((prev: any) => ({ ...prev, techStacks: prev.techStacks.filter((s: string, i: number) => i !== idx) }))} className="text-xs px-1">✕</button>
+                  <button type="button" onClick={() => setForm((prev: any) => ({ ...prev, techStacks: prev.techStacks.filter((s: string, i: number) => i !== idx) }))} className="text-xs px-1 hover:text-indigo-100">✕</button>
                 </span>
               ))}
             </div>
@@ -480,23 +487,23 @@ export default function AdminProjectsPage() {
           <div className="space-y-2">
             <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple onChange={(e) => setMediaFiles(Array.from(e.target.files || []))} />
             <div className="flex gap-2 items-center">
-              <button type="button" onClick={handleMediaUpload} disabled={mediaFiles.length === 0 || uploadingMedia} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+              <button type="button" onClick={handleMediaUpload} disabled={mediaFiles.length === 0 || uploadingMedia} className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500 transition disabled:opacity-60">
                 {uploadingMedia ? "Uploading..." : `Upload ${mediaFiles.length > 0 ? mediaFiles.length : "file(s)"}`}
               </button>
-              <button type="button" onClick={clearSelectedFiles} disabled={mediaFiles.length === 0 && !fileInputRef.current?.value} className="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">
+              <button type="button" onClick={clearSelectedFiles} disabled={mediaFiles.length === 0 && !fileInputRef.current?.value} className="px-3 py-2 bg-slate-700 text-slate-200 rounded hover:bg-slate-600 disabled:opacity-60">
                 Clear
               </button>
               <div className="flex gap-2 flex-wrap">
                 {(form as any).media && (form as any).media.map((m: any, i: number) => {
                   const url = typeof m === "string" ? m : m?.url;
                   return (
-                  <div key={url} className="mt-2 relative w-36 h-24 bg-gray-100 rounded overflow-hidden">
+                  <div key={url} className="mt-2 relative w-36 h-24 bg-slate-800/40 border border-white/10 rounded overflow-hidden">
                     {url?.endsWith?.('.mp4') || url?.endsWith?.('.webm') ? (
                       <video src={url} className="w-full h-full object-cover" controls />
                     ) : (
                       <img src={url} alt={`media-${i}`} className="w-full h-full object-cover" />
                     )}
-                    <button type="button" onClick={() => removeMediaAt(i)} className="absolute top-1 right-1 bg-black/60 text-white px-2 py-0.5 rounded">Remove</button>
+                    <button type="button" onClick={() => removeMediaAt(i)} className="absolute top-1 right-1 bg-black/60 text-white px-2 py-0.5 rounded text-xs hover:bg-black/80">Remove</button>
                   </div>
                 );
                 })}
@@ -504,35 +511,35 @@ export default function AdminProjectsPage() {
             </div>
           </div>
 
-          <input name="github" value={form.github} onChange={handleChange} placeholder="GitHub URL" className="w-full border px-4 py-2 rounded" />
+          <input name="github" value={form.github} onChange={handleChange} placeholder="GitHub URL" className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100 placeholder-slate-400" />
 
-          <input name="demo" value={form.demo} onChange={handleChange} placeholder="Live Demo URL" className="w-full border px-4 py-2 rounded" />
+          <input name="demo" value={form.demo} onChange={handleChange} placeholder="Live Demo URL" className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100 placeholder-slate-400" />
 
           <div className="flex gap-3">
-            <button type="submit" className="px-6 py-2 bg-green-600 text-white rounded" disabled={loading}>
+            <button type="submit" className="px-6 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-500 disabled:opacity-60" disabled={loading}>
               {loading ? "Saving..." : editingId ? "Update Project" : "Add Project"}
             </button>
             {editingId && (
-              <button type="button" onClick={() => { setEditingId(null); setForm({ title: "", description: "", media: [], github: "", demo: "", type: "own", longDescription: "", techStacks: [] }); }} className="px-4 py-2 bg-gray-200 rounded">
+              <button type="button" onClick={() => { setEditingId(null); setForm({ title: "", description: "", media: [], github: "", demo: "", type: "own", longDescription: "", techStacks: [] }); }} className="px-4 py-2 bg-slate-700 text-slate-200 rounded hover:bg-slate-600">
                 Cancel Edit
               </button>
             )}
           </div>
 
-          {success && <div className="text-green-600">{success}</div>}
-          {error && <div className="text-red-600">{error}</div>}
+          {success && <div className="text-emerald-400">{success}</div>}
+          {error && <div className="text-rose-400">{error}</div>}
         </form>
       </div>
 
-      <div className="bg-white rounded-xl shadow p-6">
-        <h3 className="text-xl font-semibold mb-4">Existing Projects</h3>
+      <div className="bg-slate-900/70 rounded-xl shadow p-6 border border-white/10 backdrop-blur-md">
+        <h3 className="text-xl font-semibold mb-4 text-slate-100">Existing Projects</h3>
             
         {projectTypes.length > 0 && (
           <div className="mb-4">
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setSelectedType("all")}
-                className={`px-3 py-1 rounded-full text-sm font-medium ${selectedType === "all" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700"}`}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition ${selectedType === "all" ? "bg-indigo-600 text-white" : "bg-slate-800/60 text-slate-300 border border-white/10"}`}
               >
                 All
               </button>
@@ -540,7 +547,7 @@ export default function AdminProjectsPage() {
                 <button
                   key={t}
                   onClick={() => setSelectedType(t)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${selectedType === t ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700"}`}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition ${selectedType === t ? "bg-indigo-600 text-white" : "bg-slate-800/60 text-slate-300 border border-white/10"}`}
                 >
                   {t}
                 </button>
@@ -550,13 +557,17 @@ export default function AdminProjectsPage() {
         )}
 
         {loadingProjects ? (
-          <div>Loading projects...</div>
+          <div className="space-y-3">
+            <div className="h-4 bg-slate-800 rounded animate-pulse" />
+            <div className="h-4 bg-slate-800 rounded animate-pulse" />
+            <div className="h-4 bg-slate-800 rounded animate-pulse" />
+          </div>
         ) : projects.length === 0 ? (
-          <div>No projects yet.</div>
+          <div className="text-slate-400">No projects yet.</div>
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
             {(selectedType === "all" ? projects : projects.filter((p) => p.type === selectedType)).map((p) => (
-              <div key={p.id} className="border rounded p-4 flex gap-4 items-start cursor-pointer" onClick={() => setSelectedProject(p)}>
+              <div key={p.id} className="border border-white/10 rounded p-4 flex gap-4 items-start cursor-pointer bg-slate-800/40 hover:bg-slate-800/60 transition-colors" onClick={() => setSelectedProject(p)}>
                 {(() => {
                   const media = getMediaFromProject(p);
                   if (media.length > 0) {
@@ -572,15 +583,15 @@ export default function AdminProjectsPage() {
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h4 className="font-semibold">{p.title}</h4>
-                      <p className="text-sm text-gray-600">{p.type}</p>
+                      <h4 className="font-semibold text-slate-100">{p.title}</h4>
+                      <p className="text-xs text-slate-400">{p.type}</p>
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={(e) => { e.stopPropagation(); handleEdit(p); }} className="px-3 py-1 bg-yellow-400 text-white rounded">Edit</button>
-                      <button onClick={(e) => { e.stopPropagation(); handleDelete(p.id); }} className="px-3 py-1 bg-red-500 text-white rounded">Delete</button>
+                      <button onClick={(e) => { e.stopPropagation(); handleEdit(p); }} className="px-3 py-1 bg-amber-500 text-white rounded hover:bg-amber-400">Edit</button>
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(p.id); }} className="px-3 py-1 bg-rose-600 text-white rounded hover:bg-rose-500">Delete</button>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-700 mt-2 line-clamp-3">{p.description}</p>
+                  <p className="text-sm text-slate-300 mt-2 line-clamp-3">{p.description}</p>
                 </div>
               </div>
             ))}
@@ -590,10 +601,10 @@ export default function AdminProjectsPage() {
       {selectedProject &&
         (typeof document !== "undefined"
           ? createPortal(
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setSelectedProject(null)}>
-                <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={() => setSelectedProject(null)}>
+                <div className="bg-slate-900/80 border border-white/10 rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
                   <div className="flex justify-end p-4">
-                    <button onClick={() => setSelectedProject(null)} className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Close</button>
+                    <button onClick={() => setSelectedProject(null)} className="px-3 py-1 bg-slate-700 text-slate-200 rounded hover:bg-slate-600">Close</button>
                   </div>
 
                   <div className="px-6 pb-8">
@@ -608,7 +619,7 @@ export default function AdminProjectsPage() {
                             <button
                               type="button"
                               onClick={(e) => { e.stopPropagation(); setSelectedMediaIndex((i) => (i - 1 + media.length) % media.length); }}
-                              className="absolute left-2 z-10 bg-white/80 rounded-full p-2"
+                              className="absolute left-2 z-10 bg-slate-800/80 text-slate-200 rounded-full p-2 hover:bg-slate-700"
                               aria-label="Previous media"
                             >
                               ◀
@@ -623,7 +634,7 @@ export default function AdminProjectsPage() {
                             <button
                               type="button"
                               onClick={(e) => { e.stopPropagation(); setSelectedMediaIndex((i) => (i + 1) % media.length); }}
-                              className="absolute right-2 z-10 bg-white/80 rounded-full p-2"
+                              className="absolute right-2 z-10 bg-slate-800/80 text-slate-200 rounded-full p-2 hover:bg-slate-700"
                               aria-label="Next media"
                             >
                               ▶
@@ -632,7 +643,7 @@ export default function AdminProjectsPage() {
 
                           <div className="flex gap-2 mb-4 overflow-x-auto">
                             {media.map((m, idx) => (
-                              <button key={m} onClick={() => setSelectedMediaIndex(idx)} className={`w-20 h-14 rounded overflow-hidden border ${idx === selectedMediaIndex ? 'ring-2 ring-blue-500' : 'border-gray-200'}`}>
+                              <button key={m} onClick={() => setSelectedMediaIndex(idx)} className={`w-20 h-14 rounded overflow-hidden border ${idx === selectedMediaIndex ? 'ring-2 ring-indigo-500 border-indigo-500' : 'border-white/10'}`}>
                                 {m.endsWith('.mp4') || m.endsWith('.webm') ? (
                                   <video src={m} className="w-full h-full object-cover" />
                                 ) : (
@@ -642,27 +653,27 @@ export default function AdminProjectsPage() {
                             ))}
                           </div>
 
-                          <h2 className="text-2xl font-bold mb-2">{selectedProject.title}</h2>
+                          <h2 className="text-2xl font-bold mb-2 text-slate-100">{selectedProject.title}</h2>
                         </div>
                       );
                     })()}
-                    <p className="text-sm text-gray-500 mb-4">Type: {selectedProject.type}</p>
-                    <div className="prose max-w-none text-gray-700 mb-4">{selectedProject.description}</div>
+                    <p className="text-xs text-slate-400 mb-4">Type: {selectedProject.type}</p>
+                    <div className="prose max-w-none text-slate-300 mb-4">{selectedProject.description}</div>
 
                     {/* Long description and tech stacks */}
                     {((selectedProject as any)["long-description"] || (selectedProject as any).longDescription) && (
                       <div className="mb-4">
-                        <h4 className="font-semibold">Details</h4>
-                        <div className="text-gray-700">{(selectedProject as any)["long-description"] ?? (selectedProject as any).longDescription}</div>
+                        <h4 className="font-semibold text-slate-100">Details</h4>
+                        <div className="text-slate-300">{(selectedProject as any)["long-description"] ?? (selectedProject as any).longDescription}</div>
                       </div>
                     )}
 
                     {(((selectedProject as any)["tech-stacks"] && Array.isArray((selectedProject as any)["tech-stacks"])) || ((selectedProject as any).techStacks && Array.isArray((selectedProject as any).techStacks))) && (
                       <div className="mb-4">
-                        <h4 className="font-semibold">Tech Stacks</h4>
+                        <h4 className="font-semibold text-slate-100">Tech Stacks</h4>
                         <div className="flex gap-2 flex-wrap mt-2">
                           {(((selectedProject as any)["tech-stacks"]) || (selectedProject as any).techStacks).map((t: string, i: number) => (
-                            <span key={t + i} className="px-2 py-1 bg-gray-100 rounded-full text-sm">{t}</span>
+                            <span key={t + i} className="px-2 py-1 bg-indigo-500/20 border border-indigo-600/30 rounded-full text-xs text-indigo-300">{t}</span>
                           ))}
                         </div>
                       </div>
@@ -670,10 +681,10 @@ export default function AdminProjectsPage() {
 
                     <div className="flex gap-3 mt-4">
                       {selectedProject.github && (
-                        <a href={selectedProject.github} target="_blank" rel="noreferrer" className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200">GitHub</a>
+                        <a href={selectedProject.github} target="_blank" rel="noreferrer" className="px-4 py-2 bg-slate-700 text-slate-200 rounded hover:bg-slate-600">GitHub</a>
                       )}
                       {selectedProject.demo && (
-                        <a href={selectedProject.demo} target="_blank" rel="noreferrer" className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Live Demo</a>
+                        <a href={selectedProject.demo} target="_blank" rel="noreferrer" className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500">Live Demo</a>
                       )}
                     </div>
                   </div>

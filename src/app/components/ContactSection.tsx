@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import useSiteInfo from "@/lib/useSiteInfo";
 
 export default function ContactSection() {
+  const { info } = useSiteInfo();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -33,20 +35,20 @@ export default function ContactSection() {
     {
       icon: "📧",
       title: "Email",
-      value: "your.email@example.com",
-      link: "mailto:your.email@example.com",
+      value: info?.email ?? "your.email@example.com",
+      link: info?.email ? `mailto:${info.email}` : "mailto:your.email@example.com",
     },
     {
       icon: "💼",
       title: "LinkedIn",
-      value: "linkedin.com/in/yourprofile",
-      link: "https://linkedin.com/in/yourprofile",
+      value: info?.linkedin ?? "linkedin.com/in/yourprofile",
+      link: info?.linkedin ? `https://${info.linkedin}` : "https://linkedin.com/in/yourprofile",
     },
     {
       icon: "💻",
       title: "GitHub",
-      value: "github.com/yourusername",
-      link: "https://github.com/yourusername",
+      value: info?.github ?? "github.com/yourusername",
+      link: info?.github ? `https://${info.github}` : "https://github.com/yourusername",
     },
   ];
 

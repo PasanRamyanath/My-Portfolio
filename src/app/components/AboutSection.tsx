@@ -1,45 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import { collection, getDocs, DocumentData } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import React from "react";
+import useSiteInfo from "@/lib/useSiteInfo";
 
 export default function AboutSection() {
-  const skills = ["React", "Next.js", "TypeScript", "Node.js", "Tailwind CSS", "Firebase"];
-  // fallback passions if Firestore doesn't provide any
-  const defaultPassions = [
+  const { info, loading } = useSiteInfo();
+  const skills = info?.techStacks && info.techStacks.length > 0 ? info.techStacks : ["React", "Next.js", "TypeScript", "Node.js", "Tailwind CSS", "Firebase"];
+  const passions = info?.passions && info.passions.length > 0 ? info.passions : [
     "Building intuitive user experiences",
     "Open-source contribution",
     "Performance optimization",
     "3D & web graphics",
   ];
-
-  const [passions, setPassions] = useState<string[]>(defaultPassions);
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadInfo() {
-      try {
-        const snap = await getDocs(collection(db, "my-information"));
-        if (!mounted) return;
-        if (snap.empty) return;
-        const docData = snap.docs[0].data() as DocumentData;
-        if (Array.isArray(docData.passions) && docData.passions.length > 0) {
-          setPassions(docData.passions as string[]);
-        }
-      } catch (err) {
-        // silently ignore - keep fallback passions
-        console.warn("Failed to load passions from Firestore", err);
-      }
-    }
-
-    loadInfo();
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   return (
   <section id="about" className="relative py-10 static-bg ">
@@ -61,16 +34,25 @@ export default function AboutSection() {
 
   <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
   <div className="text-center mb-8">
-          <div className="inline-block mb-4">
-            <span className="text-sm font-semibold text-blue-300 tracking-wider uppercase bg-blue-950/40 px-4 py-1.5 rounded-full border border-blue-900/40">
-              About Me
-            </span>
-          </div>
+          {loading ? (
+            <div className="space-y-4 mb-8">
+              <div className="w-36 h-6 bg-slate-700 rounded-full animate-pulse" />
+              <div className="w-4/6 h-4 bg-slate-700 rounded-md animate-pulse" />
+              <div className="w-2/3 h-4 bg-slate-700 rounded-md animate-pulse" />
+            </div>
+          ) : (
+            <>
+              <div className="inline-block mb-4">
+                <span className="text-sm font-semibold text-blue-300 tracking-wider uppercase bg-blue-950/40 px-4 py-1.5 rounded-full border border-blue-900/40">
+                  About Me
+                </span>
+              </div>
 
-          <p className="text-slate-300 text-lg max-w-3xl mx-auto leading-relaxed mb-8">
-            I&apos;m focused on building accessible, fast, and delightful web applications. 
-            I enjoy turning ideas into products and learning new web technologies along the way.
-          </p>
+              <p className="text-slate-300 text-lg max-w-3xl mx-auto leading-relaxed mb-8">
+                {info?.description ?? "I\'m focused on building accessible, fast, and delightful web applications. I enjoy turning ideas into products and learning new web technologies along the way."}
+              </p>
+            </>
+          )}
 
           <div className="flex gap-4 justify-center flex-wrap">
             <Link 
@@ -106,17 +88,23 @@ export default function AboutSection() {
               <h3 className="text-2xl font-bold text-slate-100">Core Skills</h3>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {skills.map((s, idx) => (
-                <div 
-                  key={s} 
-                  className="group px-4 py-3 bg-slate-800/70 rounded-xl text-center border border-white/10 hover:border-blue-500/50 hover:shadow-md transition-all duration-300 cursor-default"
-                  style={{ animationDelay: `${idx * 100}ms` }}
-                >
-                  <span className="text-sm font-semibold text-slate-200 group-hover:text-blue-300 transition-colors">
-                    {s}
-                  </span>
-                </div>
-              ))}
+              {loading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-12 bg-slate-700 rounded-lg animate-pulse" />
+                ))
+              ) : (
+                skills.map((s, idx) => (
+                  <div 
+                    key={s} 
+                    className="group px-4 py-3 bg-slate-800/70 rounded-xl text-center border border-white/10 hover:border-blue-500/50 hover:shadow-md transition-all duration-300 cursor-default"
+                    style={{ animationDelay: `${idx * 100}ms` }}
+                  >
+                    <span className="text-sm font-semibold text-slate-200 group-hover:text-blue-300 transition-colors">
+                      {s}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -130,22 +118,31 @@ export default function AboutSection() {
               <h3 className="text-2xl font-bold text-slate-100">What I Love</h3>
             </div>
             <ul className="space-y-4">
-              {passions.map((p, idx) => (
-                <li 
-                  key={p} 
-                  className="flex items-start gap-3 group"
-                  style={{ animationDelay: `${idx * 100}ms` }}
-                >
-                  <div className="mt-1 w-6 h-6 bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform border border-purple-800/40">
-                    <svg className="w-4 h-4 text-purple-300" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <span className="text-slate-300 leading-relaxed group-hover:text-white transition-colors">
-                    {p}
-                  </span>
-                </li>
-              ))}
+              {loading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <li key={i} className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-slate-700 rounded-lg animate-pulse" />
+                    <div className="w-48 h-4 bg-slate-700 rounded-md animate-pulse" />
+                  </li>
+                ))
+              ) : (
+                passions.map((p, idx) => (
+                  <li 
+                    key={p} 
+                    className="flex items-start gap-3 group"
+                    style={{ animationDelay: `${idx * 100}ms` }}
+                  >
+                    <div className="mt-1 w-6 h-6 bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform border border-purple-800/40">
+                      <svg className="w-4 h-4 text-purple-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="text-slate-300 leading-relaxed group-hover:text-white transition-colors">
+                      {p}
+                    </span>
+                  </li>
+                ))
+              )}
             </ul>
           </div>
         </div>

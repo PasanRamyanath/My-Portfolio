@@ -14,6 +14,8 @@ interface Cert {
   image?: string;
   issuer?: string;
   linkedin?: string;
+  // new: category/type of certificate
+  type?: "academic" | "external";
 }
 
 export default function AdminCertsPage() {
@@ -23,7 +25,7 @@ export default function AdminCertsPage() {
   const [certs, setCerts] = useState<Cert[]>([]);
   const [loadingCerts, setLoadingCerts] = useState(true);
 
-  const [form, setForm] = useState<Omit<Cert, "id">>({ cert_name: "", description: "", image: "", issuer: "", linkedin: "" });
+  const [form, setForm] = useState<Omit<Cert, "id">>({ cert_name: "", description: "", image: "", issuer: "", linkedin: "", type: "academic" });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -31,6 +33,7 @@ export default function AdminCertsPage() {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState<"all" | "academic" | "external">("all");
 
   const ADMIN_EMAIL = "pjramyanath@gmail.com";
 
@@ -60,7 +63,7 @@ export default function AdminCertsPage() {
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -93,7 +96,7 @@ export default function AdminCertsPage() {
       } else {
         await addDoc(collection(db, "certifications"), form);
       }
-      setForm({ cert_name: "", description: "", image: "", issuer: "", linkedin: "" });
+  setForm({ cert_name: "", description: "", image: "", issuer: "", linkedin: "", type: "academic" });
       setEditingId(null);
       await loadCerts();
     } catch (err) {
@@ -105,7 +108,7 @@ export default function AdminCertsPage() {
 
   const handleEdit = (c: Cert) => {
     setEditingId(c.id);
-    setForm({ cert_name: c.cert_name ?? "", description: c.description ?? "", image: c.image ?? "", issuer: c.issuer ?? "", linkedin: c.linkedin ?? "" });
+    setForm({ cert_name: c.cert_name ?? "", description: c.description ?? "", image: c.image ?? "", issuer: c.issuer ?? "", linkedin: c.linkedin ?? "", type: c.type ?? "academic" });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -137,35 +140,49 @@ export default function AdminCertsPage() {
     };
   }, [selectedCert]);
 
-  if (loadingUser) return <p>Loading...</p>;
+  if (loadingUser) return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-950">
+      <div className="space-y-3 w-64">
+        <div className="h-4 bg-slate-800 rounded animate-pulse" />
+        <div className="h-4 bg-slate-800 rounded animate-pulse" />
+        <div className="h-4 bg-slate-800 rounded animate-pulse" />
+      </div>
+    </div>
+  );
 
   if (user?.email !== ADMIN_EMAIL) {
     return (
-      <div className="text-center mt-20 text-red-500">
-        Access Denied.
-        <div className="mt-4">
-          <button onClick={handleLogout} className="px-4 py-2 bg-red-600 text-white rounded-lg">
-            Logout
-          </button>
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-rose-400">
+        <div className="bg-slate-900/60 p-6 rounded-lg border border-white/10 text-center max-w-sm">
+          <div className="font-semibold mb-2">Access Denied</div>
+          <p className="text-sm mb-4">You are not authorized to view this page.</p>
+          <button onClick={handleLogout} className="px-4 py-2 bg-rose-600 text-white rounded-lg">Logout</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-8">
-      <div className="bg-white rounded-xl shadow p-6 mb-6">
-        <h2 className="text-2xl font-bold mb-4">{editingId ? "Edit Certificate" : "Add Certificate"}</h2>
+    <div className="max-w-5xl mx-auto py-8 text-slate-100">
+      <div className="bg-slate-900/70 rounded-xl shadow p-6 mb-6 border border-white/10 backdrop-blur-md">
+        <h2 className="text-2xl font-bold mb-4 text-slate-100">{editingId ? "Edit Certificate" : "Add Certificate"}</h2>
 
         <div className="space-y-3">
-          <input name="cert_name" value={form.cert_name} onChange={handleChange} placeholder="Certificate name" className="w-full border px-3 py-2 rounded" />
-          <input name="issuer" value={form.issuer} onChange={handleChange} placeholder="Issuer" className="w-full border px-3 py-2 rounded" />
-          <input name="linkedin" value={form.linkedin} onChange={handleChange} placeholder="LinkedIn URL" className="w-full border px-3 py-2 rounded" />
-          <textarea name="description" value={form.description} onChange={handleChange} placeholder="Description" className="w-full border px-3 py-2 rounded" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input name="cert_name" value={form.cert_name} onChange={handleChange} placeholder="Certificate name" className="col-span-2 w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100 placeholder-slate-400" />
+            <select name="type" value={form.type} onChange={handleChange} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100">
+              <option value="academic">Academic</option>
+              <option value="external">External</option>
+            </select>
+          </div>
+
+          <input name="issuer" value={form.issuer} onChange={handleChange} placeholder="Issuer" className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100 placeholder-slate-400" />
+          <input name="linkedin" value={form.linkedin} onChange={handleChange} placeholder="LinkedIn URL" className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100 placeholder-slate-400" />
+          <textarea name="description" value={form.description} onChange={handleChange} placeholder="Description" className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100 placeholder-slate-400" />
 
           <div className="flex gap-3 items-center">
             <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
-            <button onClick={handleUpload} className="px-3 py-2 bg-blue-600 text-white rounded" disabled={uploadingImage}>
+            <button onClick={handleUpload} className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500" disabled={uploadingImage}>
               {uploadingImage ? "Uploading..." : "Upload image"}
             </button>
             {form.image && (
@@ -176,37 +193,48 @@ export default function AdminCertsPage() {
           </div>
 
           <div className="flex gap-3">
-            <button onClick={handleSave} className="px-4 py-2 bg-green-600 text-white rounded" disabled={saving}>
+            <button onClick={handleSave} className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-500 disabled:opacity-60" disabled={saving}>
               {saving ? "Saving..." : editingId ? "Update" : "Add"}
             </button>
             {editingId && (
               <button
                 onClick={() => {
                   setEditingId(null);
-                  setForm({ cert_name: "", description: "", image: "", issuer: "", linkedin: "" });
+                  setForm({ cert_name: "", description: "", image: "", issuer: "", linkedin: "", type: "academic" });
                 }}
-                className="px-3 py-2 bg-gray-200 rounded"
+                className="px-3 py-2 bg-slate-700 text-slate-200 rounded hover:bg-slate-600"
               >
                 Cancel
               </button>
             )}
           </div>
 
-          {error && <div className="text-red-600">{error}</div>}
+          {error && <div className="text-rose-400">{error}</div>}
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow p-6">
-        <h3 className="text-xl font-semibold mb-4">Certificates</h3>
+      <div className="bg-slate-900/70 rounded-xl shadow p-6 border border-white/10 backdrop-blur-md">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-semibold text-slate-100">Certificates</h3>
+          <div className="flex gap-2">
+            <button onClick={() => setFilterType("all")} className={`px-3 py-1 rounded-full text-xs ${filterType === "all" ? "bg-indigo-600 text-white" : "bg-slate-800/60 text-slate-300 border border-white/10"}`}>All</button>
+            <button onClick={() => setFilterType("academic")} className={`px-3 py-1 rounded-full text-xs ${filterType === "academic" ? "bg-indigo-600 text-white" : "bg-slate-800/60 text-slate-300 border border-white/10"}`}>Academic</button>
+            <button onClick={() => setFilterType("external")} className={`px-3 py-1 rounded-full text-xs ${filterType === "external" ? "bg-indigo-600 text-white" : "bg-slate-800/60 text-slate-300 border border-white/10"}`}>External</button>
+          </div>
+        </div>
 
         {loadingCerts ? (
-          <div>Loading...</div>
+          <div className="space-y-3">
+            <div className="h-4 bg-slate-800 rounded animate-pulse" />
+            <div className="h-4 bg-slate-800 rounded animate-pulse" />
+            <div className="h-4 bg-slate-800 rounded animate-pulse" />
+          </div>
         ) : certs.length === 0 ? (
-          <div>No certificates yet.</div>
+          <div className="text-slate-400">No certificates yet.</div>
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
-            {certs.map((c) => (
-              <div key={c.id} className="border rounded p-3 flex gap-3 items-start cursor-pointer" onClick={() => setSelectedCert(c)}>
+            {certs.filter(c => filterType === "all" ? true : c.type === filterType).map((c) => (
+              <div key={c.id} className="border border-white/10 rounded p-3 flex gap-3 items-start cursor-pointer bg-slate-800/40 hover:bg-slate-800/60 transition-colors" onClick={() => setSelectedCert(c)}>
                 {c.image && (
                   <div className="w-28 h-20 relative">
                     <Image src={c.image} alt={c.cert_name ?? ""} fill className="object-cover rounded" />
@@ -215,8 +243,11 @@ export default function AdminCertsPage() {
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h4 className="font-semibold">{c.cert_name}</h4>
-                      <p className="text-sm text-gray-600">{c.issuer}</p>
+                      <div className="flex items-center gap-3">
+                        <h4 className="font-semibold text-slate-100">{c.cert_name}</h4>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800/60 text-slate-300 border border-white/6">{(c.type ?? "academic").charAt(0).toUpperCase() + (c.type ?? "academic").slice(1)}</span>
+                      </div>
+                      <p className="text-sm text-slate-400">{c.issuer}</p>
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -224,7 +255,7 @@ export default function AdminCertsPage() {
                           e.stopPropagation();
                           handleEdit(c);
                         }}
-                        className="px-3 py-1 bg-yellow-400 text-white rounded"
+                        className="px-3 py-1 bg-amber-500 text-white rounded hover:bg-amber-400"
                       >
                         Edit
                       </button>
@@ -233,13 +264,13 @@ export default function AdminCertsPage() {
                           e.stopPropagation();
                           handleDelete(c.id);
                         }}
-                        className="px-3 py-1 bg-red-500 text-white rounded"
+                        className="px-3 py-1 bg-rose-600 text-white rounded hover:bg-rose-500"
                       >
                         Delete
                       </button>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-700 mt-2 line-clamp-3">{c.description}</p>
+                  <p className="text-sm text-slate-300 mt-2 line-clamp-3">{c.description}</p>
                 </div>
               </div>
             ))}
@@ -250,40 +281,32 @@ export default function AdminCertsPage() {
       {selectedCert &&
         typeof document !== "undefined" &&
         createPortal(
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setSelectedCert(null)}>
-            <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={() => setSelectedCert(null)}>
+            <div className="bg-slate-900/80 border border-white/10 rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
               <div className="flex justify-end p-4">
-                <button onClick={() => setSelectedCert(null)} className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">
-                  Close
-                </button>
+                <button onClick={() => setSelectedCert(null)} className="px-3 py-1 bg-slate-700 text-slate-200 rounded hover:bg-slate-600">Close</button>
               </div>
-
               <div className="px-6 pb-8">
                 {selectedCert.image && (
                   <div className="w-full mb-6 flex justify-center relative h-[60vh]">
                     <Image src={selectedCert.image} alt={selectedCert.cert_name ?? ""} fill className="object-contain rounded" />
                   </div>
                 )}
-
-                <h2 className="text-2xl font-bold mb-2">{selectedCert.cert_name}</h2>
-                {selectedCert.issuer && <p className="text-sm text-gray-500 mb-2">Issuer: {selectedCert.issuer}</p>}
+                <h2 className="text-2xl font-bold mb-2 text-slate-100">{selectedCert.cert_name}</h2>
+                {selectedCert.issuer && <p className="text-sm text-slate-400 mb-2">Issuer: {selectedCert.issuer}</p>}
                 {selectedCert.linkedin && (
                   <p className="mb-4">
-                    <a href={selectedCert.linkedin} target="_blank" rel="noreferrer" className="text-indigo-600">
-                      View on LinkedIn
-                    </a>
+                    <a href={selectedCert.linkedin} target="_blank" rel="noreferrer" className="text-indigo-400 hover:text-indigo-300">View on LinkedIn</a>
                   </p>
                 )}
-
-                <div className="prose max-w-none text-gray-700 mb-4">{selectedCert.description}</div>
-
+                <div className="prose max-w-none text-slate-300 mb-4">{selectedCert.description}</div>
                 <div className="flex gap-3 mt-4">
                   <button
                     onClick={() => {
                       setSelectedCert(null);
                       handleEdit(selectedCert);
                     }}
-                    className="px-4 py-2 bg-yellow-400 text-white rounded"
+                    className="px-4 py-2 bg-amber-500 text-white rounded hover:bg-amber-400"
                   >
                     Edit
                   </button>
@@ -292,7 +315,7 @@ export default function AdminCertsPage() {
                       setSelectedCert(null);
                       handleDelete(selectedCert.id);
                     }}
-                    className="px-4 py-2 bg-red-500 text-white rounded"
+                    className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-500"
                   >
                     Delete
                   </button>

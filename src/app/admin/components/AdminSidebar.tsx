@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Folder, LogOut, User } from "lucide-react";
+import { LayoutDashboard, Folder, LogOut, User, Computer } from "lucide-react";
 import clsx from "clsx";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -18,6 +18,7 @@ export default function AdminSidebar({ isOpen }: SidebarProps) {
 		{ name: "Projects", icon: Folder, href: "/admin/projects" },
 		{ name: "My-info", icon: User, href: "/admin/my-info" },
 		{ name: "Certificates", icon: LayoutDashboard, href: "/admin/certifications" },
+		{ name: "Services", icon: Computer, href: "/admin/services" },
 	];
 
 	return (

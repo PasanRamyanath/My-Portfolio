@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import CertGridClient from "./CertGridClient";
 
 export const metadata: Metadata = {
-  title: "Certifications — Pasan Ramyanath",
+  title: "Certifications - Pasan Ramyanath",
   description: "Professional certifications and courses completed.",
 };
 
