@@ -133,11 +133,6 @@ export default function ProjectsSection() {
             <div className="w-full h-full flex items-center justify-center text-gray-500">No image</div>
           )}
 
-          {/* gradient overlay + title (light glass style) */}
-          <div className="absolute left-0 bottom-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-            <h3 className="text-lg font-semibold text-slate-100">{project.title}</h3>
-            <p className="text-xs text-slate-300 line-clamp-2">{project.description}</p>
-          </div>
         </div>
 
         <div className="mt-4 p-4 bg-slate-800/40 bg-clip-padding backdrop-blur-sm border border-white/10 rounded-b-xl">
@@ -152,6 +147,8 @@ export default function ProjectsSection() {
           )}
 
           <div className="flex flex-col gap-3 mt-2">
+            {/* Show title in the info area so it's visible without hover */}
+            <h3 className="text-lg font-semibold text-slate-100">{project.title}</h3>
             <p className="text-sm text-slate-300 mb-2 line-clamp-3">{project.description}</p>
             <div className="flex gap-2">
               {project.github && (

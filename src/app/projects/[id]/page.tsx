@@ -101,6 +101,18 @@ export default async function ProjectDetailPage({ params }: { params?: Promise<P
     ? techField.split(",").map((s) => s.trim()).filter(Boolean)
     : [];
 
+  const normalizeUrl = (u?: string) => {
+    if (!u) return undefined;
+    // If it already has a protocol, return as-is
+    if (/^\w+:\/\//i.test(u)) return u;
+    // Otherwise assume https
+    return `https://${u}`;
+  };
+
+  const demoUrl = normalizeUrl(project.demo as string | undefined);
+  const githubUrl = normalizeUrl(project.github as string | undefined) ?? project.github;
+  const linkedinUrl = normalizeUrl(project.linkedin_post as string | undefined) ?? project.linkedin_post;
+
   return (
     <main className="min-h-screen py-12 static-bg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -116,18 +128,18 @@ export default async function ProjectDetailPage({ params }: { params?: Promise<P
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-          {/* Media area */}
-          <div className="md:col-span-7 lg:col-span-8">
+        <div className="grid grid-cols-1 gap-8 items-start">
+          {/* Media area with vertical thumbnails on md+ */}
+          <div>
             <div className="bg-gradient-to-br from-white/5 to-white/2 bg-clip-padding backdrop-blur-lg backdrop-saturate-150 rounded-2xl p-2 sm:p-3 border border-white/10 ring-1 ring-white/5 shadow-xl">
-              <div className="overflow-hidden rounded-xl">
-                <ProjectMediaViewerClient media={media} title={project.title} />
-              </div>
+                <div className="overflow-hidden rounded-xl w-full">
+                  <ProjectMediaViewerClient media={media} title={project.title} />
+                </div>
             </div>
           </div>
 
-          {/* Info panel */}
-          <div className="md:col-span-5 lg:col-span-4">
+          {/* Info panel moved below media as a full-width card */}
+          <div>
             <div className="bg-gradient-to-br from-white/5 to-white/2 bg-clip-padding backdrop-blur-lg backdrop-saturate-150 rounded-2xl p-6 sm:p-8 border border-white/10 ring-1 ring-white/5 shadow-xl">
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-100 mb-4">{project.title}</h1>
               <p className="text-slate-300 leading-relaxed mb-6 whitespace-pre-line">
@@ -151,11 +163,11 @@ export default async function ProjectDetailPage({ params }: { params?: Promise<P
               )}
 
               <div className="flex flex-wrap gap-3 mt-4">
-                {project.demo && (
+                {demoUrl && (
                   <a
-                    href={project.demo}
+                    href={demoUrl}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="group inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
                     <span>Live Demo</span>
@@ -166,9 +178,9 @@ export default async function ProjectDetailPage({ params }: { params?: Promise<P
                 )}
                 {project.github && (
                   <a
-                    href={project.github}
+                    href={githubUrl ?? project.github}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-800/80 text-slate-200 rounded-xl font-semibold border-2 border-slate-700 hover:border-blue-400 hover:text-blue-300 transition-all duration-300 shadow-md hover:shadow-lg"
                   >
                     GitHub
@@ -176,9 +188,9 @@ export default async function ProjectDetailPage({ params }: { params?: Promise<P
                 )}
                 {project.linkedin_post && (
                   <a
-                    href={project.linkedin_post}
+                    href={linkedinUrl ?? project.linkedin_post}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600/80 text-white rounded-xl font-semibold border-2 border-indigo-500/60 hover:border-indigo-300 transition-all duration-300 shadow-md hover:shadow-lg"
                   >
                     LinkedIn Post
