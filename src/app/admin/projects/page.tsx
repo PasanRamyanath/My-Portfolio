@@ -131,8 +131,30 @@ export default function AdminProjectsPage() {
         fd.append("file", file);
 
         const res = await fetch("/api/upload", { method: "POST", body: fd });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || "Failed to upload media");
+
+        // Some hosts (Vercel serverless) will return non-JSON text/html responses
+        // on errors (e.g. "Request Entity Too Large"). Attempt to parse JSON
+        // only when the response is JSON-like, otherwise capture text for
+        // a readable error message instead of throwing a JSON parse exception.
+        const ct = res.headers.get("content-type") || "";
+        let data: any = null;
+        if (ct.includes("application/json")) {
+          data = await res.json();
+        } else {
+          const text = await res.text();
+          // If server returned non-OK, bubble the plain text message
+          if (!res.ok) throw new Error(text || `Upload failed with status ${res.status}`);
+          try {
+            // sometimes services return JSON with wrong content-type
+            data = JSON.parse(text);
+          } catch {
+            data = { success: true, url: text };
+          }
+        }
+
+        if (!data || data.success === false) {
+          throw new Error(data?.error || "Failed to upload media");
+        }
         // store as object with url and fileId so we can delete later
         uploaded.push({ url: data.url, fileId: data.fileId });
       }
