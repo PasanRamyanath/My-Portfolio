@@ -3,6 +3,7 @@
 import React, { useState, useEffect, MouseEvent } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import useEmblaCarousel from 'embla-carousel-react';
 
 interface Props {
   media: string[];
@@ -15,6 +16,8 @@ interface Props {
 
 export default function ProjectMediaViewer({ media, title = "Media", vertical = false }: Props) {
   const [selected, setSelected] = useState<number>(0);
+  // direction: 1 = forward (next), -1 = backward (prev)
+  const [direction, setDirection] = useState<number>(0);
   const [mediaHeight, setMediaHeight] = useState<number>(420);
 
   useEffect(() => {
@@ -40,13 +43,37 @@ export default function ProjectMediaViewer({ media, title = "Media", vertical = 
 
   // Clean media array (remove empty strings / undefined)
   const cleaned = (media || []).filter((m) => typeof m === "string" && m.trim().length > 0) as string[];
-  const prev = () => setSelected((s) => (s - 1 + cleaned.length) % cleaned.length);
-  const next = () => setSelected((s) => (s + 1) % cleaned.length);
+  const prev = () => {
+    setDirection(-1);
+    setSelected((s) => (s - 1 + cleaned.length) % cleaned.length);
+  };
+  const next = () => {
+    setDirection(1);
+    setSelected((s) => (s + 1) % cleaned.length);
+  };
 
   const isVideo = (url: string) => /\.(mp4|webm)$/i.test(url);
 
-  const handleThumbnailClick = (idx: number) => setSelected(idx);
+  const handleThumbnailClick = (idx: number) => {
+    // determine direction for animation
+    setDirection(idx > selected ? 1 : idx < selected ? -1 : 0);
+    setSelected(idx);
+    if (emblaApi) emblaApi.scrollTo(idx);
+  };
   const openViewer = () => {}; // noop kept for compatibility
+
+  // Embla carousel for thumbnails (smooth, no native scrollbar)
+  const [emblaRef, emblaApi] = useEmblaCarousel({ containScroll: 'trimSnaps', align: 'center' });
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    // Scroll the carousel so the selected slide is centered in the viewport
+    try {
+      emblaApi.scrollTo(selected);
+    } catch (e) {
+      // ignore scroll errors
+    }
+  }, [selected, emblaApi]);
 
   // Keyboard navigation: left/right arrows move between media
   useEffect(() => {
@@ -94,7 +121,7 @@ export default function ProjectMediaViewer({ media, title = "Media", vertical = 
       </motion.div>
     );
 
-  const renderThumbnail = (url: string, idx: number) => {
+  const renderThumbnail = (url: string, idx: number, small = false) => {
     const isActive = idx === selected;
     const isVid = isVideo(url);
     
@@ -102,11 +129,12 @@ export default function ProjectMediaViewer({ media, title = "Media", vertical = 
       <motion.button
         key={idx}
         onClick={() => handleThumbnailClick(idx)}
-        className={`relative rounded-2xl overflow-hidden transition-all duration-300 group aspect-[4/3] ${
+        className={`relative rounded-2xl overflow-hidden transition-all duration-300 group w-full ${
           isActive 
             ? "ring-3 ring-[#bd1550] shadow-xl shadow-[#bd1550]/30" 
             : "ring-1 ring-gray-200 hover:ring-2 hover:ring-[#bd1550]/50 hover:shadow-lg"
         }`}
+        style={{ aspectRatio: small ? '1/1' : '4/3' }}
         aria-label={`Select media ${idx + 1}`}
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -115,17 +143,17 @@ export default function ProjectMediaViewer({ media, title = "Media", vertical = 
         whileTap={{ scale: 0.95 }}
       >
         {/* Thumbnail content */}
-        <div className="w-full h-full">
+        <div className={`w-full ${small ? 'h-16 sm:h-20' : 'h-full'}`}>
           {isVid ? (
-            <video src={url} className="w-full h-full object-cover" />
+            <video src={url} className="w-full h-full object-cover" preload="metadata" muted playsInline />
           ) : (
-            <div className="relative w-full h-full bg-gray-100">
+            <div className={`relative w-full h-full bg-gray-100`}> 
               <Image
                 src={url}
                 alt={`${title}-${idx}`}
                 fill
                 style={{ objectFit: "cover" }}
-                sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                sizes={small ? undefined : "(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"}
               />
             </div>
           )}
@@ -173,48 +201,47 @@ export default function ProjectMediaViewer({ media, title = "Media", vertical = 
     );
   };
 
+  // Variants for sliding carousel effect. Use `custom` to pass direction.
+  const slideVariants = {
+    enter: (dir: number) => ({ x: 50 * dir, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: -50 * dir, opacity: 0 }),
+  };
+
   return (
     <div>
       {/* Unified layout: choose vertical or horizontal */}
       {!vertical && (
         <>
           <div className="relative w-full bg-gray-50 rounded-lg overflow-hidden border border-gray-200" style={{ height: `${mediaHeight}px` }}>
-            {/* Layer all media and crossfade between them to avoid flashing */}
-            {cleaned.map((url, idx) => {
-              const visible = idx === selected;
-              if (isVideo(url)) {
-                return (
-                  <motion.video
-                    key={idx}
-                    src={url}
-                    preload="metadata"
-                    // ensure video respects preview height and uses object-fit: contain
-                    className="absolute inset-0 bg-black"
-                    style={{ zIndex: visible ? 2 : 1, width: "100%", height: `${mediaHeight}px`, objectFit: "contain" }}
-                    animate={{ opacity: visible ? 1 : 0 }}
-                    initial={{ opacity: 0 }}
-                    transition={{ duration: 0.35 }}
-                    controls={visible}
-                    autoPlay={visible}
-                    muted
-                    playsInline
-                  />
-                );
-              }
+            {/* Show only the selected media and use AnimatePresence (mode=wait) to
+                fade out the previous item before fading in the new one. This
+                provides a smooth crossfade when switching previews. */}
+              {/* Render only the selected media (no carousel/crossfade) */}
+              {(() => {
+                const url = cleaned[selected];
+                if (!url) return null;
+                if (isVideo(url)) {
+                  return (
+                    <video
+                      key={url}
+                      src={url}
+                      preload="metadata"
+                      className="absolute inset-0 bg-black"
+                      style={{ width: "100%", height: `${mediaHeight}px`, objectFit: "contain" }}
+                      controls
+                      muted
+                      playsInline
+                    />
+                  );
+                }
 
-              return (
-                <motion.div
-                  key={idx}
-                  className="absolute inset-0 w-full h-full flex items-center justify-center bg-white"
-                  style={{ zIndex: visible ? 2 : 1 }}
-                  animate={{ opacity: visible ? 1 : 0 }}
-                  initial={{ opacity: 0 }}
-                  transition={{ duration: 0.35 }}
-                >
-                  <Image src={url} alt={title} fill style={{ objectFit: "contain" }} />
-                </motion.div>
-              );
-            })}
+                return (
+                  <div key={url} className="absolute inset-0 w-full h-full flex items-center justify-center bg-white">
+                    <Image src={url} alt={title} fill style={{ objectFit: "contain" }} />
+                  </div>
+                );
+              })()}
             {cleaned.length > 1 && (
               <>
                 <button
@@ -242,26 +269,42 @@ export default function ProjectMediaViewer({ media, title = "Media", vertical = 
               transition={{ duration: 0.4, delay: 0.2 }}
             >
               {/* Progress dots */}
-              <div className="flex items-center justify-center gap-2 mb-4">
-                {cleaned.map((_, idx) => (
-                  <motion.button
-                    key={idx}
-                    onClick={() => setSelected(idx)}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      idx === selected 
-                        ? "w-8 bg-[#bd1550]" 
-                        : "w-1.5 bg-gray-300 hover:bg-[#bd1550]/50"
-                    }`}
-                    aria-label={`Go to media ${idx + 1}`}
-                    whileHover={{ scale: 1.2 }}
-                    whileTap={{ scale: 0.9 }}
-                  />
-                ))}
+              {/* Embla thumbnail strip (single horizontal row, no native scrollbar visible) */}
+              <div className="embla overflow-hidden">
+                <div className="embla__viewport" ref={emblaRef as unknown as (el: HTMLElement | null) => void}>
+                  <div className="embla__container flex gap-2 py-2 px-1">
+                    {(() => {
+                      const thumbCount = Math.min(15, cleaned.length);
+                      const percent = `${100 / thumbCount}%`;
+                      return cleaned.slice(0, thumbCount).map((m, idx) => (
+                        <div key={idx} className="embla__slide flex-shrink-0" style={{ width: percent }}>
+                          {renderThumbnail(m, idx, true)}
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                </div>
               </div>
-              
-              {/* Responsive grid - no horizontal scroll */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-                {cleaned.map((m, idx) => renderThumbnail(m, idx))}
+
+              {/* Progress dots below the strip (for the visible thumbnails) */}
+              <div className="flex items-center justify-center gap-2 mt-3">
+                {(() => {
+                  const thumbCount = Math.min(15, cleaned.length);
+                  return Array.from({ length: thumbCount }).map((_, idx) => (
+                    <motion.button
+                      key={idx}
+                      onClick={() => { setSelected(idx); emblaApi?.scrollTo(idx); }}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        idx === selected 
+                          ? "w-8 bg-[#bd1550]" 
+                          : "w-1.5 bg-gray-300 hover:bg-[#bd1550]/50"
+                      }`}
+                      aria-label={`Go to media ${idx + 1}`}
+                      whileHover={{ scale: 1.2 }}
+                      whileTap={{ scale: 0.9 }}
+                    />
+                  ));
+                })()}
               </div>
             </motion.div>
           )}
@@ -271,22 +314,19 @@ export default function ProjectMediaViewer({ media, title = "Media", vertical = 
       {vertical && (
         <div className="grid grid-cols-1 md:grid-cols-[1fr_96px] gap-4 items-start">
           <div className="relative bg-gray-50 rounded-lg overflow-hidden border border-gray-200" style={{ height: `${mediaHeight}px` }}>
-            {/* Layered preview for vertical layout - crossfade to avoid flashes */}
-            {cleaned.map((url, idx) => {
-              const visible = idx === selected;
+            {/* Vertical preview: render only selected media (no slide/carousel) */}
+            {(() => {
+              const url = cleaned[selected];
+              if (!url) return null;
               if (isVideo(url)) {
                 return (
-                  <motion.video
-                    key={idx}
+                  <video
+                    key={url}
                     src={url}
                     preload="metadata"
                     className="absolute inset-0 bg-black"
-                    style={{ zIndex: visible ? 2 : 1, width: "100%", height: `${mediaHeight}px`, objectFit: "contain" }}
-                    animate={{ opacity: visible ? 1 : 0 }}
-                    initial={{ opacity: 0 }}
-                    transition={{ duration: 0.35 }}
-                    controls={visible}
-                    autoPlay={visible}
+                    style={{ width: "100%", height: `${mediaHeight}px`, objectFit: "contain" }}
+                    controls
                     muted
                     playsInline
                   />
@@ -294,18 +334,11 @@ export default function ProjectMediaViewer({ media, title = "Media", vertical = 
               }
 
               return (
-                <motion.div
-                  key={idx}
-                  className="absolute inset-0 w-full h-full flex items-center justify-center bg-white"
-                  style={{ zIndex: visible ? 2 : 1 }}
-                  animate={{ opacity: visible ? 1 : 0 }}
-                  initial={{ opacity: 0 }}
-                  transition={{ duration: 0.35 }}
-                >
+                <div key={url} className="absolute inset-0 w-full h-full flex items-center justify-center bg-white">
                   <Image src={url} alt={title} fill style={{ objectFit: "contain" }} />
-                </motion.div>
+                </div>
               );
-            })}
+            })()}
             {cleaned.length > 1 && (
               <>
                 <button

@@ -259,17 +259,26 @@ export default function ProjectsSection() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {(selectedType === 'all' ? projects : filteredProjects)
-              .slice()
-              .map((project) => {
+                .slice()
+                .map((project) => {
                 const media = getMediaFromProject(project);
                 const thumb = media.length > 0 ? media[0] : undefined;
                 const isVideoThumb = typeof thumb === 'string' && /\.(mp4|webm|ogg)(\?.*)?$/i.test(thumb);
                 return (
-                  <article
-                    key={project.id}
-                    onClick={() => router.push(`/projects/${project.id}`)}
-                    className="cursor-pointer rounded-none p-6 bg-[#f3f3f3] border border-[#e1e1e1] shadow-[0_0_0_1px_#e1e1e1,0_0_0_3px_#fff,0_0_0_4px_#e1e1e1] hover:shadow-none transition-all"
-                  >
+                    <article
+                      key={project.id}
+                      onClick={() => router.push(`/projects/${project.id}`)}
+                      onPointerDown={() => router.push(`/projects/${project.id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          router.push(`/projects/${project.id}`);
+                        }
+                      }}
+                      role="link"
+                      tabIndex={0}
+                      className="cursor-pointer rounded-none p-6 bg-[#f3f3f3] border border-[#e1e1e1] shadow-[0_0_0_1px_#e1e1e1,0_0_0_3px_#fff,0_0_0_4px_#e1e1e1] hover:shadow-none transition-all"
+                    >
                     {thumb ? (
                       <div className="w-full h-44 mb-4 bg-black/5 overflow-hidden rounded">
                         {isVideoThumb ? (
@@ -286,6 +295,7 @@ export default function ProjectsSection() {
                     <div className="flex gap-3">
                       {project.github && (
                         <a
+                          onPointerDown={(e) => e.stopPropagation()}
                           onClick={(e) => e.stopPropagation()}
                           href={project.github}
                           target="_blank"
@@ -297,6 +307,7 @@ export default function ProjectsSection() {
                       )}
                       {project.demo && (
                         <a
+                          onPointerDown={(e) => e.stopPropagation()}
                           onClick={(e) => e.stopPropagation()}
                           href={project.demo}
                           target="_blank"

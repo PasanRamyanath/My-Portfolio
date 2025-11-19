@@ -46,10 +46,6 @@ export default function HeroSection() {
                   className="img-circle mb-6"
                   src="/profile.jpeg"
                   alt={info?.displayName ?? info?.initialName ?? "Profile"}
-                  onError={(e) => {
-                    // fallback to original image if profile.jpeg is missing
-                    (e.currentTarget as HTMLImageElement).src = "/images/guy.jpg";
-                  }}
                 />
                 <span className="title block mt-4">{info?.displayName ?? info?.initialName ?? ""}</span>
                 <span className="tagline block mt-2">
@@ -60,8 +56,12 @@ export default function HeroSection() {
                   </a>
                 </span>
                 <div className="flex gap-4 flex-wrap justify-center mx-auto mt-6 text-white">
-                  <Link href="/projects" className="btn btn-primary inline-flex items-center gap-2 text-white">
-                    <span className="text-white">See My Work</span>
+                  <Link
+                    href="/projects"
+                    className="btn btn-primary inline-flex items-center gap-2 hero-see-work"
+                    style={{ color: "white" }}
+                  >
+                    <span style={{ color: "white" }}>See My Work</span>
                   </Link>
 
                   <a href="/I.M.P.J%20Ramyanath.pdf" download="Ramyanath_CV.pdf" className="btn btn-action inline-flex items-center gap-2">
@@ -73,6 +73,9 @@ export default function HeroSection() {
           </h1>
         </div>
       </header>
+
+      {/* Inline override to ensure CTA text appears white even if external CSS uses !important */}
+      <style>{`.hero-see-work, .hero-see-work * { color: #fff !important; }`}</style>
 
     </>
   );

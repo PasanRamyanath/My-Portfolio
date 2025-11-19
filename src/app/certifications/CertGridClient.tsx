@@ -84,19 +84,31 @@ export default function CertGridClient({ certs }: Props) {
         <div className="flex gap-3">
           <button
             onClick={() => setFilterType("all")}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${filterType === "all" ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg" : "bg-white/10 text-white border border-white/10"}`}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all border-2 ${
+              filterType === "all"
+                ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
+                : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
+            }`}
           >
             All
           </button>
           <button
             onClick={() => setFilterType("university")}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${filterType === "university" ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg" : "bg-white/10 text-white border border-white/10"}`}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all border-2 ${
+              filterType === "university"
+                ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
+                : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
+            }`}
           >
             University
           </button>
           <button
             onClick={() => setFilterType("external")}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${filterType === "external" ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg" : "bg-white/10 text-white border border-white/10"}`}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all border-2 ${
+              filterType === "external"
+                ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
+                : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
+            }`}
           >
             External
           </button>

@@ -40,17 +40,17 @@ export default async function CertificationsPage() {
   const certs: Cert[] = snapshot.docs.map(mapCertDoc);
 
   return (
-    <main className="min-h-screen py-5 static-bg">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main className="relative min-h-screen overflow-hidden py-10" style={{ background: "#fff" }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
-          <h1 className="text-5xl sm:text-3xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">Certifications</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="initio-section-title"><span>Certifications</span></h1>
+          <p className="text-[#7C7C7C] text-base max-w-2xl mx-auto">
             Selected professional certifications and course badges.
           </p>
         </div>
 
         {certs.length === 0 ? (
-          <div className="text-center text-gray-500">No certifications found.</div>
+          <div className="text-center text-[#a5a5a5]">No certifications found.</div>
         ) : (
           <CertGridClient certs={certs} />
         )}

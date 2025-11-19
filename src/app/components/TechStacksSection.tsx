@@ -31,7 +31,7 @@ export default function TechStacksSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col items-center pt-4 md:pt-12">
         <div className="text-center mb-8 relative">
           <h2 className="initio-section-title">
-            <span>Tech Stack</span>
+            <span>Tech Skills</span>
           </h2>
           <p className="text-[#7C7C7C] max-w-2xl mx-auto text-base leading-relaxed">
             An overview of the frameworks, languages, platforms and technologies I&apos;ve used to craft performant, maintainable solutions.
@@ -51,10 +51,10 @@ export default function TechStacksSection() {
 
         {loading ? (
           <div className="flex justify-center items-center h-96">
-            <div className="text-[#7C7C7C]">Loading tech stacks...</div>
+            <div className="text-[#7C7C7C]">Loading tech skills...</div>
           </div>
         ) : categoryEntries.length === 0 ? (
-          <div className="text-center text-[#7C7C7C]">No tech stacks added yet.</div>
+          <div className="text-center text-[#7C7C7C]">No tech skills added yet.</div>
         ) : (
           <div className="flex justify-center w-full">
             <TechConstellation categories={categorized} searchQuery={searchQuery} />

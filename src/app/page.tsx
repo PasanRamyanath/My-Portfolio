@@ -3,6 +3,7 @@ import TechStacksSection from "./components/TechStacksSection";
 import AboutSection from "./components/AboutSection";
 import Navbar from "./components/Navbar";
 import { Metadata } from "next";
+import SocialsSection from "./components/SocialsSection";
 
 export const metadata: Metadata = {
   title: "Pasan Ramyanath",
@@ -18,6 +19,7 @@ export default function Home() {
       <Navbar deferUntilScroll />
       <TechStacksSection />
       <AboutSection />
+      <SocialsSection />
     </main>
   );
 }
