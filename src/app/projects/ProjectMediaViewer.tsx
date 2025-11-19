@@ -40,8 +40,6 @@ export default function ProjectMediaViewer({ media, title = "Media", vertical = 
 
   // Clean media array (remove empty strings / undefined)
   const cleaned = (media || []).filter((m) => typeof m === "string" && m.trim().length > 0) as string[];
-  if (!cleaned || cleaned.length === 0) return null;
-
   const prev = () => setSelected((s) => (s - 1 + cleaned.length) % cleaned.length);
   const next = () => setSelected((s) => (s + 1) % cleaned.length);
 
@@ -59,6 +57,8 @@ export default function ProjectMediaViewer({ media, title = "Media", vertical = 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [cleaned.length]);
+
+  if (!cleaned || cleaned.length === 0) return null;
 
   // Render preview with a consistent height computed from screen size
   const renderPreview = (url: string) =>
@@ -188,8 +188,9 @@ export default function ProjectMediaViewer({ media, title = "Media", vertical = 
                     key={idx}
                     src={url}
                     preload="metadata"
-                    className="absolute inset-0 w-full h-full object-contain bg-black"
-                    style={{ zIndex: visible ? 2 : 1 }}
+                    // ensure video respects preview height and uses object-fit: contain
+                    className="absolute inset-0 bg-black"
+                    style={{ zIndex: visible ? 2 : 1, width: "100%", height: `${mediaHeight}px`, objectFit: "contain" }}
                     animate={{ opacity: visible ? 1 : 0 }}
                     initial={{ opacity: 0 }}
                     transition={{ duration: 0.35 }}
@@ -279,8 +280,8 @@ export default function ProjectMediaViewer({ media, title = "Media", vertical = 
                     key={idx}
                     src={url}
                     preload="metadata"
-                    className="absolute inset-0 w-full h-full object-contain bg-black"
-                    style={{ zIndex: visible ? 2 : 1 }}
+                    className="absolute inset-0 bg-black"
+                    style={{ zIndex: visible ? 2 : 1, width: "100%", height: `${mediaHeight}px`, objectFit: "contain" }}
                     animate={{ opacity: visible ? 1 : 0 }}
                     initial={{ opacity: 0 }}
                     transition={{ duration: 0.35 }}

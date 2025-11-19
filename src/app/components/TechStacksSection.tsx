@@ -34,7 +34,7 @@ export default function TechStacksSection() {
             <span>Tech Stack</span>
           </h2>
           <p className="text-[#7C7C7C] max-w-2xl mx-auto text-base leading-relaxed">
-            An overview of the frameworks, languages, platforms and technologies I've used to craft performant, maintainable solutions.
+            An overview of the frameworks, languages, platforms and technologies I&apos;ve used to craft performant, maintainable solutions.
           </p>
           
           {/* Search input */}
