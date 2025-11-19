@@ -6,6 +6,8 @@ import React from "react";
 
 export default function TechStacksSection() {
   const { info, loading } = useSiteInfo();
+  const [searchQuery, setSearchQuery] = React.useState("");
+  
   // Build categorized stacks: prefer info.techStacksByCategory, else fallback to flat array under General
   const categorized: Record<string, string[]> = React.useMemo(() => {
     if (info?.techStacksByCategory && Object.keys(info.techStacksByCategory).length > 0) {
@@ -25,46 +27,37 @@ export default function TechStacksSection() {
   const categoryEntries = Object.entries(categorized).sort((a, b) => a[0].localeCompare(b[0]));
 
   return (
-  <section id="stack" className="relative min-h-screen py-16 static-bg">
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-0 top-10 w-72 h-72 bg-blue-300/10 rounded-full blur-3xl" />
-        <div className="absolute right-0 bottom-0 w-96 h-96 bg-purple-400/10 rounded-full blur-2xl" />
-        <svg className="absolute inset-0 w-full h-full opacity-[0.04]" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="techgrid" width="50" height="50" patternUnits="userSpaceOnUse">
-              <circle cx="3" cy="3" r="2" fill="#ffffff" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#techgrid)" />
-        </svg>
-      </div>
-
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full grid grid-rows-[auto_auto] gap-y-10 md:gap-y-14 items-start pt-4 md:pt-12">
-    <div className="text-center mb-4 relative">
-          <span className="inline-block text-[11px] tracking-wider uppercase font-semibold text-indigo-300 bg-indigo-950/50 px-5 py-2 rounded-full border border-indigo-800/50 shadow-sm shadow-indigo-900/30 mb-5 backdrop-blur-sm">
-            Tech Stack
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-5 drop-shadow-[0_4px_12px_rgba(99,102,241,0.25)]">
-            Tools & Technologies I Use
+    <section id="stack" className="relative min-h-screen py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col items-center pt-4 md:pt-12">
+        <div className="text-center mb-8 relative">
+          <h2 className="initio-section-title">
+            <span>Tech Stack</span>
           </h2>
-          <p className="text-slate-300/90 max-w-2xl mx-auto text-base leading-relaxed">
-            A concise overview of the frameworks, languages and platforms I use regularly to craft performant, maintainable solutions.
+          <p className="text-[#7C7C7C] max-w-2xl mx-auto text-base leading-relaxed">
+            An overview of the frameworks, languages, platforms and technologies I've used to craft performant, maintainable solutions.
           </p>
+          
+          {/* Search input */}
+          <div className="mt-6 max-w-md mx-auto">
+            <input
+              type="text"
+              placeholder="Search for a technology..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 border border-[#cccccc] rounded-none text-[#333] placeholder-[#999] focus:outline-none focus:border-[#bd1550] transition-colors"
+            />
+          </div>
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 place-items-center">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-56 w-[240px] sm:w-[260px] rounded-2xl bg-slate-800/40 border border-white/10 animate-pulse" />
-            ))}
+          <div className="flex justify-center items-center h-96">
+            <div className="text-[#7C7C7C]">Loading tech stacks...</div>
           </div>
         ) : categoryEntries.length === 0 ? (
-          <div className="text-center text-slate-400">No tech stacks added yet.</div>
+          <div className="text-center text-[#7C7C7C]">No tech stacks added yet.</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 place-items-center">
-            {categoryEntries.map(([category, items]) => (
-              <TechCategoryCard key={category} category={category} items={items} />
-            ))}
+          <div className="flex justify-center w-full">
+            <TechConstellation categories={categorized} searchQuery={searchQuery} />
           </div>
         )}
       </div>
@@ -93,5 +86,198 @@ function TechCategoryCard({ category, items }: { category: string; items: string
       </div>
       <div className="pointer-events-none absolute inset-0 rounded-2xl" />
     </div>
+  );
+}
+
+function TechConstellation({ categories, searchQuery }: { categories: Record<string, string[]>; searchQuery: string }) {
+  const width = 900;
+  const height = 300; // further reduced height for a more compact window
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const categoryRadius = 100; // reduced distance of category centers from the center
+
+  const categoryEntries = Object.entries(categories);
+  const totalCategories = categoryEntries.length;
+
+  // Normalize search query for case-insensitive matching
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+
+  // Position each category in a circle around the center
+  const categoryPositions: Record<
+    string,
+    { 
+      x: number; 
+      y: number; 
+      techs: { name: string; x: number; y: number }[] 
+    }
+  > = {};
+
+  // Lay out categories horizontally across the SVG so different types are spaced
+  // evenly. If there's only one category, center it.
+  const paddingX = 80;
+  const availableWidth = Math.max(0, width - paddingX * 2);
+  categoryEntries.forEach(([category, items], index) => {
+    const catX = totalCategories > 1
+      ? paddingX + (index / (totalCategories - 1)) * availableWidth
+      : centerX;
+    const catY = centerY; // keep them vertically centered
+
+    // Position techs in a small cluster around the category center
+    const techRadius = 30;
+    const techs = items.map((tech, i) => {
+      const techAngle = (i / items.length) * 2 * Math.PI;
+      const techX = catX + techRadius * Math.cos(techAngle);
+      const techY = catY + techRadius * Math.sin(techAngle);
+      return { name: tech, x: techX, y: techY };
+    });
+
+    categoryPositions[category] = { x: catX, y: catY, techs };
+  });
+
+  // Create lines connecting all techs within the same category (animated)
+  const animatedConnections = Object.values(categoryPositions).map(({ techs }) => {
+    const connections: Array<{
+      tech1: { name: string; x: number; y: number; seed: number };
+      tech2: { name: string; x: number; y: number; seed: number };
+    }> = [];
+    
+    // Add seed to each tech for animation
+    const techsWithSeed = techs.map(t => ({
+      ...t,
+      seed: Math.abs(Array.from(t.name).reduce((acc, ch) => acc * 31 + ch.charCodeAt(0), 7))
+    }));
+
+    for (let i = 0; i < techsWithSeed.length; i++) {
+      for (let j = i + 1; j < techsWithSeed.length; j++) {
+        connections.push({
+          tech1: techsWithSeed[i],
+          tech2: techsWithSeed[j]
+        });
+      }
+    }
+    return connections;
+  }).flat();
+
+  return (
+    <svg 
+      width={width} 
+      height={height} 
+      className="bg-white"
+      style={{ maxWidth: '100%', height: 'auto' }}
+    >
+      {/* Connection lines between techs in same category - dynamically animated to follow moving techs */}
+      {animatedConnections.map((conn, i) => {
+        const amp1 = 8 + (conn.tech1.seed % 12);
+        const dur1 = 4 + (conn.tech1.seed % 6);
+        const dx1 = Math.round((conn.tech1.seed % 3) - 1) * amp1;
+        const dy1 = Math.round((conn.tech1.seed % 5) - 2) * amp1;
+        
+        const amp2 = 8 + (conn.tech2.seed % 12);
+        const dur2 = 4 + (conn.tech2.seed % 6);
+        const dx2 = Math.round((conn.tech2.seed % 3) - 1) * amp2;
+        const dy2 = Math.round((conn.tech2.seed % 5) - 2) * amp2;
+
+        return (
+          <line
+            key={`line-${i}`}
+            stroke="#000000"
+            strokeWidth="1"
+            opacity="0.3"
+          >
+            <animate
+              attributeName="x1"
+              values={`${conn.tech1.x}; ${conn.tech1.x + dx1}; ${conn.tech1.x - dx1}; ${conn.tech1.x}`}
+              dur={`${dur1}s`}
+              repeatCount="indefinite"
+            />
+            <animate
+              attributeName="y1"
+              values={`${conn.tech1.y}; ${conn.tech1.y - dy1}; ${conn.tech1.y + dy1}; ${conn.tech1.y}`}
+              dur={`${dur1}s`}
+              repeatCount="indefinite"
+            />
+            <animate
+              attributeName="x2"
+              values={`${conn.tech2.x}; ${conn.tech2.x + dx2}; ${conn.tech2.x - dx2}; ${conn.tech2.x}`}
+              dur={`${dur2}s`}
+              repeatCount="indefinite"
+            />
+            <animate
+              attributeName="y2"
+              values={`${conn.tech2.y}; ${conn.tech2.y - dy2}; ${conn.tech2.y + dy2}; ${conn.tech2.y}`}
+              dur={`${dur2}s`}
+              repeatCount="indefinite"
+            />
+          </line>
+        );
+      })}
+
+      {/* Tech nodes (circles and labels) with floating animation */}
+      {Object.values(categoryPositions).map(({ techs }, catIdx) =>
+        techs.map((tech, techIdx) => {
+          // deterministic pseudo-random values based on name to keep animations stable
+          const seed = Math.abs(
+            Array.from(tech.name).reduce((acc, ch) => acc * 31 + ch.charCodeAt(0), 7)
+          );
+          const amp = 8 + (seed % 12); // amplitude between 8 and 19 px for more noticeable floating
+          const dur = 4 + (seed % 6); // duration between 4s and 9s
+          const dx = Math.round((seed % 3) - 1) * amp; // x offset
+          const dy = Math.round((seed % 5) - 2) * amp; // y offset
+          
+          // Check if this tech matches the search query
+          const isHighlighted = normalizedSearch.length > 0 && tech.name.toLowerCase().includes(normalizedSearch);
+          const fillColor = isHighlighted ? "#bd1550" : "#000000"; // Initio primary color for highlight
+          const strokeColor = isHighlighted ? "#bd1550" : "#000000";
+          const textColor = isHighlighted ? "#bd1550" : "#000000";
+
+          return (
+            <g key={`tech-${catIdx}-${techIdx}`}>
+              <circle 
+                r="6" 
+                fill={fillColor} 
+                stroke={strokeColor}
+                strokeWidth="2"
+              >
+                <animate
+                  attributeName="cx"
+                  values={`${tech.x}; ${tech.x + dx}; ${tech.x - dx}; ${tech.x}`}
+                  dur={`${dur}s`}
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="cy"
+                  values={`${tech.y}; ${tech.y - dy}; ${tech.y + dy}; ${tech.y}`}
+                  dur={`${dur}s`}
+                  repeatCount="indefinite"
+                />
+              </circle>
+              <text
+                textAnchor="middle"
+                fontSize="11"
+                fill={textColor}
+                fontWeight={isHighlighted ? "700" : "400"}
+                fontFamily="Open Sans, Helvetica, Arial, sans-serif"
+              >
+                {tech.name}
+                <animate
+                  attributeName="x"
+                  values={`${tech.x}; ${tech.x + dx}; ${tech.x - dx}; ${tech.x}`}
+                  dur={`${dur}s`}
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="y"
+                  values={`${tech.y - 14}; ${tech.y - 14 - dy}; ${tech.y - 14 + dy}; ${tech.y - 14}`}
+                  dur={`${dur}s`}
+                  repeatCount="indefinite"
+                />
+              </text>
+            </g>
+          );
+        })
+      )}
+
+      {/* Category labels removed — constellation now shows only nodes and connections */}
+    </svg>
   );
 }

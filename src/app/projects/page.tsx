@@ -7,5 +7,9 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
-  return <ProjectsSection />;
+  return (
+    <main className="min-h-screen">
+      <ProjectsSection />
+    </main>
+  );
 }

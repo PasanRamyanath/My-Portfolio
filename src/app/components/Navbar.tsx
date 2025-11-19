@@ -1,21 +1,48 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import useSiteInfo from "@/lib/useSiteInfo";
 
-export default function Navbar() {
+interface NavbarProps {
+  deferUntilScroll?: boolean; // when true (home page), start below hero and stick when scrolled
+}
+
+export default function Navbar({ deferUntilScroll = false }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { info } = useSiteInfo();
+  const navRef = useRef<HTMLElement | null>(null);
+  // Start with a very large threshold so we don't accidentally mark as scrolled
+  // before we measure the navbar position on mount.
+  const [threshold, setThreshold] = useState<number>(Number.POSITIVE_INFINITY);
+
+  useEffect(() => {
+    // Measure navbar position after mount
+    const navEl = navRef.current;
+    if (navEl && deferUntilScroll) {
+      // Use the top offset of the nav (its position in the flow) plus a small buffer
+      // so the nav will stick once the user scrolls past it.
+      setThreshold(navEl.offsetTop + 8);
+    } else {
+      setThreshold(20);
+    }
+  }, [deferUntilScroll]);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      const y = window.scrollY;
+      if (deferUntilScroll) {
+        setScrolled(y >= threshold);
+      } else {
+        setScrolled(y > 20);
+      }
     };
     window.addEventListener("scroll", handleScroll);
+    // run once to set initial state (after threshold measured)
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [deferUntilScroll, threshold]);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -26,33 +53,32 @@ export default function Navbar() {
   ];
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-slate-900/70 backdrop-blur-lg shadow-lg border-b border-white/5"
-          : "bg-slate-950/30 backdrop-blur-lg border-b border-white/5"
-      }`}
-    >
+    <>
+      <nav
+        ref={navRef}
+        className={`${deferUntilScroll && !scrolled ? "relative" : "fixed top-0 left-0 right-0"} z-50 transition-all duration-300 border-y ${
+          scrolled ? "bg-white/85 backdrop-blur-sm border-[#cccccc]" : "bg-white border-[#cccccc]"
+        }`}
+      >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
-        <div className="flex items-center justify-between h-16">
+        <div className="relative flex items-center justify-between min-h-[64px]">
           {/* Logo */}
           <Link
             href="/"
-            className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent hover:scale-105 transition-transform"
+            className="md:hidden text-2xl font-bold text-[#333] hover:opacity-90 transition-opacity"
           >
             {info?.displayName ?? info?.initialName ?? "Portfolio"}
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-8">
+          <div className="hidden md:flex w-full items-center justify-center">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-slate-200 hover:text-blue-400 transition-colors font-medium relative group"
+                className="text-[#454545] hover:text-black transition-colors font-light uppercase tracking-wide px-8 py-5 inline-block"
               >
                 {link.name}
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-400 transition-all group-hover:w-full" />
               </Link>
             ))}
           </div>
@@ -60,22 +86,22 @@ export default function Navbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-slate-800 transition-colors"
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
             aria-label="Toggle menu"
           >
             <div className="w-6 h-5 flex flex-col justify-between">
               <span
-                className={`w-full h-0.5 bg-slate-200 transition-all ${
+                className={`w-full h-0.5 bg-gray-700 transition-all ${
                   mobileMenuOpen ? "rotate-45 translate-y-2" : ""
                 }`}
               />
               <span
-                className={`w-full h-0.5 bg-slate-200 transition-all ${
+                className={`w-full h-0.5 bg-gray-700 transition-all ${
                   mobileMenuOpen ? "opacity-0" : ""
                 }`}
               />
               <span
-                className={`w-full h-0.5 bg-slate-200 transition-all ${
+                className={`w-full h-0.5 bg-gray-700 transition-all ${
                   mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
                 }`}
               />
@@ -90,19 +116,22 @@ export default function Navbar() {
           mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         } absolute left-0 right-0 top-16 z-40`}
       >
-        <div className="px-4 py-4 bg-slate-900/95 backdrop-blur-lg shadow-lg border-t border-white/5">
+        <div className="px-4 py-2 bg-white shadow-sm border-t border-[#cccccc]">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
               onClick={() => setMobileMenuOpen(false)}
-              className="block py-3 text-slate-200 hover:text-blue-400 transition-colors font-medium"
+              className="block py-4 text-[#454545] hover:text-black transition-colors font-light uppercase tracking-wide"
             >
               {link.name}
             </Link>
           ))}
         </div>
       </div>
-    </nav>
+      </nav>
+      {/* Spacer to avoid layout jump when navbar becomes fixed */}
+      {deferUntilScroll && scrolled && <div style={{ height: 64 }} />}
+    </>
   );
 }

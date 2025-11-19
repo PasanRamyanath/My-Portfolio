@@ -17,68 +17,62 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid md:grid-cols-3 gap-8 mb-8">
-          {/* Brand Section */}
-          <div>
-            <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
-              {info?.displayName ?? info?.initialName ?? "Your Name"}
-            </h3>
-            <p className="text-gray-400 leading-relaxed">
-              {info?.description ?? "Full Stack Developer passionate about creating beautiful and functional web experiences."}
-            </p>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              {quickLinks.map((link) => (
-                <li key={link.name}>
-                  <a
-                    href={link.href}
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    {link.name}
+    <>
+      <footer id="footer" className="initio-footer">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid md:grid-cols-3 gap-8 mb-0">
+            {/* Brand Section */}
+            <div>
+              <h3 className="widget-title text-[0.9375rem]">Contact</h3>
+              <div className="widget-body text-sm">
+                <p>
+                  <a href={info?.email ? `mailto:${info.email}` : "mailto:you@example.com"}>
+                    {info?.email ?? "you@example.com"}
                   </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+                </p>
+              </div>
+            </div>
 
-          {/* Social Links */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Connect</h4>
-            <ul className="space-y-2">
-              {socialLinks.map((link) => (
-                <li key={link.name}>
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            {/* Follow me */}
+            <div>
+              <h3 className="widget-title">Follow me</h3>
+              <div className="widget-body text-sm">
+                <p className="follow-me-icons text-[30px] flex gap-4">
+                  {socialLinks.map((link) => (
+                    <a key={link.name} href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.name}>
+                      {/* simple text links to keep light footprint */}
+                      <span className="text-[#ccc] hover:text-white text-base align-middle">{link.name}</span>
+                    </a>
+                  ))}
+                </p>
+              </div>
+            </div>
+
+            {/* About */}
+            <div>
+              <h3 className="widget-title">About</h3>
+              <div className="widget-body text-sm text-[#999]">
+                <p>
+                  {info?.description ?? "Full Stack Developer passionate about creating beautiful and functional web experiences."}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
+      </footer>
 
-        {/* Bottom Bar */}
-        <div className="pt-8 border-t border-gray-800">
+      <footer id="underfooter" className="initio-underfooter">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-400 text-sm">
-              © {currentYear} {info?.displayName ?? info?.initialName ?? "Your Name"}. All rights reserved.
+            <p className="text-[12px] text-[#777]">
+              © {currentYear} {info?.displayName ?? info?.initialName ?? "Your Name"}
             </p>
-            <p className="text-gray-400 text-sm">
-              Built with ❤️ using Next.js & Tailwind CSS
+            <p className="text-[12px] text-right">
+              Design inspired by <a href="http://www.gettemplate.com" rel="noreferrer" target="_blank">Initio</a>
             </p>
           </div>
         </div>
-      </div>
-    </footer>
+      </footer>
+    </>
   );
 }

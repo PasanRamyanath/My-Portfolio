@@ -45,38 +45,32 @@ export default function Services() {
   }, []);
 
   return (
-    <main className="relative min-h-screen static-bg overflow-hidden py-5">
-      {/* subtle background accents to match theme */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-0 top-8 w-72 h-72 bg-teal-200/30 rounded-full blur-3xl transform -rotate-12 animate-slow-float" />
-        <div className="absolute right-0 -top-6 w-96 h-96 bg-indigo-200/20 rounded-full blur-2xl transform rotate-6" />
-      </div>
-
+    <main className="relative min-h-screen overflow-hidden py-10" style={{ background: "#fff" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
-          <h1 className="text-5xl sm:text-4xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">Services</h1>
-          <p className="text-slate-300 text-lg max-w-2xl mx-auto">
+          <h1 className="initio-section-title"><span>Services</span></h1>
+          <p className="text-[#7C7C7C] text-base max-w-2xl mx-auto">
             I help teams and founders ship quality web products. Below are some of the services I offer — if
             you don&apos;t see exactly what you need, reach out and we&apos;ll craft a custom plan.
           </p>
         </div>
 
         {loading ? (
-          <div className="text-center text-slate-400">Loading services…</div>
+          <div className="text-center text-[#a5a5a5]">Loading services…</div>
         ) : error ? (
-          <div className="text-center text-rose-400">{error}</div>
+          <div className="text-center text-[#bd1550]">{error}</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {services.map((s) => (
               <article
                 key={s.id}
-                className="rounded-2xl p-6 bg-slate-800/40 backdrop-blur-md border border-white/10 shadow-md hover:shadow-xl transition-all"
+                className="rounded-none p-6 bg-[#f3f3f3] border border-[#e1e1e1] shadow-[0_0_0_1px_#e1e1e1,0_0_0_3px_#fff,0_0_0_4px_#e1e1e1] hover:shadow-none transition-all"
               >
-                <h2 className="text-lg font-semibold text-slate-100 mb-2">{s.title}</h2>
-                <p className="text-sm text-slate-300 mb-4">{s.description}</p>
+                <h2 className="text-lg font-bold text-[#333] mb-2 uppercase tracking-wide">{s.title}</h2>
+                <p className="text-sm text-[#666] mb-4">{s.description}</p>
                 <Link
                   href="/contact"
-                  className="inline-block mt-auto px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
+                  className="inline-block mt-auto btn btn-action"
                 >
                   Discuss project
                 </Link>
@@ -86,7 +80,7 @@ export default function Services() {
         )}
 
         <div className="mt-12 text-center">
-          <p className="text-slate-300">Prefer a custom engagement or hourly consulting? <Link href="/contact" className="text-blue-400 font-semibold">Contact me</Link>.</p>
+          <p className="text-[#7C7C7C]">Prefer a custom engagement or hourly consulting? <Link href="/contact" className="text-[var(--initio-primary)] font-semibold">Contact me</Link>.</p>
         </div>
       </div>
     </main>

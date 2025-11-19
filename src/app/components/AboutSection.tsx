@@ -54,53 +54,9 @@ export default function AboutSection() {
           
         </div>
 
-  <div className="grid md:grid-cols-2 gap-8 mt-10 items-stretch h-full">
-    {/* Left: What I Love card (visual left) */}
-  <div className="w-full md:col-start-1 bg-gradient-to-br from-white/5 to-white/2 bg-clip-padding backdrop-blur-lg backdrop-saturate-150 rounded-2xl p-8 shadow-lg border border-white/10 ring-1 ring-white/5 hover:shadow-2xl hover:from-white/10 hover:to-white/5 transition-all duration-300 flex flex-col justify-between h-full">
-      {/* Make What I Love content (moved left) */}
-      {loading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-slate-700 rounded-lg animate-pulse" />
-              <div className="w-48 h-4 bg-slate-700 rounded-md animate-pulse" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div>
-          <div className="flex items-center gap-3 mb-6 justify-start">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold text-slate-100">What I Love</h3>
-          </div>
-          <ul className="space-y-4">
-            {passions.map((p, idx) => (
-              <li 
-                key={p} 
-                className="flex items-start gap-3 group"
-                style={{ animationDelay: `${idx * 100}ms` }}
-              >
-                <div className="mt-1 w-6 h-6 bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform border border-purple-800/40">
-                  <svg className="w-4 h-4 text-purple-300" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-slate-300 leading-relaxed group-hover:text-white transition-colors">
-                  {p}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-
-    {/* Right: About description card (visual right) */}
-  <div className="w-full md:col-start-2 bg-gradient-to-br from-white/5 to-white/2 bg-clip-padding backdrop-blur-lg backdrop-saturate-150 rounded-2xl p-8 shadow-lg border border-white/10 ring-1 ring-white/5 hover:shadow-2xl hover:from-white/10 hover:to-white/5 transition-all duration-300 flex flex-col justify-center h-full">
+  <div className="grid md:grid-cols-1 gap-8 mt-10 items-stretch h-full">
+    {/* About description card (full width) */}
+  <div className="w-full bg-gradient-to-br from-white/5 to-white/2 bg-clip-padding backdrop-blur-lg backdrop-saturate-150 rounded-2xl p-8 shadow-lg border border-white/10 ring-1 ring-white/5 hover:shadow-2xl hover:from-white/10 hover:to-white/5 transition-all duration-300 flex flex-col justify-center h-full">
       {loading ? (
         <div className="space-y-3">
           <div className="w-full h-4 bg-slate-700 rounded-md animate-pulse" />
@@ -110,7 +66,7 @@ export default function AboutSection() {
       ) : (
         <div>
           <h3 className="text-xl font-semibold text-slate-100 mb-4">About Me</h3>
-          <p className="text-slate-300 leading-relaxed">{info?.aboutMeDescription ?? info?.description ?? "I\'m focused on building accessible, fast, and delightful web applications. I enjoy turning ideas into products and learning new web technologies along the way."}</p>
+          <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{info?.aboutMeDescription ?? info?.description ?? "I\'m focused on building accessible, fast, and delightful web applications. I enjoy turning ideas into products and learning new web technologies along the way."}</p>
         </div>
       )}
     </div>

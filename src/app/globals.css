@@ -4,22 +4,54 @@
 html, body {
   height: 100%;
   margin: 0;
-  font-family: system-ui, sans-serif;
 }
 
-/* Dark theme as the default */
+/* Initio-like theme variables */
 :root {
-  color-scheme: dark;
+  /* Colors */
+  --initio-text: #666666;
+  --initio-heading: #333333;
+  --initio-muted: #7c7c7c;
+  --initio-border: #cccccc;
+  /* Improve contrast for readability */
+  --initio-text-strong: #222222;
+  --initio-heading-strong: #111111;
+  --initio-muted-strong: #5e5e5e;
+  --initio-page-bg: #ffffff;
+  --initio-hero-bg: #f4f4f4;
+  --initio-primary: #bd1550;
+  --initio-primary-hover: #e61f65;
 }
 
+/* Light theme as default (Initio is light) */
 body {
-  background-color: #0b1220; /* near slate-950 */
-  color: #e5e7eb; /* gray-200 */
+  background-color: var(--initio-page-bg);
+  color: var(--initio-text-strong);
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
 }
 
-/* Subtle dark gradient for sections opting into a static background */
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--initio-heading-strong);
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  font-weight: 400;
+}
+
+/* Make paragraph and form text more readable by default */
+p, li, label, input, textarea, button, span {
+  color: var(--initio-text-strong);
+}
+
+/* Links should be darker and clearly visible */
+a { color: var(--initio-heading-strong); }
+a:hover { color: var(--initio-primary); }
+
+/* Muted text variant (use for secondary lines) */
+.text-muted, .muted { color: var(--initio-muted-strong); }
+
+/* Utility: static light background to mirror Initio sections */
 .static-bg {
-  background: linear-gradient(180deg, #0b1220 0%, #0a0f1a 100%);
+  background: var(--initio-hero-bg);
 }
 
 * {
@@ -33,16 +65,110 @@ img, picture, video, canvas {
   display: block;
 }
 
+/* Section title style similar to Initio */
+.initio-section-title {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  margin: 0 0 25px;
+  text-align: center;
+  font-weight: 300;
+  text-transform: uppercase;
+  font-size: 2.25rem; /* 36px */
+  letter-spacing: 1px;
+  color: var(--initio-heading);
+}
+.initio-section-title > span {
+  display: inline-block;
+  position: relative;
+}
+.initio-section-title > span::before,
+.initio-section-title > span::after {
+  content: "";
+  position: absolute;
+  height: 4px;
+  top: .53em;
+  width: 400%;
+  border-bottom: 1px solid #ccc;
+  border-top: 1px solid #ccc;
+}
+.initio-section-title > span::before { right: 100%; margin-right: 45px; }
+.initio-section-title > span::after { left: 100%; margin-left: 45px; }
+
+/* Buttons similar to Initio */
+.btn { /* used optionally alongside Tailwind */
+  font-size: 0.75rem;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #333;
+  border-radius: 0;
+  transition: all .2s ease;
+  border: 0 none;
+  padding: 12px 35px;
+}
+.btn-primary {
+  color: #fff;
+  background-color: var(--initio-primary);
+}
+.btn-primary:hover,
+.btn-primary:focus { background-color: var(--initio-primary-hover); color: #fff; }
+.btn-action {
+  font-weight: bold;
+  background: transparent !important;
+  border: 1px solid #333;
+}
+.btn-action:hover { color: var(--initio-primary); border-color: var(--initio-primary); }
+.btn-lg { padding: 15px 60px; font-size: 12px; font-weight: 700; line-height: 1.33; }
+
+/* Footer colors to match Initio */
+.initio-footer { background: #232323; color: #999; }
+.initio-footer a { color: #ccc; }
+.initio-footer a:hover { color: #fff; }
+.initio-footer .widget-title { text-transform: uppercase; color: #ccc; font-size: 0.9375rem; margin: 0 0 20px; }
+
+.initio-underfooter { background: #191919; color: #777; font-size: 12px; }
+.initio-underfooter a { color: #aaa; }
+.initio-underfooter a:hover { color: #fff; }
+.initio-underfooter p { margin: 0; }
+
+/* Initio hero (#head) */
+#head {
+    /* Make background image very subtle: overlay a near-white translucent layer
+      so the image is barely noticeable while preserving parallax behavior. */
+    background: linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.92)), url('/bg_head.jpg') top center / cover no-repeat;
+  background-size: cover;
+  color: #7C7C7C;
+  padding: 90px 0; /* home variant */
+}
+#head img.img-circle {
+  display: block;
+  width: 140px;
+  height: 140px;
+  overflow: hidden;
+  border: 9px solid rgba(0,0,0,0.05);
+  margin: 0 auto;
+  border-radius: 9999px;
+}
+#head .title {
+  font-family: Alice, Georgia, serif;
+  font-size: 49px;
+  color: #333333;
+}
+#head .title a { text-decoration: none; color: #333333; }
+#head .tagline {
+  display: block;
+  font-size: 14px;
+  line-height: 1.2em;
+  color: #7C7C7C;
+  margin: 5px 0 0;
+}
+#head .tagline a { color: #5E5E5E; }
+
 /* Reduce base spacing on very small screens */
 @media (max-width: 420px) {
-  :root {
-    /* Slightly reduce the root font size so large headings scale better */
-    font-size: 14px;
-  }
+  :root { font-size: 14px; }
 }
 
 /* Utility: center content inside full-bleed sections on small screens */
-.container-sm {
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
+.container-sm { padding-left: 1rem; padding-right: 1rem; }

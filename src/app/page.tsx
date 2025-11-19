@@ -1,6 +1,7 @@
 import HeroSection from "./components/HeroSection";
 import TechStacksSection from "./components/TechStacksSection";
 import AboutSection from "./components/AboutSection";
+import Navbar from "./components/Navbar";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -13,6 +14,8 @@ export default function Home() {
   return (
     <main>
       <HeroSection />
+      {/* Navbar appears after hero, will stick to top once scrolled */}
+      <Navbar deferUntilScroll />
       <TechStacksSection />
       <AboutSection />
     </main>

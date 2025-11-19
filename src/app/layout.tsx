@@ -17,6 +17,7 @@ const ADMIN_EMAIL = "pjramyanath@gmail.com"
 export default function RootLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isAdminPath = pathname?.startsWith("/admin");
+  const isHome = pathname === "/";
 
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
@@ -41,12 +42,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const showShell = !(isAdminPath && (loadingAuth || authorized));
 
   return (
-    <html lang="en" className="dark">
-      <body className="font-sans bg-slate-950 text-slate-200 antialiased min-h-screen">
-        {showShell && <Navbar />}
+    <html lang="en">
+      <body className="font-sans bg-white text-[#666] antialiased min-h-screen">
+        {/* Show fixed Navbar for non-home pages; home page mounts its own scroll-reactive navbar inside page */}
+        {showShell && !isHome && <Navbar />}
 
         {/* Add top padding so fixed navbar doesn't overlap content on small screens */}
-        <div className={`${showShell ? "pt-16 md:pt-16" : ""}`}>{children}</div>
+        <div className={`${showShell && !isHome ? "pt-16 md:pt-16" : ""}`}>{children}</div>
 
         {showShell && <Footer />}
       </body>

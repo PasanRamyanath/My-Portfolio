@@ -189,7 +189,7 @@ export default function ProjectsSection() {
       : projects.filter((p) => p.type === selectedType);
 
   return (
-    <section id="projects" className="relative py-5 static-bg overflow-hidden">
+    <main className="relative min-h-screen overflow-hidden py-10" style={{ background: "#fff" }}>
       
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute left-0 top-8 w-72 h-72 bg-teal-200/30 rounded-full blur-3xl transform -rotate-12 animate-slow-float" />
@@ -197,9 +197,11 @@ export default function ProjectsSection() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center">
-          <h2 className="text-5xl sm:text-4xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">Selected Projects</h2>
-          <p className="text-slate-300 text-lg max-w-2xl mx-auto">Curated work that highlights problem solving, design, and engineering.</p>
+        <div className="text-center mb-10">
+          <h1 className="initio-section-title"><span>Projects</span></h1>
+          <p className="text-[#7C7C7C] text-base max-w-2xl mx-auto">
+            Curated work that highlights problem solving, design, and engineering. Click a project to view details.
+          </p>
         </div>
 
         {projectTypes.length > 0 && (
@@ -253,41 +255,64 @@ export default function ProjectsSection() {
         )}
 
         {projects.length === 0 ? (
-          <div className="text-slate-400 text-lg text-center">Loading...</div>
-        ) : selectedType === "all" ? (
-          <div className="space-y-8">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-100 mb-4">All Projects</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {projects
-                  .slice()
-                  .sort((a, b) => {
-                    // selected first
-                    if (!!a.selected && !b.selected) return -1;
-                    if (!a.selected && !!b.selected) return 1;
-                    // then by type: private before university
-                    const rank = (t?: string) => (t === 'private' ? 0 : t === 'university' ? 1 : 2);
-                    return rank(a.type) - rank(b.type);
-                  })
-                  .map((project) => (
-                    <ProjectCard key={project.id} project={project} onOpen={() => router.push(`/projects/${project.id}`)} />
-                  ))}
-              </div>
-            </div>
-          </div>
-        ) : filteredProjects.length === 0 ? (
-          <div className="text-slate-400 text-lg text-center">No projects in this category yet.</div>
+          <div className="text-[#a5a5a5] text-lg text-center">Loading projects...</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProjects
+            {(selectedType === 'all' ? projects : filteredProjects)
               .slice()
-              .sort((a, b) => ((b.selected ? 1 : 0) - (a.selected ? 1 : 0)))
-              .map((project) => (
-                <ProjectCard key={project.id} project={project} onOpen={() => router.push(`/projects/${project.id}`)} />
-              ))}
+              .map((project) => {
+                const media = getMediaFromProject(project);
+                const thumb = media.length > 0 ? media[0] : undefined;
+                const isVideoThumb = typeof thumb === 'string' && /\.(mp4|webm|ogg)(\?.*)?$/i.test(thumb);
+                return (
+                  <article
+                    key={project.id}
+                    onClick={() => router.push(`/projects/${project.id}`)}
+                    className="cursor-pointer rounded-none p-6 bg-[#f3f3f3] border border-[#e1e1e1] shadow-[0_0_0_1px_#e1e1e1,0_0_0_3px_#fff,0_0_0_4px_#e1e1e1] hover:shadow-none transition-all"
+                  >
+                    {thumb ? (
+                      <div className="w-full h-44 mb-4 bg-black/5 overflow-hidden rounded">
+                        {isVideoThumb ? (
+                          <video src={thumb} className="object-cover w-full h-full" autoPlay muted loop playsInline />
+                        ) : (
+                          <Image src={thumb} alt={project.title} width={1200} height={700} className="object-cover w-full h-full" />
+                        )}
+                      </div>
+                    ) : null}
+
+                    <h2 className="text-lg font-bold text-[#333] mb-2 uppercase tracking-wide">{project.title}</h2>
+                    <p className="text-sm text-[#666] mb-4 line-clamp-3">{project.description}</p>
+
+                    <div className="flex gap-3">
+                      {project.github && (
+                        <a
+                          onClick={(e) => e.stopPropagation()}
+                          href={project.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block px-3 py-2 text-sm rounded bg-slate-700 text-white hover:bg-slate-600"
+                        >
+                          GitHub
+                        </a>
+                      )}
+                      {project.demo && (
+                        <a
+                          onClick={(e) => e.stopPropagation()}
+                          href={project.demo}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block px-3 py-2 text-sm rounded bg-emerald-600 text-white hover:bg-emerald-500"
+                        >
+                          Live
+                        </a>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
           </div>
         )}
       </div>
-    </section>
+    </main>
   );
 }
