@@ -226,66 +226,66 @@ export default function AdminMyInfoPage() {
           <div className="space-y-4">
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Full name</span>
-              <input value={fields.fullName} onChange={(e) => handleFieldChange("fullName", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
+              <input value={fields.fullName} onChange={(e) => handleFieldChange("fullName", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Initial name</span>
-              <input value={fields.initialName} onChange={(e) => handleFieldChange("initialName", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
+              <input value={fields.initialName} onChange={(e) => handleFieldChange("initialName", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Email</span>
-              <input value={fields.email} onChange={(e) => handleFieldChange("email", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
+              <input value={fields.email} onChange={(e) => handleFieldChange("email", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Location</span>
-              <input value={fields.location} onChange={(e) => handleFieldChange("location", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
+              <input value={fields.location} onChange={(e) => handleFieldChange("location", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Portfolio</span>
-              <input value={fields.portfolio} onChange={(e) => handleFieldChange("portfolio", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
+              <input value={fields.portfolio} onChange={(e) => handleFieldChange("portfolio", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">GitHub</span>
-              <input value={fields.github} onChange={(e) => handleFieldChange("github", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
+              <input value={fields.github} onChange={(e) => handleFieldChange("github", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">LinkedIn</span>
-              <input value={fields.linkedin} onChange={(e) => handleFieldChange("linkedin", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
+              <input value={fields.linkedin} onChange={(e) => handleFieldChange("linkedin", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Instagram</span>
-              <input value={fields.instagram} onChange={(e) => handleFieldChange("instagram", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
+              <input value={fields.instagram} onChange={(e) => handleFieldChange("instagram", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Facebook</span>
-              <input value={fields.facebook} onChange={(e) => handleFieldChange("facebook", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
+              <input value={fields.facebook} onChange={(e) => handleFieldChange("facebook", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Description</span>
-              <textarea value={fields.description} onChange={(e) => handleFieldChange("description", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" rows={4} />
+              <textarea value={fields.description} onChange={(e) => handleFieldChange("description", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" rows={4} />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Short description</span>
-              <input value={fields.shortDescription} onChange={(e) => handleFieldChange("shortDescription", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
+              <input value={fields.shortDescription} onChange={(e) => handleFieldChange("shortDescription", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">About me description</span>
-              <textarea value={fields.aboutMeDescription} onChange={(e) => handleFieldChange("aboutMeDescription", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" rows={6} />
+              <textarea value={fields.aboutMeDescription} onChange={(e) => handleFieldChange("aboutMeDescription", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" rows={6} />
             </label>
 
             <div>
-              <span className="text-sm font-medium">Tech stacks</span>
+              <span className="text-sm font-medium text-slate-300">Tech stacks</span>
               <div className="mt-2 space-y-3">
                 {Object.keys(fields.techStacks || {}).length === 0 ? (
                   <div className="text-sm text-slate-400">No tech stacks yet.</div>
@@ -314,14 +314,14 @@ export default function AdminMyInfoPage() {
                   value={newTechValue}
                   onChange={(e) => setNewTechValue(e.target.value)}
                   placeholder="Add tech (e.g. node)"
-                  className="col-span-2 w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400"
+                  className="col-span-2 w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500"
                 />
 
                 <div className="flex items-center gap-2">
                   <select
                     value={selectedTechCategory}
                     onChange={(e) => setSelectedTechCategory(e.target.value)}
-                    className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100"
+                    className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 focus:border-blue-500"
                   >
                     {Object.keys(fields.techStacks || {}).map((c) => (
                       <option value={c} key={c}>{c}</option>
@@ -335,7 +335,7 @@ export default function AdminMyInfoPage() {
                     value={newTechCategory}
                     onChange={(e) => setNewTechCategory(e.target.value)}
                     placeholder="New category name"
-                    className="col-span-3 w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400"
+                    className="col-span-3 w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500"
                   />
                 )}
 
@@ -353,7 +353,7 @@ export default function AdminMyInfoPage() {
                 </div>
               </div>
 
-              <span className="text-sm font-medium">Passions</span>
+              <span className="text-sm font-medium text-slate-300">Passions</span>
               <div className="mt-2 flex gap-2 flex-wrap">
                 {(fields.passions || []).map((p: string, i: number) => (
                   <span key={i} className="inline-flex items-center gap-2 bg-pink-500/20 text-pink-300 px-3 py-1 rounded-full border border-pink-600/30">
@@ -364,7 +364,7 @@ export default function AdminMyInfoPage() {
               </div>
 
               <div className="mt-3 flex gap-2">
-                <input id="newPassion" placeholder="Add passion (e.g. music)" className="flex-1 bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100 placeholder-slate-400" />
+                <input id="newPassion" placeholder="Add passion (e.g. music)" className="flex-1 bg-slate-800 border border-slate-700 px-3 py-2 rounded text-slate-100 placeholder-slate-500 focus:border-blue-500" />
                 <button onClick={() => { const el = document.getElementById("newPassion") as HTMLInputElement | null; if (el) { addPassion(el.value.trim()); el.value = ""; } }} className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500">Add</button>
               </div>
             </div>

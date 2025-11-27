@@ -456,14 +456,14 @@ export default function AdminProjectsPage() {
             value={form.title}
             onChange={handleChange}
             placeholder="Title"
-            className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100 placeholder-slate-400"
+            className="w-full bg-slate-800 border border-slate-700 px-4 py-2 rounded text-slate-100 placeholder-slate-500 focus:border-blue-500"
             required
           />
 
           {/* Type Dropdown */}
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">Project category</label>
-            <select name="type" value={form.type} onChange={handleChange} className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100">
+            <select name="type" value={form.type} onChange={handleChange} className="w-full bg-slate-800 border border-slate-700 px-4 py-2 rounded text-slate-100 focus:border-blue-500">
               <option value="private">Private</option>
               <option value="university">University</option>
             </select>
@@ -474,7 +474,7 @@ export default function AdminProjectsPage() {
             value={form.description}
             onChange={handleChange}
             placeholder="Description"
-            className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100 placeholder-slate-400"
+            className="w-full bg-slate-800 border border-slate-700 px-4 py-2 rounded text-slate-100 placeholder-slate-500 focus:border-blue-500"
             required
           />
 
@@ -486,7 +486,7 @@ export default function AdminProjectsPage() {
               value={(form as any).longDescription}
               onChange={handleChange}
               placeholder="Long description / full details"
-              className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded h-32 text-slate-100 placeholder-slate-400"
+              className="w-full bg-slate-800 border border-slate-700 px-4 py-2 rounded h-32 text-slate-100 placeholder-slate-500 focus:border-blue-500"
             />
           </div>
 
@@ -497,7 +497,7 @@ export default function AdminProjectsPage() {
               type="text"
               placeholder="Type a tech and press Enter"
               onKeyDown={handleTechKey}
-              className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100 placeholder-slate-400"
+              className="w-full bg-slate-800 border border-slate-700 px-4 py-2 rounded text-slate-100 placeholder-slate-500 focus:border-blue-500"
             />
             <div className="flex gap-2 flex-wrap mt-2">
               {(form as any).techStacks?.map((t: string, idx: number) => (
@@ -529,8 +529,9 @@ export default function AdminProjectsPage() {
               <div className="flex gap-2 flex-wrap">
                 {(form as any).media && (form as any).media.map((m: any, i: number) => {
                   const url = typeof m === "string" ? m : m?.url;
+                  const key = `${url ?? 'media'}-${i}`;
                   return (
-                  <div key={url} className="mt-2 relative w-36 h-24 bg-slate-800/40 border border-white/10 rounded overflow-hidden">
+                  <div key={key} className="mt-2 relative w-36 h-24 bg-slate-800 border border-slate-700 rounded overflow-hidden">
                     {url?.endsWith?.('.mp4') || url?.endsWith?.('.webm') ? (
                       <video src={url} className="w-full h-full object-cover" controls />
                     ) : (
@@ -544,9 +545,9 @@ export default function AdminProjectsPage() {
             </div>
           </div>
 
-          <input name="github" value={form.github} onChange={handleChange} placeholder="GitHub URL" className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100 placeholder-slate-400" />
+          <input name="github" value={form.github} onChange={handleChange} placeholder="GitHub URL" className="w-full bg-slate-800 border border-slate-700 px-4 py-2 rounded text-slate-100 placeholder-slate-500 focus:border-blue-500" />
 
-          <input name="demo" value={form.demo} onChange={handleChange} placeholder="Live Demo URL" className="w-full bg-slate-800/60 border border-white/10 px-4 py-2 rounded text-slate-100 placeholder-slate-400" />
+          <input name="demo" value={form.demo} onChange={handleChange} placeholder="Live Demo URL" className="w-full bg-slate-800 border border-slate-700 px-4 py-2 rounded text-slate-100 placeholder-slate-500 focus:border-blue-500" />
 
           <div className="flex gap-3">
             <button type="submit" className="px-6 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-500 disabled:opacity-60" disabled={loading}>
@@ -572,7 +573,7 @@ export default function AdminProjectsPage() {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setSelectedType("all")}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition ${selectedType === "all" ? "bg-indigo-600 text-white" : "bg-slate-800/60 text-slate-300 border border-white/10"}`}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition ${selectedType === "all" ? "bg-indigo-600 text-white" : "bg-slate-800 text-slate-300 border border-slate-700"}`}
               >
                 All
               </button>
@@ -580,7 +581,7 @@ export default function AdminProjectsPage() {
                 <button
                   key={t}
                   onClick={() => setSelectedType(t)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition ${selectedType === t ? "bg-indigo-600 text-white" : "bg-slate-800/60 text-slate-300 border border-white/10"}`}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition ${selectedType === t ? "bg-indigo-600 text-white" : "bg-slate-800 text-slate-300 border border-slate-700"}`}
                 >
                   {t}
                 </button>
@@ -675,15 +676,18 @@ export default function AdminProjectsPage() {
                           </div>
 
                           <div className="flex gap-2 mb-4 overflow-x-auto">
-                            {media.map((m, idx) => (
-                              <button key={m} onClick={() => setSelectedMediaIndex(idx)} className={`w-20 h-14 rounded overflow-hidden border ${idx === selectedMediaIndex ? 'ring-2 ring-indigo-500 border-indigo-500' : 'border-white/10'}`}>
+                            {media.map((m, idx) => {
+                              const key = `${m ?? 'media'}-${idx}`;
+                              return (
+                              <button key={key} onClick={() => setSelectedMediaIndex(idx)} className={`w-20 h-14 rounded overflow-hidden border ${idx === selectedMediaIndex ? 'ring-2 ring-indigo-500 border-indigo-500' : 'border-white/10'}`}>
                                 {m.endsWith('.mp4') || m.endsWith('.webm') ? (
                                   <video src={m} className="w-full h-full object-cover" />
                                 ) : (
                                   <img src={m} className="w-full h-full object-cover" />
                                 )}
                               </button>
-                            ))}
+                            );
+                            })}
                           </div>
 
                           <h2 className="text-2xl font-bold mb-2 text-slate-100">{selectedProject.title}</h2>

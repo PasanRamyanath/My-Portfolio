@@ -172,3 +172,51 @@ img, picture, video, canvas {
 
 /* Utility: center content inside full-bleed sections on small screens */
 .container-sm { padding-left: 1rem; padding-right: 1rem; }
+
+/* Admin Panel Dark Theme Override */
+.admin-panel {
+  background-color: #020617 !important; /* slate-950 */
+  color: #e2e8f0 !important; /* slate-200 */
+}
+
+.admin-panel body {
+  background-color: #020617 !important;
+  color: #e2e8f0 !important;
+}
+
+.admin-panel h1,
+.admin-panel h2,
+.admin-panel h3,
+.admin-panel h4,
+.admin-panel h5,
+.admin-panel h6 {
+  color: #f1f5f9 !important; /* slate-100 */
+}
+
+.admin-panel p,
+.admin-panel li,
+.admin-panel label,
+.admin-panel span {
+  color: #cbd5e1 !important; /* slate-300 */
+}
+
+.admin-panel input,
+.admin-panel textarea,
+.admin-panel select {
+  background-color: #1e293b !important; /* slate-800 */
+  color: #f1f5f9 !important; /* slate-100 */
+  border-color: #334155 !important; /* slate-700 */
+}
+
+.admin-panel input::placeholder,
+.admin-panel textarea::placeholder {
+  color: #64748b !important; /* slate-500 */
+}
+
+.admin-panel a {
+  color: #93c5fd !important; /* blue-300 */
+}
+
+.admin-panel a:hover {
+  color: #60a5fa !important; /* blue-400 */
+}

@@ -136,115 +136,123 @@ export default function AdminServicesPage() {
   }
 
   return (
-    <main className="min-h-screen py-10 px-6 lg:px-12 static-bg text-slate-100">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">Admin — Services</h1>
+    <div className="max-w-5xl mx-auto py-8 text-slate-100">
+      <div className="bg-slate-900/70 rounded-xl shadow-lg p-8 mb-8 border border-white/10 backdrop-blur-md">
+        <h2 className="text-2xl font-bold mb-4 text-slate-100">{editingId ? "Edit Service" : "Add New Service"}</h2>
 
-        <section className="mb-8">
-          <form onSubmit={handleAdd} className="grid grid-cols-1 gap-4">
+        <form onSubmit={handleAdd} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-200 mb-2">Service</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Service</label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-white/10 text-slate-100 outline-none"
+                className="w-full px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-100 placeholder:text-slate-500 outline-none focus:border-blue-500"
                 placeholder="e.g. Web Development"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-200 mb-2">Description</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Description</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg bg-slate-900/50 border border-white/10 text-slate-100 outline-none resize-none h-28"
+                className="w-full px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-100 placeholder:text-slate-500 outline-none resize-none h-28 focus:border-blue-500"
                 placeholder="Short description of the service"
               />
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex gap-3">
               <button
                 type="submit"
                 disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-60"
+                className="px-6 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-500 disabled:opacity-60"
               >
                 {saving ? "Saving…" : editingId ? "Update Service" : "Add Service"}
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (editingId) {
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={() => {
                     setEditingId(null);
-                  }
-                  setTitle("");
-                  setDescription("");
-                  setError(null);
-                }}
-                className="px-4 py-2 bg-slate-700 text-slate-200 rounded-lg"
-              >
-                Reset
-              </button>
-              {error && <p className="text-sm text-rose-400">{error}</p>}
+                    setTitle("");
+                    setDescription("");
+                    setError(null);
+                  }}
+                  className="px-4 py-2 bg-slate-700 text-slate-200 rounded hover:bg-slate-600"
+                >
+                  Cancel Edit
+                </button>
+              )}
             </div>
-          </form>
-        </section>
 
-        <section>
-          <h2 className="text-lg font-semibold mb-4">Existing Services</h2>
+            {error && <div className="text-rose-400">{error}</div>}
+          </form>
+        </div>
+
+        <div className="bg-slate-900/70 rounded-xl shadow p-6 border border-white/10 backdrop-blur-md">
+          <h3 className="text-xl font-semibold mb-4 text-slate-100">Existing Services</h3>
           {loading ? (
-            <p className="text-slate-400">Loading…</p>
+            <div className="space-y-3">
+              <div className="h-4 bg-slate-800 rounded animate-pulse" />
+              <div className="h-4 bg-slate-800 rounded animate-pulse" />
+              <div className="h-4 bg-slate-800 rounded animate-pulse" />
+            </div>
           ) : services.length === 0 ? (
-            <p className="text-slate-400">No services yet.</p>
+            <div className="text-slate-400">No services yet.</div>
           ) : (
-            <ul className="space-y-3">
+            <div className="grid md:grid-cols-2 gap-4">
               {services.map((s) => (
-                <li
+                <div
                   key={s.id}
                   onClick={() => setSelectedService(s)}
-                  className="flex items-start justify-between gap-4 p-4 rounded-lg bg-slate-800/40 border border-white/10 hover:bg-slate-800/60 cursor-pointer transition-colors"
+                  className="border border-white/10 rounded p-4 flex flex-col gap-3 cursor-pointer bg-slate-800/40 hover:bg-slate-800/60 transition-colors"
                 >
-                  <div>
-                          <div className="font-semibold text-slate-100">{s.title}</div>
-                          <div className="text-sm text-slate-300">{s.description}</div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-slate-100">{s.title}</h4>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); startEdit(s); }}
+                          className="px-3 py-1 bg-amber-500 text-white rounded hover:bg-amber-400 text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }}
+                          className="px-3 py-1 bg-rose-600 text-white rounded hover:bg-rose-500 text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-sm text-slate-300 mt-2 line-clamp-3">{s.description}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); startEdit(s); }}
-                            className="px-3 py-1 bg-amber-500 text-white rounded-md hover:bg-amber-400"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }}
-                            className="px-3 py-1 bg-rose-600 text-white rounded-md"
-                          >
-                            Delete
-                          </button>
-                  </div>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
-        </section>
-      </div>
-      {selectedService && typeof document !== "undefined" && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setSelectedService(null)}>
-          <div className="bg-slate-900/90 border border-white/10 rounded-lg max-w-xl w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center p-4 border-b border-white/6">
-              <h3 className="text-lg font-semibold text-slate-100">{selectedService.title}</h3>
-              <button onClick={() => setSelectedService(null)} className="text-slate-300 hover:text-slate-100">Close</button>
+        </div>
+      {selectedService && typeof document !== "undefined" && (createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={() => setSelectedService(null)}>
+          <div className="bg-slate-900/80 border border-white/10 rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-end p-4">
+              <button onClick={() => setSelectedService(null)} className="px-3 py-1 bg-slate-700 text-slate-200 rounded hover:bg-slate-600">Close</button>
             </div>
-            <div className="p-4 text-slate-200">
-              <div className="mb-3 text-sm text-slate-400">{formatServiceDate(selectedService.createdAt)}</div>
-              <div className="whitespace-pre-wrap">{selectedService.description}</div>
-            </div>
-            <div className="flex justify-end gap-2 p-4 border-t border-white/6">
-              <button onClick={() => { setSelectedService(null); }} className="px-3 py-1 bg-slate-700 text-slate-200 rounded hover:bg-slate-600">Close</button>
-              <button onClick={() => { if (selectedService) { startEdit(selectedService); setSelectedService(null); } }} className="px-3 py-1 bg-amber-500 text-white rounded hover:bg-amber-400">Edit</button>
-              <button onClick={() => { if (selectedService?.id) { handleDelete(selectedService.id); setSelectedService(null); } }} className="px-3 py-1 bg-rose-600 text-white rounded hover:bg-rose-500">Delete</button>
+
+            <div className="px-6 pb-8">
+              <h2 className="text-2xl font-bold mb-2 text-slate-100">{selectedService.title}</h2>
+              <p className="text-xs text-slate-400 mb-4">Created: {formatServiceDate(selectedService.createdAt)}</p>
+              <div className="prose max-w-none text-slate-300 mb-4 whitespace-pre-wrap">{selectedService.description}</div>
+
+              <div className="flex gap-3 mt-4">
+                <button onClick={() => { if (selectedService) { startEdit(selectedService); setSelectedService(null); } }} className="px-4 py-2 bg-amber-500 text-white rounded hover:bg-amber-400">Edit</button>
+                <button onClick={() => { if (selectedService?.id) { handleDelete(selectedService.id); setSelectedService(null); } }} className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-500">Delete</button>
+              </div>
             </div>
           </div>
-        </div>, document.body)}
-    </main>
+        </div>, document.body))}
+    </div>
   );
 }

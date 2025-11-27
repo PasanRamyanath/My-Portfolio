@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 import ImageKit from "imagekit";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -33,10 +35,7 @@ export async function POST(request: Request) {
     console.log("/api/upload called");
     const imagekit = createImageKitInstance();
     const cloud = configureCloudinary();
-    if (!imagekit) {
-      console.error("ImageKit env missing on server: IMAGEKIT_PRIVATE_KEY and NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT are required");
-      return NextResponse.json({ success: false, error: "Server misconfiguration: ImageKit keys missing" }, { status: 500 });
-    }
+    // imagekit may be null if not configured; we'll handle a dev fallback below
     if (!cloud) {
       console.warn("Cloudinary env missing: CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET not all set. Video uploads will fail.");
     }
@@ -84,14 +83,31 @@ export async function POST(request: Request) {
       }
     }
 
-    // Otherwise treat as image and use ImageKit
-    console.log(`Uploading image ${fileName} (${buffer.length} bytes) to ImageKit`);
-    const uploadResponse = await imagekit.upload({ file: buffer, fileName, folder: "/uploads" });
-    console.log("ImageKit response:", uploadResponse);
-    if (!uploadResponse || !uploadResponse.url) {
-      return NextResponse.json({ success: false, error: "ImageKit upload failed, no url returned", raw: uploadResponse }, { status: 500 });
+    // Otherwise treat as image and use ImageKit if available; else dev fallback to local disk
+    if (imagekit) {
+      console.log(`Uploading image ${fileName} (${buffer.length} bytes) to ImageKit`);
+      const uploadResponse = await imagekit.upload({ file: buffer, fileName, folder: "/uploads" });
+      console.log("ImageKit response:", uploadResponse);
+      if (!uploadResponse || !uploadResponse.url) {
+        return NextResponse.json({ success: false, error: "ImageKit upload failed, no url returned", raw: uploadResponse }, { status: 500 });
+      }
+      return NextResponse.json({ success: true, url: uploadResponse.url, fileId: uploadResponse.fileId, provider: "imagekit" });
     }
-    return NextResponse.json({ success: true, url: uploadResponse.url, fileId: uploadResponse.fileId, provider: "imagekit" });
+
+    // Dev fallback: persist file under public/uploads and return a local URL
+    try {
+      const uploadsDir = path.join(process.cwd(), "public", "uploads");
+      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+      const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const targetPath = path.join(uploadsDir, `${Date.now()}-${safeName}`);
+      await fs.promises.writeFile(targetPath, buffer);
+      const publicUrl = `/uploads/${path.basename(targetPath)}`;
+      console.log("Saved local upload:", targetPath);
+      return NextResponse.json({ success: true, url: publicUrl, provider: "local", fileId: null });
+    } catch (e) {
+      console.error("Local upload fallback failed", e);
+      return NextResponse.json({ success: false, error: "No upload provider configured and local fallback failed" }, { status: 500 });
+    }
   } catch (err: unknown) {
     console.error("Image upload failed:", err);
 

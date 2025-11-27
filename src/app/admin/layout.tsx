@@ -26,7 +26,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   // flashing the admin chrome briefly.
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-950 text-slate-300">
+      <div className="admin-panel flex items-center justify-center h-screen bg-slate-950 text-slate-300">
         <div className="space-y-3 w-64">
           <div className="h-4 bg-slate-800 rounded animate-pulse" />
           <div className="h-4 bg-slate-800 rounded animate-pulse" />
@@ -40,11 +40,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   // If not authorized, render children only (Login page will be shown there).
   if (!authorized) {
-    return <div className="min-h-screen bg-slate-950 text-slate-200 flex items-center justify-center">{children}</div>;
+    return <div className="admin-panel min-h-screen bg-slate-950 text-slate-200 flex items-center justify-center">{children}</div>;
   }
 
   return (
-    <div className="bg-slate-950 text-slate-200 flex h-screen overflow-hidden">
+    <div className="admin-panel bg-slate-950 text-slate-200 flex h-screen overflow-hidden">
       <AdminSidebar isOpen={isSidebarOpen} />
 
       {/* Mobile hamburger: appears fixed in top-left on small screens so the toggle is accessible from the navbar area */}

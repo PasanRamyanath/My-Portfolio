@@ -240,16 +240,16 @@ export default function AdminCertsPage() {
 
         <div className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <input name="cert_name" value={form.cert_name} onChange={handleChange} placeholder="Certificate name" className="col-span-2 w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100 placeholder-slate-400" />
-            <select name="type" value={form.type} onChange={handleChange} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100">
+            <input name="cert_name" value={form.cert_name} onChange={handleChange} placeholder="Certificate name" className="col-span-2 w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded text-slate-100 placeholder-slate-500 focus:border-blue-500" />
+            <select name="type" value={form.type} onChange={handleChange} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded text-slate-100 focus:border-blue-500">
               <option value="university">University</option>
               <option value="external">External</option>
             </select>
           </div>
 
-          <input name="issuer" value={form.issuer} onChange={handleChange} placeholder="Issuer" className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100 placeholder-slate-400" />
-          <input name="linkedin" value={form.linkedin} onChange={handleChange} placeholder="LinkedIn URL" className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100 placeholder-slate-400" />
-          <textarea name="description" value={form.description} onChange={handleChange} placeholder="Description" className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100 placeholder-slate-400" />
+          <input name="issuer" value={form.issuer} onChange={handleChange} placeholder="Issuer" className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded text-slate-100 placeholder-slate-500 focus:border-blue-500" />
+          <input name="linkedin" value={form.linkedin} onChange={handleChange} placeholder="LinkedIn URL" className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded text-slate-100 placeholder-slate-500 focus:border-blue-500" />
+          <textarea name="description" value={form.description} onChange={handleChange} placeholder="Description" className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded text-slate-100 placeholder-slate-500 focus:border-blue-500" />
 
           <div className="flex gap-3 items-center">
             <input ref={fileInputRef} type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
@@ -307,9 +307,9 @@ export default function AdminCertsPage() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-semibold text-slate-100">Certificates</h3>
           <div className="flex gap-2">
-            <button onClick={() => setFilterType("all")} className={`px-3 py-1 rounded-full text-xs ${filterType === "all" ? "bg-indigo-600 text-white" : "bg-slate-800/60 text-slate-300 border border-white/10"}`}>All</button>
-            <button onClick={() => setFilterType("university")} className={`px-3 py-1 rounded-full text-xs ${filterType === "university" ? "bg-indigo-600 text-white" : "bg-slate-800/60 text-slate-300 border border-white/10"}`}>University</button>
-            <button onClick={() => setFilterType("external")} className={`px-3 py-1 rounded-full text-xs ${filterType === "external" ? "bg-indigo-600 text-white" : "bg-slate-800/60 text-slate-300 border border-white/10"}`}>External</button>
+            <button onClick={() => setFilterType("all")} className={`px-3 py-1 rounded-full text-xs ${filterType === "all" ? "bg-indigo-600 text-white" : "bg-slate-800 text-slate-300 border border-slate-700"}`}>All</button>
+            <button onClick={() => setFilterType("university")} className={`px-3 py-1 rounded-full text-xs ${filterType === "university" ? "bg-indigo-600 text-white" : "bg-slate-800 text-slate-300 border border-slate-700"}`}>University</button>
+            <button onClick={() => setFilterType("external")} className={`px-3 py-1 rounded-full text-xs ${filterType === "external" ? "bg-indigo-600 text-white" : "bg-slate-800 text-slate-300 border border-slate-700"}`}>External</button>
           </div>
         </div>
 
@@ -334,7 +334,7 @@ export default function AdminCertsPage() {
                 return 0;
               })
               .map((c) => (
-              <div key={c.id} className="border border-white/10 rounded p-3 flex gap-3 items-start cursor-pointer bg-slate-800/40 hover:bg-slate-800/60 transition-colors" onClick={() => setSelectedCert(c)}>
+              <div key={c.id} className="border border-slate-700 rounded p-3 flex gap-3 items-start cursor-pointer bg-slate-800 hover:bg-slate-700 transition-colors" onClick={() => setSelectedCert(c)}>
                 {c.image && (
                   <div className="w-28 h-20 relative">
                     <Image src={c.image} alt={c.cert_name ?? ""} fill className="object-cover rounded" />
