@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import StylishContactPage from "./ContactClient";
+import SocialsSection from "../components/SocialsSection";
 
 export const metadata: Metadata = {
   title: "Contact - Pasan Ramyanath",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
-  return <StylishContactPage />;
+  return <SocialsSection />;
 }

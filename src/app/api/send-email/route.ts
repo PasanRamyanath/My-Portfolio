@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
     }
 
-    const to = 'pjramyanath@gmail.com';
+    const to = process.env.TO_EMAIL ?? 'pjramyanath@gmail.com';
   const subject = `Contact Form Submission - Regarding: ${regarding ?? 'General'}`;
   const text = `My Name: ${name}\nMy Email Address: ${email}\nRegarding: ${regarding ?? 'General'}\n\nMessage:\n${message}`;
 
@@ -28,11 +28,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Optionally allow insecure/self-signed TLS for development/testing environments.
+    // WARNING: setting this to true disables certificate verification and SHOULD NOT be used in production.
+    const allowInsecureTls = process.env.SMTP_ALLOW_INSECURE_TLS === 'true';
+
     const transporter = nodemailer.createTransport({
       host,
       port,
       secure: secure || port === 465,
       auth: { user, pass },
+      tls: allowInsecureTls ? { rejectUnauthorized: false } : undefined,
     });
 
     await transporter.sendMail({

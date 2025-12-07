@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import useSiteInfo from "@/lib/useSiteInfo";
 
 interface NavbarProps {
@@ -13,6 +14,8 @@ export default function Navbar({ deferUntilScroll = false }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { info } = useSiteInfo();
   const navRef = useRef<HTMLElement | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
   // Start with a very large threshold so we don't accidentally mark as scrolled
   // before we measure the navbar position on mount.
   const [threshold, setThreshold] = useState<number>(Number.POSITIVE_INFINITY);
@@ -49,8 +52,48 @@ export default function Navbar({ deferUntilScroll = false }: NavbarProps) {
     { name: "Projects", href: "/projects" },
     { name: "Services", href: "/services" },
     { name: "Certifications", href: "/certifications" },
-    { name: "Contact", href: "/contact" },
+    { name: "Contact", href: "#socials" },
   ];
+
+  // Smooth scroll handler for Home and Contact
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href === "#socials") {
+      e.preventDefault();
+      if (pathname === "/") {
+        // Already on homepage, scroll directly
+        const el = document.getElementById("socials");
+        if (el) {
+          const y = el.getBoundingClientRect().top + window.pageYOffset - 50; // 50px offset for navbar
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
+      } else {
+        // Navigate to homepage and then scroll
+        router.push("/");
+        setTimeout(() => {
+          const el = document.getElementById("socials");
+          if (el) {
+            const y = el.getBoundingClientRect().top + window.pageYOffset - 50;
+            window.scrollTo({ top: y, behavior: "smooth" });
+          }
+        }, 100); // Small delay to allow navigation
+      }
+      setMobileMenuOpen(false);
+    } else if (href === "/") {
+      // Only intercept if already on the homepage
+      if (pathname === "/") {
+        e.preventDefault();
+        // If there's a #home section, scroll to it, else scroll to top
+        const homeEl = document.getElementById("home");
+        if (homeEl) {
+          const y = homeEl.getBoundingClientRect().top + window.pageYOffset - 50;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        } else {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+        setMobileMenuOpen(false);
+      }
+    }
+  };
 
   return (
     <>
@@ -73,13 +116,24 @@ export default function Navbar({ deferUntilScroll = false }: NavbarProps) {
           {/* Desktop Navigation */}
           <div className="hidden md:flex w-full items-center justify-center">
             {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-[#454545] hover:text-black transition-colors font-light uppercase tracking-wide px-8 py-5 inline-block"
-              >
-                {link.name}
-              </Link>
+              link.name === "Contact" || link.name === "Home" ? (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  onClick={e => handleNavClick(e, link.href)}
+                  className="text-[#454545] hover:text-black transition-colors font-light uppercase tracking-wide px-8 py-5 inline-block cursor-pointer"
+                >
+                  {link.name}
+                </a>
+              ) : (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className="text-[#454545] hover:text-black transition-colors font-light uppercase tracking-wide px-8 py-5 inline-block"
+                >
+                  {link.name}
+                </Link>
+              )
             ))}
           </div>
 
@@ -118,14 +172,25 @@ export default function Navbar({ deferUntilScroll = false }: NavbarProps) {
       >
         <div className="px-4 py-2 bg-white shadow-sm border-t border-[#cccccc]">
           {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className="block py-4 text-[#454545] hover:text-black transition-colors font-light uppercase tracking-wide"
-            >
-              {link.name}
-            </Link>
+            link.name === "Contact" || link.name === "Home" ? (
+              <a
+                key={link.name}
+                href={link.href}
+                onClick={e => handleNavClick(e, link.href)}
+                className="block py-4 text-[#454545] hover:text-black transition-colors font-light uppercase tracking-wide cursor-pointer"
+              >
+                {link.name}
+              </a>
+            ) : (
+              <Link
+                key={link.name}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-4 text-[#454545] hover:text-black transition-colors font-light uppercase tracking-wide"
+              >
+                {link.name}
+              </Link>
+            )
           ))}
         </div>
       </div>

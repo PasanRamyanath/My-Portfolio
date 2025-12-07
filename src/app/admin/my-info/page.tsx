@@ -19,9 +19,11 @@ export default function AdminMyInfoPage() {
   const [fields, setFields] = useState<any>({
     description: "",
     email: "",
+    phone: "",
     facebook: "",
     fullName: "",
     github: "",
+    huggingFace: "",
     initialName: "",
     instagram: "",
     linkedin: "",
@@ -36,6 +38,8 @@ export default function AdminMyInfoPage() {
   const [selectedTechCategory, setSelectedTechCategory] = useState<string>("__new__");
   const [newTechValue, setNewTechValue] = useState<string>("");
   const [newTechCategory, setNewTechCategory] = useState<string>("");
+  const [newTechImage, setNewTechImage] = useState<File | null>(null);
+  const newTechFileRef = React.useRef<HTMLInputElement | null>(null);
 
   const ADMIN_EMAIL = "pjramyanath@gmail.com";
 
@@ -64,12 +68,21 @@ export default function AdminMyInfoPage() {
         const d = snap.docs[0];
         setDocId(d.id);
         const data = d.data() as any;
-        // normalize techStacks: if legacy array, move into default 'General' category
-        let techStacks: Record<string, string[]> = {};
+        // normalize techStacks into an object of arrays of items { name, image?, fileId? }
+        let techStacks: Record<string, Array<any>> = {};
         if (Array.isArray(data.techStacks)) {
-          techStacks = { General: data.techStacks };
+          techStacks = { General: data.techStacks.map((s: any) => (typeof s === 'string' ? { name: s } : s)) };
         } else if (data.techStacks && typeof data.techStacks === 'object') {
-          techStacks = data.techStacks as Record<string, string[]>;
+          techStacks = Object.entries(data.techStacks).reduce((acc: any, [k, v]: any) => {
+            if (Array.isArray(v)) {
+              acc[k] = v.map((it: any) => {
+                if (typeof it === 'string') return { name: it };
+                if (it && typeof it === 'object') return { name: it.name ?? (it.url ? String(it.url) : ''), image: it.image ?? it.url, fileId: it.fileId };
+                return { name: String(it) };
+              });
+            } else acc[k] = [];
+            return acc;
+          }, {} as Record<string, Array<any>>);
         } else {
           techStacks = {};
         }
@@ -79,9 +92,11 @@ export default function AdminMyInfoPage() {
           shortDescription: data.shortDescription ?? "",
           aboutMeDescription: data.aboutMeDescription ?? "",
           email: data.email ?? "",
+          phone: data.phone ?? "",
           facebook: data.facebook ?? "",
           fullName: data.fullName ?? "",
           github: data.github ?? "",
+          huggingFace: data.huggingFace ?? "",
           initialName: data.initialName ?? "",
           instagram: data.instagram ?? "",
           linkedin: data.linkedin ?? "",
@@ -107,27 +122,55 @@ export default function AdminMyInfoPage() {
     setFields((prev: any) => ({ ...prev, [k]: v }));
   };
 
-  const addTech = (t: string) => {
+  const uploadFile = async (file: File) => {
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Upload failed');
+      return { url: data.url, fileId: data.fileId };
+    } catch (e) {
+      console.warn('Upload failed', e);
+      return null;
+    }
+  };
+
+  const addTech = async (t: string) => {
     if (!t) return;
-  const cat = selectedTechCategory === '__new__' ? (newTechCategory.trim() || 'General') : selectedTechCategory;
+    const cat = selectedTechCategory === '__new__' ? (newTechCategory.trim() || 'General') : selectedTechCategory;
+    let item: any = { name: t };
+    if (newTechImage) {
+      const uploaded = await uploadFile(newTechImage);
+      if (uploaded) item = { ...item, image: uploaded.url, fileId: uploaded.fileId };
+    }
     setFields((prev: any) => {
-      const current: Record<string, string[]> = prev.techStacks || {};
+      const current: Record<string, any[]> = prev.techStacks || {};
       const updated = { ...current };
       if (!updated[cat]) updated[cat] = [];
-      updated[cat] = [...updated[cat], t];
+      updated[cat] = [...updated[cat], item];
       return { ...prev, techStacks: updated };
     });
     setNewTechValue('');
     setNewTechCategory('');
+    setNewTechImage(null);
+    try { if (newTechFileRef.current) newTechFileRef.current.value = ''; } catch (_) {}
   };
 
-  const removeTech = (category: string, i: number) => {
+  const removeTech = async (category: string, i: number) => {
+    const item = (fields.techStacks?.[category] || [])[i];
+    if (item && item.fileId) {
+      try {
+        await fetch('/api/upload/delete', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ fileId: item.fileId }) });
+      } catch (err) {
+        console.warn('Failed to delete tech image', err);
+      }
+    }
     setFields((prev: any) => {
-      const current: Record<string, string[]> = prev.techStacks || {};
+      const current: Record<string, any[]> = prev.techStacks || {};
       const updated = { ...current };
       if (!updated[category]) return prev;
       updated[category] = updated[category].filter((_: any, idx: number) => idx !== i);
-      // if category become empty, remove the category
       if (updated[category].length === 0) delete updated[category];
       return { ...prev, techStacks: updated };
     });
@@ -226,82 +269,95 @@ export default function AdminMyInfoPage() {
           <div className="space-y-4">
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Full name</span>
-              <input value={fields.fullName} onChange={(e) => handleFieldChange("fullName", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
+              <input value={fields.fullName} onChange={(e) => handleFieldChange("fullName", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Initial name</span>
-              <input value={fields.initialName} onChange={(e) => handleFieldChange("initialName", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
+              <input value={fields.initialName} onChange={(e) => handleFieldChange("initialName", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Email</span>
-              <input value={fields.email} onChange={(e) => handleFieldChange("email", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
+              <input value={fields.email} onChange={(e) => handleFieldChange("email", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
+            </label>
+
+            <label className="block">
+              <span className="text-sm font-medium text-slate-300">Phone</span>
+              <input value={fields.phone} onChange={(e) => handleFieldChange("phone", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" placeholder="+94 77 123 4567" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Location</span>
-              <input value={fields.location} onChange={(e) => handleFieldChange("location", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
+              <input value={fields.location} onChange={(e) => handleFieldChange("location", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Portfolio</span>
-              <input value={fields.portfolio} onChange={(e) => handleFieldChange("portfolio", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
+              <input value={fields.portfolio} onChange={(e) => handleFieldChange("portfolio", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">GitHub</span>
-              <input value={fields.github} onChange={(e) => handleFieldChange("github", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
+              <input value={fields.github} onChange={(e) => handleFieldChange("github", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">LinkedIn</span>
-              <input value={fields.linkedin} onChange={(e) => handleFieldChange("linkedin", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
+              <input value={fields.linkedin} onChange={(e) => handleFieldChange("linkedin", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
+            </label>
+
+            <label className="block">
+              <span className="text-sm font-medium text-slate-300">Hugging Face</span>
+              <input value={fields.huggingFace} onChange={(e) => handleFieldChange("huggingFace", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" placeholder="https://huggingface.co/your-profile" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Instagram</span>
-              <input value={fields.instagram} onChange={(e) => handleFieldChange("instagram", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
+              <input value={fields.instagram} onChange={(e) => handleFieldChange("instagram", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Facebook</span>
-              <input value={fields.facebook} onChange={(e) => handleFieldChange("facebook", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
+              <input value={fields.facebook} onChange={(e) => handleFieldChange("facebook", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Description</span>
-              <textarea value={fields.description} onChange={(e) => handleFieldChange("description", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" rows={4} />
+              <textarea value={fields.description} onChange={(e) => handleFieldChange("description", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" rows={4} />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">Short description</span>
-              <input value={fields.shortDescription} onChange={(e) => handleFieldChange("shortDescription", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" />
+              <input value={fields.shortDescription} onChange={(e) => handleFieldChange("shortDescription", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" />
             </label>
 
             <label className="block">
               <span className="text-sm font-medium text-slate-300">About me description</span>
-              <textarea value={fields.aboutMeDescription} onChange={(e) => handleFieldChange("aboutMeDescription", e.target.value)} className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500" rows={6} />
+              <textarea value={fields.aboutMeDescription} onChange={(e) => handleFieldChange("aboutMeDescription", e.target.value)} className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400" rows={6} />
             </label>
 
             <div>
-              <span className="text-sm font-medium text-slate-300">Tech stacks</span>
+              <span className="text-sm font-medium">Tech stacks</span>
               <div className="mt-2 space-y-3">
                 {Object.keys(fields.techStacks || {}).length === 0 ? (
                   <div className="text-sm text-slate-400">No tech stacks yet.</div>
                 ) : (
-                  Object.entries((fields.techStacks || {}) as Record<string, string[]>).map(([cat, items]) => (
+                  Object.entries((fields.techStacks || {}) as Record<string, any[]>).map(([cat, items]) => (
                     <div key={cat}>
                       <div className="flex items-center justify-between mb-2">
                         <div className="text-sm font-semibold text-slate-200">{cat}</div>
                         <div className="text-xs text-slate-400">{items.length} item{items.length !== 1 ? 's' : ''}</div>
                       </div>
                       <div className="flex gap-2 flex-wrap">
-                        {items.map((t: string, i: number) => (
-                          <span key={t + i} className="inline-flex items-center gap-2 bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-600/30">
-                            <span>{t}</span>
+                        {items.map((it: any, i: number) => (
+                          <div key={`${(it && (it.name || it)) ?? i}`} className="inline-flex items-center gap-2 bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-600/30">
+                            {it && it.image ? (
+                              <img src={it.image} alt={it.name} className="w-5 h-5 rounded-full object-cover" />
+                            ) : null}
+                            <span>{typeof it === 'string' ? it : it.name}</span>
                             <button type="button" onClick={() => removeTech(cat, i)} className="text-sm text-indigo-600">×</button>
-                          </span>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -309,19 +365,19 @@ export default function AdminMyInfoPage() {
                 )}
               </div>
 
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 items-center">
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 items-center">
                 <input
                   value={newTechValue}
                   onChange={(e) => setNewTechValue(e.target.value)}
                   placeholder="Add tech (e.g. node)"
-                  className="col-span-2 w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500"
+                  className="col-span-2 w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400"
                 />
 
                 <div className="flex items-center gap-2">
                   <select
                     value={selectedTechCategory}
                     onChange={(e) => setSelectedTechCategory(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 focus:border-blue-500"
+                    className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100"
                   >
                     {Object.keys(fields.techStacks || {}).map((c) => (
                       <option value={c} key={c}>{c}</option>
@@ -335,16 +391,26 @@ export default function AdminMyInfoPage() {
                     value={newTechCategory}
                     onChange={(e) => setNewTechCategory(e.target.value)}
                     placeholder="New category name"
-                    className="col-span-3 w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-500 focus:border-blue-500"
+                    className="col-span-3 w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded mt-1 text-slate-100 placeholder-slate-400"
                   />
                 )}
 
+                <div className="col-span-3 flex items-center gap-2">
+                  <input
+                    ref={newTechFileRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setNewTechImage(e.target.files ? e.target.files[0] : null)}
+                    className="w-full bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100"
+                  />
+                </div>
+
                 <div className="col-span-3 flex justify-end">
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       if (!newTechValue.trim()) return;
                       const tech = newTechValue.trim();
-                      addTech(tech);
+                      await addTech(tech);
                     }}
                     className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500"
                   >
@@ -353,7 +419,7 @@ export default function AdminMyInfoPage() {
                 </div>
               </div>
 
-              <span className="text-sm font-medium text-slate-300">Passions</span>
+              <span className="text-sm font-medium">Passions</span>
               <div className="mt-2 flex gap-2 flex-wrap">
                 {(fields.passions || []).map((p: string, i: number) => (
                   <span key={i} className="inline-flex items-center gap-2 bg-pink-500/20 text-pink-300 px-3 py-1 rounded-full border border-pink-600/30">
@@ -364,7 +430,7 @@ export default function AdminMyInfoPage() {
               </div>
 
               <div className="mt-3 flex gap-2">
-                <input id="newPassion" placeholder="Add passion (e.g. music)" className="flex-1 bg-slate-800 border border-slate-700 px-3 py-2 rounded text-slate-100 placeholder-slate-500 focus:border-blue-500" />
+                <input id="newPassion" placeholder="Add passion (e.g. music)" className="flex-1 bg-slate-800/60 border border-white/10 px-3 py-2 rounded text-slate-100 placeholder-slate-400" />
                 <button onClick={() => { const el = document.getElementById("newPassion") as HTMLInputElement | null; if (el) { addPassion(el.value.trim()); el.value = ""; } }} className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500">Add</button>
               </div>
             </div>
