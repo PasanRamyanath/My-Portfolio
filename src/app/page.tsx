@@ -4,6 +4,7 @@ import AboutSection from "./components/AboutSection";
 import Navbar from "./components/Navbar";
 import { Metadata } from "next";
 import SocialsSection from "./components/SocialsSection";
+import ProjectsSection from "./components/ProjectsSection";
 
 export const metadata: Metadata = {
   title: "Pasan Ramyanath",
@@ -19,6 +20,7 @@ export default function Home() {
       <Navbar deferUntilScroll />
       <TechStacksSection />
       <AboutSection />
+      <ProjectsSection />
       <SocialsSection />
     </main>
   );

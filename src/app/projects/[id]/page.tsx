@@ -2,7 +2,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { Metadata } from "next";
 import ProjectMediaViewerClient from "../ProjectMediaViewer";
-import Link from "next/link";
+import BackButton from "@/app/components/BackButton";
 
 interface MediaObject {
   url: string;
@@ -117,15 +117,12 @@ export default async function ProjectDetailPage({ params }: { params?: Promise<P
     <main className="min-h-screen py-12 static-bg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <Link
-            href="/projects"
-            className="inline-flex items-center gap-2 text-sm text-indigo-300 hover:text-indigo-200 transition-colors"
-          >
+          <BackButton>
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
             </svg>
-            Back to projects
-          </Link>
+            Go Back
+          </BackButton>
         </div>
 
         <div className="grid grid-cols-1 gap-8 items-start">

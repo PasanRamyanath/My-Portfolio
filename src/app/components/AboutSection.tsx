@@ -46,8 +46,8 @@ export default function AboutSection() {
           ) : (
             <>
               <div className="inline-block mb-4">
-                <span className="text-sm font-semibold text-blue-300 tracking-wider uppercase bg-blue-950/40 px-4 py-1.5 rounded-full border border-blue-900/40">
-                  About Me
+                <span className="text-sm font-semibold text-green-900 tracking-wider uppercase bg-blue-950/20 px-4 py-1.5 rounded-full border border-blue-900/40">
+                  Who Am I?
                 </span>
               </div>
             </>
@@ -59,9 +59,9 @@ export default function AboutSection() {
           <div className="hidden md:flex items-stretch justify-center h-full">
             <div className="w-full max-w-[480px] h-full rounded-xl h-full">
               <div className="relative overflow-hidden rounded-xl h-full">
-                <div className="relative w-full h-full">
-                  <Image src="/side_pic.jpg" alt="About" fill className="object-contain" style={{ objectPosition: 'center' }} />
-                </div>
+                    <div className="relative w-full h-full rounded-xl overflow-hidden">
+                      <Image src="/side_pic.jpg" alt="About" fill className="object-cover" style={{ objectPosition: 'center' }} />
+                    </div>
               </div>
             </div>
           </div>

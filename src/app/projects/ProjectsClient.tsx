@@ -28,7 +28,7 @@ interface Project {
 
 export default function ProjectsSection() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedType, setSelectedType] = useState<string>("selected");
+  const [selectedType, setSelectedType] = useState<string>("all");
   const [projectTypes, setProjectTypes] = useState<string[]>([]);
   const router = useRouter();
 
@@ -111,7 +111,7 @@ export default function ProjectsSection() {
         onClick={onOpen}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
-  className="group cursor-pointer rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 bg-slate-800/40 text-slate-200 backdrop-blur-md border border-white/10 shadow-lg"
+  className="group cursor-pointer rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 bg-slate-800/40 text-slate-200 backdrop-blur-md border border-white/10 shadow-lg flex flex-col h-full"
       >
   <div className="relative w-full h-44 sm:h-52 md:h-56 bg-black/20 overflow-hidden rounded-t-2xl">
           {currentSrc ? (
@@ -135,7 +135,7 @@ export default function ProjectsSection() {
 
         </div>
 
-        <div className="mt-4 p-4 bg-slate-800/40 bg-clip-padding backdrop-blur-sm border border-white/10 rounded-b-xl">
+        <div className="mt-4 p-4 bg-slate-800/40 bg-clip-padding backdrop-blur-sm border border-white/10 rounded-b-xl flex flex-col flex-1">
           {getTechListFromProject(project).length > 0 && (
             <div className="flex gap-2 flex-wrap mb-3">
               {getTechListFromProject(project).map((t) => (
@@ -146,34 +146,40 @@ export default function ProjectsSection() {
             </div>
           )}
 
-          <div className="flex flex-col gap-3 mt-2">
+          <div className="flex-1">
             {/* Show title in the info area so it's visible without hover */}
             <h3 className="text-lg font-semibold text-slate-100">{project.title}</h3>
             <p className="text-sm text-slate-300 mb-2 line-clamp-3">{project.description}</p>
-            <div className="flex gap-2">
-              {project.github && (
-                <a
-                  onClick={(e) => e.stopPropagation()}
-                  href={project.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 px-3 py-2 text-sm rounded-full bg-slate-600 text-white hover:bg-slate-500 font-medium transition-colors text-center"
-                >
-                  GitHub
-                </a>
-              )}
-              {project.demo && (
-                <a
-                  onClick={(e) => e.stopPropagation()}
-                  href={project.demo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 px-3 py-2 text-sm rounded-full bg-emerald-600 text-white hover:bg-emerald-500 font-medium transition-colors text-center"
-                >
-                  Live
-                </a>
-              )}
-            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            {project.github ? (
+              <a
+                onClick={(e) => e.stopPropagation()}
+                href={project.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full px-3 py-2 text-sm rounded-full bg-slate-600 hover:bg-slate-500 font-medium transition-colors flex items-center justify-center text-center"
+              >
+                <span style={{ color: 'white' }}>GitHub</span>
+              </a>
+            ) : (
+              <div aria-hidden className="w-full px-3 py-2 rounded-full" />
+            )}
+
+            {project.demo ? (
+              <a
+                onClick={(e) => e.stopPropagation()}
+                href={project.demo}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full px-3 py-2 text-sm rounded-full bg-emerald-600 hover:bg-emerald-500 font-medium transition-colors flex items-center justify-center text-center"
+              >
+                <span style={{ color: 'white' }}>Live</span>
+              </a>
+            ) : (
+              <div aria-hidden className="w-full px-3 py-2 rounded-full" />
+            )}
           </div>
         </div>
       </div>
@@ -208,47 +214,47 @@ export default function ProjectsSection() {
           <div className="mb-8 flex justify-center">
             <div className="flex flex-wrap gap-3">
               <button
-                onClick={() => setSelectedType("selected")}
-                className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 ${
-                  selectedType === "selected"
-                    ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
-                    : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
+                onClick={() => setSelectedType("all")}
+                className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 cursor-pointer ${
+                  selectedType === "all"
+                    ? "bg-gradient-to-r from-[#bd1550] to-[#e61f65] text-white shadow-lg"
+                    : "bg-slate-800/60 text-white border-slate-700 hover:shadow-sm"
                 }`}
               >
-                Selected
+                <span style={{ color: 'white' }}>All</span>
               </button>
 
               <button
                 onClick={() => setSelectedType("university")}
-                className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 ${
+                className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 cursor-pointer ${
                   selectedType === "university"
-                    ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
-                    : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
+                    ? "bg-gradient-to-r from-[#bd1550] to-[#e61f65] text-white shadow-lg"
+                    : "bg-slate-800/60 text-white border-slate-700 hover:shadow-sm"
                 }`}
               >
-                University
+                <span style={{ color: 'white' }}>University</span>
               </button>
 
               <button
                 onClick={() => setSelectedType("private")}
-                className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 ${
+                className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 cursor-pointer ${
                   selectedType === "private"
-                    ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
-                    : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
+                    ? "bg-gradient-to-r from-[#bd1550] to-[#e61f65] text-white shadow-lg"
+                    : "bg-slate-800/60 text-white border-slate-700 hover:shadow-sm"
                 }`}
               >
-                Private
+                <span style={{ color: 'white' }}>Private</span>
               </button>
 
               <button
-                onClick={() => setSelectedType("all")}
-                className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 ${
-                  selectedType === "all"
-                    ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
-                    : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
+                onClick={() => setSelectedType("selected")}
+                className={`px-4 py-2 rounded-full font-medium text-sm transition-all border-2 cursor-pointer ${
+                  selectedType === "selected"
+                    ? "bg-gradient-to-r from-[#bd1550] to-[#e61f65] text-white shadow-lg"
+                    : "bg-slate-800/60 text-white border-slate-700 hover:shadow-sm"
                 }`}
               >
-                All
+                <span style={{ color: 'white' }}>Selected</span>
               </button>
             </div>
           </div>
@@ -276,8 +282,8 @@ export default function ProjectsSection() {
                         }
                       }}
                       role="link"
-                      tabIndex={0}
-                      className="cursor-pointer rounded-none p-6 bg-[#f3f3f3] border border-[#e1e1e1] shadow-[0_0_0_1px_#e1e1e1,0_0_0_3px_#fff,0_0_0_4px_#e1e1e1] hover:shadow-none transition-all"
+                        tabIndex={0}
+                        className="cursor-pointer rounded-none p-6 bg-[#f3f3f3] border border-[#e1e1e1] shadow-[0_0_0_1px_#e1e1e1,0_0_0_3px_#fff,0_0_0_4px_#e1e1e1] hover:shadow-none transition-all flex flex-col h-full"
                     >
                     {thumb ? (
                       <div className="w-full h-44 mb-4 bg-black/5 overflow-hidden rounded">
@@ -289,33 +295,40 @@ export default function ProjectsSection() {
                       </div>
                     ) : null}
 
-                    <h2 className="text-lg font-bold text-[#333] mb-2 uppercase tracking-wide">{project.title}</h2>
-                    <p className="text-sm text-[#666] mb-4 line-clamp-3">{project.description}</p>
+                    <div className="flex-1">
+                      <h2 className="text-lg font-bold text-[#333] mb-2 uppercase tracking-wide">{project.title}</h2>
+                      <p className="text-sm text-[#666] mb-4 line-clamp-3">{project.description}</p>
+                    </div>
 
-                    <div className="flex gap-3">
-                      {project.github && (
+                    <div className="mt-auto grid grid-cols-2 gap-3">
+                      {project.github ? (
                         <a
                           onPointerDown={(e) => e.stopPropagation()}
                           onClick={(e) => e.stopPropagation()}
                           href={project.github}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-block px-3 py-2 text-sm rounded bg-slate-700 text-white hover:bg-slate-600"
+                          className="w-full inline-block px-3 py-2 text-sm rounded bg-slate-700 hover:bg-slate-600 flex items-center justify-center text-center"
                         >
-                          GitHub
+                          <span style={{ color: 'white' }}>GitHub</span>
                         </a>
+                      ) : (
+                        <div aria-hidden className="w-full px-3 py-2 rounded" />
                       )}
-                      {project.demo && (
+
+                      {project.demo ? (
                         <a
                           onPointerDown={(e) => e.stopPropagation()}
                           onClick={(e) => e.stopPropagation()}
                           href={project.demo}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-block px-3 py-2 text-sm rounded bg-emerald-600 text-white hover:bg-emerald-500"
+                          className="w-full inline-block px-3 py-2 text-sm rounded bg-emerald-600 hover:bg-emerald-500 flex items-center justify-center text-center"
                         >
-                          Live
+                          <span style={{ color: 'white' }}>Live</span>
                         </a>
+                      ) : (
+                        <div aria-hidden className="w-full px-3 py-2 rounded" />
                       )}
                     </div>
                   </article>

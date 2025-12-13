@@ -84,33 +84,33 @@ export default function CertGridClient({ certs }: Props) {
         <div className="flex gap-3">
           <button
             onClick={() => setFilterType("all")}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all border-2 ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all border-2 cursor-pointer ${
               filterType === "all"
-                ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
-                : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
+                ? "bg-gradient-to-r from-[#bd1550] to-[#e61f65] text-white shadow-lg"
+                : "bg-slate-800/60 text-white border-slate-700 hover:shadow-sm"
             }`}
           >
-            All
+            <span style={{ color: 'white' }}>All</span>
           </button>
           <button
             onClick={() => setFilterType("university")}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all border-2 ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all border-2 cursor-pointer ${
               filterType === "university"
-                ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
-                : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
+                ? "bg-gradient-to-r from-[#bd1550] to-[#e61f65] text-white shadow-lg"
+                : "bg-slate-800/60 text-white border-slate-700 hover:shadow-sm"
             }`}
           >
-            University
+            <span style={{ color: 'white' }}>University</span>
           </button>
           <button
             onClick={() => setFilterType("external")}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all border-2 ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all border-2 cursor-pointer ${
               filterType === "external"
-                ? "bg-gradient-to-r from-indigo-600 to-teal-400 text-white shadow-lg"
-                : "bg-slate-800/60 text-slate-200 border-slate-700 hover:shadow-sm"
+                ? "bg-gradient-to-r from-[#bd1550] to-[#e61f65] text-white shadow-lg"
+                : "bg-slate-800/60 text-white border-slate-700 hover:shadow-sm"
             }`}
           >
-            External
+            <span style={{ color: 'white' }}>External</span>
           </button>
         </div>
       </div>
@@ -119,7 +119,15 @@ export default function CertGridClient({ certs }: Props) {
         {certs
           .filter((c) => (filterType === "all" ? true : (c.type ?? "university") === filterType))
           .sort((a, b) => {
-            // external certificates should appear first
+            // Certificates whose name starts with "Oracle" should appear first
+            const an = (a.cert_name ?? "").trim().toLowerCase();
+            const bn = (b.cert_name ?? "").trim().toLowerCase();
+            const aOracle = an.startsWith("oracle");
+            const bOracle = bn.startsWith("oracle");
+            if (aOracle && !bOracle) return -1;
+            if (!aOracle && bOracle) return 1;
+
+            // fallback: external certificates appear before university ones
             const ta = a.type ?? "university";
             const tb = b.type ?? "university";
             if (ta === tb) return 0;
@@ -131,7 +139,7 @@ export default function CertGridClient({ certs }: Props) {
           <button
             key={c.id}
             onClick={() => setSelected(c)}
-              className="rounded-lg p-6 flex flex-col items-start text-left transition shadow-lg border border-white/20 bg-white/30 backdrop-blur-md hover:bg-white/40 hover:shadow-xl"
+              className="rounded-lg p-6 flex flex-col items-start text-left transition shadow-lg border border-white/20 bg-white/30 backdrop-blur-md hover:bg-white/40 hover:shadow-xl cursor-pointer"
           >
             {c.image && (
               <div className="w-full h-40 mb-4 overflow-hidden rounded relative">
@@ -157,15 +165,15 @@ export default function CertGridClient({ certs }: Props) {
         typeof document !== "undefined" &&
         createPortal(
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
             onClick={() => setSelected(null)}
             role="dialog"
             aria-modal="true"
             aria-label={selected.cert_name ?? "Certificate dialog"}
           >
-            <div
+              <div
               ref={modalRef}
-              className="rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl border border-white/20 bg-white/40 backdrop-blur-md glass-scrollbar"
+              className="rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl border border-white/20 bg-white/60 backdrop-blur-md glass-scrollbar cursor-auto text-black"
               onClick={(e) => e.stopPropagation()}
             >
             <style jsx>{`
@@ -187,10 +195,13 @@ export default function CertGridClient({ certs }: Props) {
                 <button
                   ref={closeBtnRef}
                   onClick={() => setSelected(null)}
-                  className="px-3 py-1 bg-slate-700 text-slate-200 rounded hover:bg-slate-600"
+                  className="p-2 rounded-full bg-slate-100 text-black hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e61f65] cursor-pointer"
                   aria-label="Close certificate dialog"
+                  title="Close"
                 >
-                  Close
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" className="h-5 w-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 6l8 8M6 14L14 6" />
+                  </svg>
                 </button>
               </div>
 
@@ -207,11 +218,11 @@ export default function CertGridClient({ certs }: Props) {
                   </div>
                 )}
 
-                <h2 className="text-2xl font-bold mb-2 text-slate-100 text-center">{selected.cert_name ?? "Certification"}</h2>
-                {selected.issuer && <p className="text-sm text-slate-300 mb-4 text-center">{selected.issuer}</p>}
+                <h2 className="text-2xl font-bold mb-2 text-black text-center">{selected.cert_name ?? "Certification"}</h2>
+                {selected.issuer && <p className="text-sm text-black mb-4 text-center">{selected.issuer}</p>}
 
                 {selected.description && (
-                  <div className="prose mx-auto max-w-prose text-slate-200 mb-4 text-center">{selected.description}</div>
+                  <div className="prose mx-auto max-w-prose text-black mb-4 text-center">{selected.description}</div>
                 )}
 
                 <div className="flex gap-3 mt-4 justify-center">
@@ -220,7 +231,7 @@ export default function CertGridClient({ certs }: Props) {
                       href={selected.linkedin}
                       target="_blank"
                       rel="noreferrer"
-                      className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                      className="px-4 py-2 bg-indigo-600 text-black rounded hover:bg-indigo-700"
                     >
                       View on LinkedIn
                     </a>

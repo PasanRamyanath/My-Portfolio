@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Mail, MapPin, Send, RotateCcw, CheckCircle2 } from "lucide-react";
+import { Mail, MapPin, Send, RotateCcw, CheckCircle2,Phone } from "lucide-react";
 import Image from "next/image";
 
 interface Info {
@@ -82,6 +82,43 @@ export default function SocialsSection() {
     };
   }, []);
 
+  // If navigation from another page requested scrolling to socials, honour it here.
+  useEffect(() => {
+    // Run only after initial loading finished (so the section exists in the DOM)
+    if (loading) return;
+
+    let want = false;
+    try {
+      want = sessionStorage.getItem("scrollToSocials") === "1";
+    } catch (e) {
+      want = false;
+    }
+    const viaHash = typeof window !== "undefined" && window.location.hash === "#socials";
+    if (!want && !viaHash) return;
+
+    // clear the intent flag so repeat navigation won't re-trigger
+    try {
+      sessionStorage.removeItem("scrollToSocials");
+    } catch (e) {}
+
+    let attempts = 0;
+    const maxAttempts = 80; // ~8s
+    const interval = setInterval(() => {
+      attempts += 1;
+      const el = document.getElementById("socials");
+      if (el) {
+        const navOffset = 64; // match Navbar offset
+        const y = el.getBoundingClientRect().top + window.pageYOffset - navOffset;
+        window.scrollTo({ top: y, behavior: "smooth" });
+        clearInterval(interval);
+      } else if (attempts >= maxAttempts) {
+        clearInterval(interval);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [loading]);
+
   const handleSubmit = () => {
     (async () => {
       setError(null);
@@ -135,7 +172,7 @@ export default function SocialsSection() {
 
   const contactInfo = [
     {
-      icon: Mail,
+      icon: Phone,
       label: "Phone",
       // Initio shows phone, email, address stacked; prefer saved phone from Firebase
       value: info?.phone ?? "+94 00 0000000",
@@ -159,31 +196,31 @@ export default function SocialsSection() {
     {
       name: "LinkedIn",
       image: "/socials/linkedin.png",
-      url: info?.linkedin ? `https://www.linkedin.com/in/${info.linkedin}` : "https://www.linkedin.com/in/pasan-ramyanath/",
+      url: info?.linkedin ? `${info.linkedin}` : "https://www.linkedin.com/in/pasan-ramyanath/",
       color: "from-blue-500 to-cyan-500",
     },
     {
       name: "GitHub",
       image: "/socials/Github.png",
-      url: info?.github ? `https://github.com/${info.github}` : "https://github.com/PasanRamyanath",
+      url: info?.github ? `${info.github}` : "https://github.com/PasanRamyanath",
       color: "from-gray-700 to-gray-900",
     },
     {
       name: "Hugging Face",
       image: "/socials/Huggingface.png",
-      url: info?.huggingFace ?? "https://huggingface.co/",
+      url: info?.huggingFace ?? "",
       color: "from-yellow-500 to-orange-500",
     },
     {
       name: "Instagram",
       image: "/socials/instagram.png",
-      url: info?.instagram ? `https://instagram.com/${info.instagram}` : "https://instagram.com/",
+      url: info?.instagram ? `${info.instagram}` : "https://instagram.com/",
       color: "from-pink-500 to-purple-500",
     },
     {
       name: "Facebook",
       image: "/socials/facebook.png",
-      url: info?.facebook ? `https://facebook.com/${info.facebook}` : "https://facebook.com/",
+      url: info?.facebook ? `${info.facebook}` : "https://facebook.com/",
       color: "from-blue-600 to-indigo-600",
     },
   ];
@@ -202,27 +239,21 @@ export default function SocialsSection() {
   return (
     <section id="socials" className="py-16 bg-white text-[#999]">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section title styled like Initio section-title */}
-        <h2 className="section-title mb-10 text-center text-[2.25rem] font-light uppercase tracking-[1px] text-[#333]">
-          <span className="inline-block relative px-6">
-            <span className="before:content-[''] before:absolute before:h-[4px] before:top-1/2 before:right-full before:mr-6 before:w-[100%] before:border-y before:border-[#777] after:content-[''] after:absolute after:h-[4px] after:top-1/2 after:left-full after:ml-6 after:w-[100%] after:border-y after:border-[#777]">
-              Contact Me
-            </span>
-          </span>
-        </h2>
+        {/* Section title (reuse global Initio style) */}
+        <h2 className="initio-section-title mb-10 text-center"><span>Contact Me</span></h2>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
           {/* Left: Contact info + socials, like Initio footer widgets */}
           <div className="space-y-8 md:order-2 md:col-span-4">
             <div>
               <h3 className="text-[0.9375rem] uppercase text-[#ccc] mb-4">Contact</h3>
-              <div className="text-sm leading-relaxed text-[#999]">
+              <div className="text-sm leading-relaxed text-[#000]">
                 {contactInfo.map((item, idx) => {
                   const Icon = item.icon;
                   return (
                     <p key={idx} className="mb-1 flex items-center gap-2">
                       <Icon className="w-4 h-4 text-[#bd1550]" />
-                      <span className="font-semibold text-[#ccc] mr-1">{item.label}:</span>
+                      <span className="font-semibold text-[#777] mr-1">{item.label}:</span>
                       {item.href ? (
                         <a href={item.href} className="text-[#ccc] hover:text-white underline-offset-2 hover:underline break-all">
                           {item.value}
@@ -339,7 +370,7 @@ export default function SocialsSection() {
                 <button 
                   onClick={handleSubmit} 
                   disabled={sending}
-                  className="flex-1 px-6 py-3 bg-[#bd1550] text-white font-bold text-xs uppercase tracking-wide hover:bg-[#e61f65] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 px-6 py-3 bg-[#bd1550] text-white font-bold text-xs uppercase tracking-wide hover:bg-[#e61f65] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Send className="w-4 h-4 text-white" />
                   <span style={{ color: 'white' }}>{sending ? 'Sending...' : 'Send Message'}</span>
@@ -347,7 +378,7 @@ export default function SocialsSection() {
 
                 <button 
                   onClick={handleReset} 
-                  className="px-6 py-3 bg-transparent border border-[#333] text-[#ccc] font-bold text-xs uppercase tracking-wide hover:border-[#bd1550] hover:text-white transition-colors flex items-center justify-center gap-2"
+                  className="px-6 py-3 bg-transparent border border-[#000] text-[#444] font-bold text-xs uppercase tracking-wide hover:border-[#bd1550] hover:text-[#bd1550] transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <RotateCcw className="w-4 h-4" />
                   Reset

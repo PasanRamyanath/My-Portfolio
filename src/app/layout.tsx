@@ -48,7 +48,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {showShell && !isHome && <Navbar />}
 
         {/* Add top padding so fixed navbar doesn't overlap content on small screens */}
-        <div className={`${showShell && !isHome ? "pt-16 md:pt-16" : ""}`}>{children}</div>
+        <div className={`${showShell && !isHome ? "pt-16 md:pt-16" : ""}`}>
+          <main key={pathname} className="page-transition">{children}</main>
+        </div>
 
         {showShell && <Footer />}
       </body>

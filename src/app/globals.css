@@ -37,8 +37,11 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 400;
 }
 
-/* Make paragraph and form text more readable by default */
-p, li, label, input, textarea, button, span {
+/* Make paragraph and form text more readable by default
+   NOTE: avoid styling generic `button` and `span` here so utility classes
+   like Tailwind's `text-white` can control color without being overridden
+   by this file's later cascade order. */
+p, li, label, input, textarea {
   color: var(--initio-text-strong);
 }
 
@@ -219,4 +222,32 @@ img, picture, video, canvas {
 
 .admin-panel a:hover {
   color: #60a5fa !important; /* blue-400 */
+}
+
+/* Ensure form texts and controls are readable (white) inside admin panel */
+.admin-panel label,
+.admin-panel p,
+.admin-panel li,
+.admin-panel span,
+.admin-panel .form-label,
+.admin-panel .form-text,
+.admin-panel .input-label {
+  color: #ffffff !important;
+}
+
+.admin-panel input,
+.admin-panel textarea,
+.admin-panel select,
+.admin-panel option,
+.admin-panel .form-control,
+.admin-panel .checkbox-label,
+.admin-panel .radio-label {
+  color: #ffffff !important;
+  background-color: #0b1220 !important;
+  border-color: #334155 !important;
+}
+
+.admin-panel input::placeholder,
+.admin-panel textarea::placeholder {
+  color: #94a3b8 !important; /* slightly muted placeholder for contrast */
 }

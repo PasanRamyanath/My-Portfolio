@@ -8,9 +8,11 @@ export interface SiteInfo {
   aboutMeDescription?: string;
   displayName?: string;
   email?: string;
+  phone?: string;
   facebook?: string;
   fullName?: string;
   github?: string;
+  huggingFace?: string;
   initialName?: string;
   instagram?: string;
   linkedin?: string;
@@ -56,9 +58,11 @@ async function fetchSiteInfoOnce(): Promise<SiteInfo | null> {
         aboutMeDescription: typeof data.aboutMeDescription === "string" ? data.aboutMeDescription : undefined,
         displayName: typeof data.displayName === "string" ? data.displayName : undefined,
         email: typeof data.email === "string" ? data.email : undefined,
+        phone: typeof data.phone === "string" ? data.phone : undefined,
         facebook: typeof data.facebook === "string" ? data.facebook : undefined,
         fullName: typeof data.fullName === "string" ? data.fullName : undefined,
         github: typeof data.github === "string" ? data.github : undefined,
+        huggingFace: typeof data.huggingFace === "string" ? data.huggingFace : undefined,
         initialName: typeof data.initialName === "string" ? data.initialName : undefined,
         instagram: typeof data.instagram === "string" ? data.instagram : undefined,
         linkedin: typeof data.linkedin === "string" ? data.linkedin : undefined,

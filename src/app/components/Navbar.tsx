@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -16,20 +17,35 @@ export default function Navbar({ deferUntilScroll = false }: NavbarProps) {
   const navRef = useRef<HTMLElement | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const [pendingScrollToSocials, setPendingScrollToSocials] = useState(false);
   // Start with a very large threshold so we don't accidentally mark as scrolled
   // before we measure the navbar position on mount.
   const [threshold, setThreshold] = useState<number>(Number.POSITIVE_INFINITY);
 
   useEffect(() => {
-    // Measure navbar position after mount
-    const navEl = navRef.current;
-    if (navEl && deferUntilScroll) {
-      // Use the top offset of the nav (its position in the flow) plus a small buffer
-      // so the nav will stick once the user scrolls past it.
-      setThreshold(navEl.offsetTop + 8);
-    } else {
-      setThreshold(20);
-    }
+    // Measure navbar position after mount. Use offsetTop per request but run
+    // measurement after a short delay and on resize/load to ensure layout is ready.
+    const measure = () => {
+      const navEl = navRef.current;
+      if (navEl && deferUntilScroll) {
+        // Use the top offset of the nav (its position in the flow) plus a small buffer
+        // so the nav will stick once the user scrolls past it.
+        setThreshold(navEl.offsetTop + 8);
+      } else {
+        setThreshold(20);
+      }
+    };
+
+    // run after a short delay to allow layout to settle (images/fonts)
+    const t = window.setTimeout(measure, 50);
+    window.addEventListener("resize", measure);
+    window.addEventListener("load", measure);
+
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("load", measure);
+    };
   }, [deferUntilScroll]);
 
   useEffect(() => {
@@ -47,6 +63,33 @@ export default function Navbar({ deferUntilScroll = false }: NavbarProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [deferUntilScroll, threshold]);
 
+  // When user clicked Contact from another page we set `pendingScrollToSocials`.
+  // Wait for pathname to become `/` then try to scroll to the section. Use a retry
+  // loop in case the DOM isn't hydrated immediately.
+  useEffect(() => {
+    if (!pendingScrollToSocials) return;
+    if (pathname !== "/") return;
+
+    let attempts = 0;
+    const maxAttempts = 80; // ~8s
+    const interval = setInterval(() => {
+      attempts += 1;
+      const el = document.getElementById("socials");
+      if (el) {
+        const navOffset = 64;
+        const y = el.getBoundingClientRect().top + window.pageYOffset - navOffset;
+        window.scrollTo({ top: y, behavior: "smooth" });
+        clearInterval(interval);
+        setPendingScrollToSocials(false);
+      } else if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        setPendingScrollToSocials(false);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [pendingScrollToSocials, pathname]);
+
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Projects", href: "/projects" },
@@ -61,21 +104,18 @@ export default function Navbar({ deferUntilScroll = false }: NavbarProps) {
       e.preventDefault();
       if (pathname === "/") {
         // Already on homepage, scroll directly
-        const el = document.getElementById("socials");
+        const el = document.getElementById("socials") ;
         if (el) {
-          const y = el.getBoundingClientRect().top + window.pageYOffset - 50; // 50px offset for navbar
+          const y = el.getBoundingClientRect().top + window.pageYOffset + 30; // 100px offset for navbar
           window.scrollTo({ top: y, behavior: "smooth" });
         }
       } else {
-        // Navigate to homepage and then scroll
+        // Navigate to homepage and set a pending flag so a useEffect can
+        // wait for the pathname to become '/' and then scroll reliably.
+        // mark intent in sessionStorage so the homepage can honour it after navigation
+        try { sessionStorage.setItem('scrollToSocials', '1'); } catch (e) {}
+        setPendingScrollToSocials(true);
         router.push("/");
-        setTimeout(() => {
-          const el = document.getElementById("socials");
-          if (el) {
-            const y = el.getBoundingClientRect().top + window.pageYOffset - 50;
-            window.scrollTo({ top: y, behavior: "smooth" });
-          }
-        }, 100); // Small delay to allow navigation
       }
       setMobileMenuOpen(false);
     } else if (href === "/") {
@@ -85,7 +125,7 @@ export default function Navbar({ deferUntilScroll = false }: NavbarProps) {
         // If there's a #home section, scroll to it, else scroll to top
         const homeEl = document.getElementById("home");
         if (homeEl) {
-          const y = homeEl.getBoundingClientRect().top + window.pageYOffset - 50;
+          const y = homeEl.getBoundingClientRect().top + window.pageYOffset + 500;
           window.scrollTo({ top: y, behavior: "smooth" });
         } else {
           window.scrollTo({ top: 0, behavior: "smooth" });
@@ -99,7 +139,7 @@ export default function Navbar({ deferUntilScroll = false }: NavbarProps) {
     <>
       <nav
         ref={navRef}
-        className={`${deferUntilScroll && !scrolled ? "relative" : "fixed top-0 left-0 right-0"} z-50 transition-all duration-300 border-y ${
+        className={`${deferUntilScroll ? "sticky top-0" : "fixed top-0 left-0 right-0"} z-50 transition-all duration-300 border-y ${
           scrolled ? "bg-white/85 backdrop-blur-sm border-[#cccccc]" : "bg-white border-[#cccccc]"
         }`}
       >

@@ -256,29 +256,37 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
           stroke="#000000"
           strokeWidth="1"
           opacity="0.3"
+          x1={conn.tech1.x}
+          y1={conn.tech1.y}
+          x2={conn.tech2.x}
+          y2={conn.tech2.y}
         >
           <animate
             attributeName="x1"
             values={`${conn.tech1.x}; ${conn.tech1.x + conn.tech1.dx}; ${conn.tech1.x - conn.tech1.dx}; ${conn.tech1.x}`}
             dur={`${conn.tech1.dur}s`}
+            begin="0s"
             repeatCount="indefinite"
           />
           <animate
             attributeName="y1"
             values={`${conn.tech1.y}; ${conn.tech1.y - conn.tech1.dy}; ${conn.tech1.y + conn.tech1.dy}; ${conn.tech1.y}`}
             dur={`${conn.tech1.dur}s`}
+            begin="0s"
             repeatCount="indefinite"
           />
           <animate
             attributeName="x2"
             values={`${conn.tech2.x}; ${conn.tech2.x + conn.tech2.dx}; ${conn.tech2.x - conn.tech2.dx}; ${conn.tech2.x}`}
             dur={`${conn.tech2.dur}s`}
+            begin="0s"
             repeatCount="indefinite"
           />
           <animate
             attributeName="y2"
             values={`${conn.tech2.y}; ${conn.tech2.y - conn.tech2.dy}; ${conn.tech2.y + conn.tech2.dy}; ${conn.tech2.y}`}
             dur={`${conn.tech2.dur}s`}
+            begin="0s"
             repeatCount="indefinite"
           />
         </line>
@@ -331,12 +339,14 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
                     attributeName="x"
                     values={`${tech.x - 18}; ${tech.x - 18 + tech.dx}; ${tech.x - 18 - tech.dx}; ${tech.x - 18}`}
                     dur={`${tech.dur}s`}
+                    begin="0s"
                     repeatCount="indefinite"
                   />
                   <animate
                     attributeName="y"
                     values={`${tech.y - 18}; ${tech.y - 18 - tech.dy}; ${tech.y - 18 + tech.dy}; ${tech.y - 18}`}
                     dur={`${tech.dur}s`}
+                    begin="0s"
                     repeatCount="indefinite"
                   />
                 </image>
@@ -346,17 +356,21 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
                   fill={fillColor}
                   stroke={strokeColor}
                   strokeWidth="2"
+                  cx={tech.x}
+                  cy={tech.y}
                 >
                   <animate
                     attributeName="cx"
                     values={`${tech.x}; ${tech.x + tech.dx}; ${tech.x - tech.dx}; ${tech.x}`}
                     dur={`${tech.dur}s`}
+                    begin="0s"
                     repeatCount="indefinite"
                   />
                   <animate
                     attributeName="cy"
                     values={`${tech.y}; ${tech.y - tech.dy}; ${tech.y + tech.dy}; ${tech.y}`}
                     dur={`${tech.dur}s`}
+                    begin="0s"
                     repeatCount="indefinite"
                   />
                 </circle>
@@ -367,18 +381,22 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
                 fill={textColor}
                 fontWeight={isHighlighted ? "700" : "400"}
                 fontFamily="Open Sans, Helvetica, Arial, sans-serif"
+                x={tech.x}
+                y={tech.y - 28}
               >
                 {tech.name}
                 <animate
                   attributeName="x"
                   values={`${tech.x}; ${tech.x + tech.dx}; ${tech.x - tech.dx}; ${tech.x}`}
                   dur={`${tech.dur}s`}
+                  begin="0s"
                   repeatCount="indefinite"
                 />
                 <animate
                   attributeName="y"
                   values={`${tech.y - 28}; ${tech.y - 28 - tech.dy}; ${tech.y - 28 + tech.dy}; ${tech.y - 28}`}
                   dur={`${tech.dur}s`}
+                  begin="0s"
                   repeatCount="indefinite"
                 />
               </text>

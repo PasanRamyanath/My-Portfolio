@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { collection, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -15,6 +16,17 @@ export default function Services() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleDiscussClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    try {
+      sessionStorage.setItem("scrollToSocials", "1");
+    } catch (err) {
+      // ignore
+    }
+    router.push("/");
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -63,24 +75,26 @@ export default function Services() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {services.map((s) => (
               <article
-                key={s.id}
-                className="rounded-none p-6 bg-[#f3f3f3] border border-[#e1e1e1] shadow-[0_0_0_1px_#e1e1e1,0_0_0_3px_#fff,0_0_0_4px_#e1e1e1] hover:shadow-none transition-all"
-              >
+                  key={s.id}
+                  className="rounded-none p-6 bg-[#f3f3f3] border border-[#e1e1e1] shadow-[0_0_0_1px_#e1e1e1,0_0_0_3px_#fff,0_0_0_4px_#e1e1e1] hover:shadow-none transition-all flex flex-col h-full"
+                >
                 <h2 className="text-lg font-bold text-[#333] mb-2 uppercase tracking-wide">{s.title}</h2>
                 <p className="text-sm text-[#666] mb-4">{s.description}</p>
-                <Link
-                  href="/contact"
-                  className="inline-block mt-auto btn btn-action"
+                <a
+                  href="/"
+                  onClick={handleDiscussClick}
+                  className="mt-auto w-full flex items-center justify-center px-6 py-3 bg-[#bd1550] text-white font-bold text-xs uppercase tracking-wide hover:bg-[#e61f65] transition-colors"
+                  role="button"
                 >
-                  Discuss project
-                </Link>
+                  <span style={{ color: 'white' }}>Discuss project</span>
+                </a>
               </article>
             ))}
           </div>
         )}
 
         <div className="mt-12 text-center">
-          <p className="text-[#7C7C7C]">Prefer a custom engagement or hourly consulting? <Link href="/contact" className="text-[var(--initio-primary)] font-semibold">Contact me</Link>.</p>
+          <p className="text-[#7C7C7C]">Prefer a custom engagement or hourly consulting? <a href="/" onClick={handleDiscussClick} className="text-[var(--initio-primary)] font-semibold">Contact me</a>.</p>
         </div>
       </div>
     </main>
