@@ -34,9 +34,9 @@ export default function TechStacksSection() {
   const categoryEntries = Object.entries(categorized).sort((a, b) => a[0].localeCompare(b[0]));
 
   return (
-    <section id="stack" className="relative min-h-screen py-16 bg-white">
+    <section id="stack" className="relative min-h-screen py-8 bg-white">
       <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col items-center pt-4 md:pt-12">
-        <div className="text-center mb-8 relative">
+        <div className="text-center mb-8 md:mb-12 relative">
           <h2 className="initio-section-title">
             <span>Technical Skills</span>
           </h2>
@@ -63,7 +63,7 @@ export default function TechStacksSection() {
         ) : categoryEntries.length === 0 ? (
           <div className="text-center text-[#7C7C7C]">No tech skills added yet.</div>
         ) : (
-          <div className="flex justify-center w-full">
+          <div className="flex justify-center w-full mt-4">
             <TechConstellation categories={categorized} searchQuery={searchQuery} />
           </div>
         )}
@@ -119,8 +119,11 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
       // Subtract horizontal margin from the viewport so the SVG canvas leaves space on the left/right
       // Use the viewport width directly (no fixed maximum) so the canvas adapts to screen size
       const width = Math.max(360, vw - 80);
-      // Height scales with viewport height - no fixed max, fully responsive to screen size
-      const height = Math.max(300, Math.round(vh * 0.5));
+      // On mobile (≤720px), use scaled height for vertical stacking; desktop uses 50% of viewport
+      const isMobile = vw <= 720;
+      const height = isMobile 
+        ? Math.max(1000, Math.round(vh * 2.2)) // 2.8x viewport height for mobile to prevent cropping
+        : Math.max(300, Math.round(vh * 0.5));
       setSvgSize({ width, height });
     }
     computeSize();
@@ -212,13 +215,50 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
     startX = Math.floor((width - totalSpan) / 2);
   }
 
+  // Responsive stacked layout for narrow/mobile viewports: when the canvas
+  // is narrow, arrange category centers vertically down the SVG instead of
+  // horizontally. Compute vertical spacing using the same minGap/clamping
+  // rules so spacing scales with the canvas height.
+  const isStacked = width <= 720; // breakpoint for mobile/narrow layouts
+  let spacingY = 0;
+  let startY = centerY;
+  if (isStacked && totalCategories > 1) {
+    const verticalPadding = Math.max(140, Math.round(height * 0.1)); // Padding for mobile while maximizing constellation space
+    let availableInnerY = Math.max(0, height - verticalPadding * 2);
+    // Increase mobile gap significantly - use larger base and multiplier
+    const mobileMinGap = Math.max(minGap * 2.5, 250); // At least 2.5x the standard gap or 250px
+    spacingY = Math.max(mobileMinGap, Math.floor(availableInnerY / (totalCategories - 1)));
+    // Cap spacing relative to availableInnerY so the stack stays centered
+    let maxSpacingY = Math.floor(availableInnerY * 0.8); // Allow more spacing on mobile
+    spacingY = Math.min(spacingY, Math.max(mobileMinGap, maxSpacingY));
+    let totalSpanY = spacingY * (totalCategories - 1);
+    if (totalSpanY > availableInnerY) {
+      // Reduce padding to fit
+      const effectivePadY = Math.max(16, Math.floor((height - totalSpanY) / 2));
+      availableInnerY = Math.max(0, height - effectivePadY * 2);
+      spacingY = Math.max(mobileMinGap, Math.floor(availableInnerY / (totalCategories - 1)));
+      maxSpacingY = Math.floor(availableInnerY * 0.8);
+      spacingY = Math.min(spacingY, Math.max(mobileMinGap, maxSpacingY));
+      totalSpanY = spacingY * (totalCategories - 1);
+    }
+    startY = Math.floor((height - totalSpanY) / 2);
+  }
+
   categoryEntries.forEach(([category, items], index) => {
-    const catX = totalCategories > 1 ? startX + index * spacing : centerX;
-    const catY = centerY; // keep them vertically centered
+    // Use vertical stacking on mobile/narrow viewports (≤720px), horizontal otherwise
+    const catX = isStacked 
+      ? centerX 
+      : (totalCategories > 1 ? startX + index * spacing : centerX);
+    const catY = isStacked && totalCategories > 1
+      ? startY + index * spacingY
+      : centerY;
 
     // Position techs in a much larger cluster around the category center with significant spacing
     // techRadius scales with viewport and ensures plenty of space to prevent overlap
-    const techRadius = Math.max(80, Math.round(Math.min(width, height) * 0.25));
+    // On mobile, use smaller radius relative to height to prevent bottom cropping
+    const techRadius = isStacked 
+      ? Math.max(80, Math.round(Math.min(width, height) * 0.18))
+      : Math.max(80, Math.round(Math.min(width, height) * 0.25));
 
     // First compute base positions so we can measure inter-node distances
     const basePositions = items.map((tech, i) => {

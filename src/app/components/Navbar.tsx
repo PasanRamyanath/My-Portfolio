@@ -76,7 +76,7 @@ export default function Navbar({ deferUntilScroll = false }: NavbarProps) {
       attempts += 1;
       const el = document.getElementById("socials");
       if (el) {
-        const navOffset = 64;
+        const navOffset = -200; // negative value scrolls much further down to show more content
         const y = el.getBoundingClientRect().top + window.pageYOffset - navOffset;
         window.scrollTo({ top: y, behavior: "smooth" });
         clearInterval(interval);
@@ -106,7 +106,7 @@ export default function Navbar({ deferUntilScroll = false }: NavbarProps) {
         // Already on homepage, scroll directly
         const el = document.getElementById("socials") ;
         if (el) {
-          const y = el.getBoundingClientRect().top + window.pageYOffset + 30; // 100px offset for navbar
+          const y = el.getBoundingClientRect().top + window.pageYOffset + 40; // scroll further down to show more content
           window.scrollTo({ top: y, behavior: "smooth" });
         }
       } else {
