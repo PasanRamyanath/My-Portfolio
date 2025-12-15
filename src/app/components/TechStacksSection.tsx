@@ -35,7 +35,7 @@ export default function TechStacksSection() {
 
   return (
     <section id="stack" className="relative min-h-screen py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col items-center pt-4 md:pt-12">
+      <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col items-center pt-4 md:pt-12">
         <div className="text-center mb-8 relative">
           <h2 className="initio-section-title">
             <span>Technical Skills</span>
@@ -83,7 +83,7 @@ function TechCategoryCard({ category, items }: { category: string; items: TechIt
         </div>
         <h3 className="text-xl font-semibold text-slate-100 tracking-wide">{category}</h3>
       </div>
-      <div className="flex flex-wrap gap-2 mt-2">
+      <div className="flex flex-wrap gap-8 mt-2">
         {items.map((tech, idx) => (
           <span
             key={tech.name + idx}
@@ -115,9 +115,12 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
     function computeSize() {
       const vw = window.innerWidth || 900;
       const vh = window.innerHeight || 800;
-      // Keep reasonable min/max bounds so layout remains usable across devices
-      const width = Math.max(600, Math.min(vw - 80, 1200));
-      const height = Math.max(220, Math.min(Math.round(vh * 0.45), 700));
+      // Make both width and height fully responsive to device screen
+      // Subtract horizontal margin from the viewport so the SVG canvas leaves space on the left/right
+      // Use the viewport width directly (no fixed maximum) so the canvas adapts to screen size
+      const width = Math.max(360, vw - 80);
+      // Height scales with viewport height - no fixed max, fully responsive to screen size
+      const height = Math.max(300, Math.round(vh * 0.5));
       setSvgSize({ width, height });
     }
     computeSize();
@@ -152,6 +155,7 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
         seed: number;
         amp: number;
         dur: number;
+        phase: number;
         dx: number;
         dy: number;
       }[];
@@ -161,8 +165,21 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
   // Lay out categories horizontally across the SVG so different types are spaced
   // evenly. Enforce a responsive left/right padding and a minimum gap between
   // category centers so constellations don't crowd each other or the edges.
-  const basePadding = Math.max(80, Math.round(width * 0.06));
-  const minGap = Math.max(120, Math.round(width * 0.12));
+  // Increase minimum horizontal padding so category centers are further from edges
+  const basePadding = Math.max(120, Math.round(width * 0.1));
+  const minGap = (() => {
+    // Adapt to the canvas size and number of categories so spacing scales responsively.
+    // Use the smaller dimension to keep gaps reasonable on tall/narrow screens.
+    const minDimension = Math.min(width, height);
+    // Base proportional gap from the smaller dimension (about ~18%)
+    const propGap = Math.round(minDimension * 0.18);
+    // When there are many categories, reduce the gap so they can fit.
+    // Limit factor to the range [1,4] so the gap doesn't shrink too aggressively.
+    const catFactor = Math.max(1, Math.min(4, totalCategories));
+    const adjusted = Math.round(propGap / catFactor);
+    // Clamp to reasonable bounds: at least 80px, at most half the canvas width.
+    return Math.max(80, Math.min(adjusted, Math.round(width * 0.3)));
+  })();
   let effectivePadding = basePadding;
   let availableInner = Math.max(0, width - effectivePadding * 2);
 
@@ -199,27 +216,70 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
     const catX = totalCategories > 1 ? startX + index * spacing : centerX;
     const catY = centerY; // keep them vertically centered
 
-    // Position techs in a larger cluster around the category center
-    // techRadius scales with viewport so items don't overlap or leave the SVG
-    const techRadius = Math.max(40, Math.round(Math.min(width, height) * 0.08));
-    const techs = items.map((tech, i) => {
+    // Position techs in a much larger cluster around the category center with significant spacing
+    // techRadius scales with viewport and ensures plenty of space to prevent overlap
+    const techRadius = Math.max(80, Math.round(Math.min(width, height) * 0.25));
+
+    // First compute base positions so we can measure inter-node distances
+    const basePositions = items.map((tech, i) => {
       const techAngle = (i / items.length) * 2 * Math.PI;
       const techX = catX + techRadius * Math.cos(techAngle);
       const techY = catY + techRadius * Math.sin(techAngle);
+      return { name: tech.name, image: tech.image, fileId: tech.fileId, x: techX, y: techY, i };
+    });
+
+    // Node visual radius in px (accounts for image/label size) - used as collision buffer
+    const nodeRadius = 20;
+
+    const techs = basePositions.map((p) => {
+      const { name: tname, image, fileId, x: techX, y: techY, i } = p;
       // Unique seed per tech for animation
-      let seed = Math.abs(Array.from(tech.name).reduce((acc, ch) => acc * 31 + ch.charCodeAt(0), 7) + i * 101);
+      let seed = Math.abs(Array.from(tname).reduce((acc, ch) => acc * 31 + ch.charCodeAt(0), 7) + i * 101);
       if (seed === 0) seed = 1;
-      const amp = 8 + (seed % 12);
-      // Use a fixed duration so all tech nodes animate at the same speed
-      const dur = 6; // seconds
-      let dx = Math.round((seed % 3) - 1) * amp;
-      let dy = Math.round((seed % 5) - 2) * amp;
-      // Ensure we don't end up with both dx and dy as 0 (no movement)
-      if (dx === 0 && dy === 0) {
-        dx = amp;
-        dy = amp / 2;
+
+      // Desired amplitude (movement distance) based on seed
+      const desiredAmp = 10 + (seed % 18);
+
+      // Compute minimum distance to any other base position
+      let minDist = Infinity;
+      for (const other of basePositions) {
+        if (other === p) continue;
+        const d = Math.hypot(techX - other.x, techY - other.y);
+        if (d < minDist) minDist = d;
       }
-      return { name: tech.name, image: tech.image, fileId: tech.fileId, x: techX, y: techY, seed, amp, dur, dx, dy };
+
+      // If only one node or minDist is infinite, allow desiredAmp; otherwise limit amplitude
+      let safeAmp = desiredAmp;
+      if (isFinite(minDist)) {
+        // ensure the moving node won't reach closer than nodeRadius to another node
+        // allow movement up to roughly 35% of the inter-node distance minus buffer
+        const maxAllowed = Math.max(6, Math.floor((minDist - nodeRadius * 2) * 0.35));
+        safeAmp = Math.max(6, Math.min(desiredAmp, maxAllowed));
+      }
+
+      // Randomize duration (animation speed) for non-repetitive motion - vary between 4-10 seconds
+      const dur = 4 + (seed % 7) + (i % 3) * 0.5;
+      // Randomize phase offset so animations don't all start in sync
+      const phase = (seed % 10) * 0.12; // 0 to ~1.08s offset
+
+      // Choose a pseudo-random direction for movement based on seed
+      const theta = ((seed % 360) / 360) * 2 * Math.PI;
+      const dx = Math.round(Math.cos(theta) * safeAmp);
+      const dy = Math.round(Math.sin(theta) * safeAmp);
+
+      return {
+        name: tname,
+        image,
+        fileId,
+        x: techX,
+        y: techY,
+        seed,
+        amp: safeAmp,
+        dur,
+        phase,
+        dx,
+        dy,
+      };
     });
 
     categoryPositions[category] = { x: catX, y: catY, techs };
@@ -243,19 +303,21 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
   }).flat();
 
   return (
-    <svg 
-      width={width} 
-      height={height} 
+    <svg
+      width="100%"
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio="xMidYMid meet"
       className="bg-white"
-      style={{ maxWidth: '100%', height: 'auto' }}
+      style={{ maxWidth: '100%', height: `${height}px`, display: 'block', overflow: 'visible' }}
     >
       {/* Connection lines between techs in same category - dynamically animated to follow moving techs */}
       {animatedConnections.map((conn, i) => (
         <line
           key={`line-${i}`}
           stroke="#000000"
-          strokeWidth="1"
-          opacity="0.3"
+          strokeWidth="0.8"
+          opacity="0.12"
           x1={conn.tech1.x}
           y1={conn.tech1.y}
           x2={conn.tech2.x}
@@ -265,28 +327,28 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
             attributeName="x1"
             values={`${conn.tech1.x}; ${conn.tech1.x + conn.tech1.dx}; ${conn.tech1.x - conn.tech1.dx}; ${conn.tech1.x}`}
             dur={`${conn.tech1.dur}s`}
-            begin="0s"
+            begin={`${conn.tech1.phase}s`}
             repeatCount="indefinite"
           />
           <animate
             attributeName="y1"
             values={`${conn.tech1.y}; ${conn.tech1.y - conn.tech1.dy}; ${conn.tech1.y + conn.tech1.dy}; ${conn.tech1.y}`}
             dur={`${conn.tech1.dur}s`}
-            begin="0s"
+            begin={`${conn.tech1.phase}s`}
             repeatCount="indefinite"
           />
           <animate
             attributeName="x2"
             values={`${conn.tech2.x}; ${conn.tech2.x + conn.tech2.dx}; ${conn.tech2.x - conn.tech2.dx}; ${conn.tech2.x}`}
             dur={`${conn.tech2.dur}s`}
-            begin="0s"
+            begin={`${conn.tech2.phase}s`}
             repeatCount="indefinite"
           />
           <animate
             attributeName="y2"
             values={`${conn.tech2.y}; ${conn.tech2.y - conn.tech2.dy}; ${conn.tech2.y + conn.tech2.dy}; ${conn.tech2.y}`}
             dur={`${conn.tech2.dur}s`}
-            begin="0s"
+            begin={`${conn.tech2.phase}s`}
             repeatCount="indefinite"
           />
         </line>
@@ -316,12 +378,14 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
                     attributeName="cx"
                     values={`${tech.x}; ${tech.x + tech.dx}; ${tech.x - tech.dx}; ${tech.x}`}
                     dur={`${tech.dur}s`}
+                    begin={`${tech.phase}s`}
                     repeatCount="indefinite"
                   />
                   <animate
                     attributeName="cy"
                     values={`${tech.y}; ${tech.y - tech.dy}; ${tech.y + tech.dy}; ${tech.y}`}
                     dur={`${tech.dur}s`}
+                    begin={`${tech.phase}s`}
                     repeatCount="indefinite"
                   />
                 </circle>
@@ -339,14 +403,14 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
                     attributeName="x"
                     values={`${tech.x - 18}; ${tech.x - 18 + tech.dx}; ${tech.x - 18 - tech.dx}; ${tech.x - 18}`}
                     dur={`${tech.dur}s`}
-                    begin="0s"
+                    begin={`${tech.phase}s`}
                     repeatCount="indefinite"
                   />
                   <animate
                     attributeName="y"
                     values={`${tech.y - 18}; ${tech.y - 18 - tech.dy}; ${tech.y - 18 + tech.dy}; ${tech.y - 18}`}
                     dur={`${tech.dur}s`}
-                    begin="0s"
+                    begin={`${tech.phase}s`}
                     repeatCount="indefinite"
                   />
                 </image>
@@ -363,14 +427,14 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
                     attributeName="cx"
                     values={`${tech.x}; ${tech.x + tech.dx}; ${tech.x - tech.dx}; ${tech.x}`}
                     dur={`${tech.dur}s`}
-                    begin="0s"
+                    begin={`${tech.phase}s`}
                     repeatCount="indefinite"
                   />
                   <animate
                     attributeName="cy"
                     values={`${tech.y}; ${tech.y - tech.dy}; ${tech.y + tech.dy}; ${tech.y}`}
                     dur={`${tech.dur}s`}
-                    begin="0s"
+                    begin={`${tech.phase}s`}
                     repeatCount="indefinite"
                   />
                 </circle>
@@ -389,14 +453,14 @@ function TechConstellation({ categories, searchQuery }: { categories: Record<str
                   attributeName="x"
                   values={`${tech.x}; ${tech.x + tech.dx}; ${tech.x - tech.dx}; ${tech.x}`}
                   dur={`${tech.dur}s`}
-                  begin="0s"
+                  begin={`${tech.phase}s`}
                   repeatCount="indefinite"
                 />
                 <animate
                   attributeName="y"
                   values={`${tech.y - 28}; ${tech.y - 28 - tech.dy}; ${tech.y - 28 + tech.dy}; ${tech.y - 28}`}
                   dur={`${tech.dur}s`}
-                  begin="0s"
+                  begin={`${tech.phase}s`}
                   repeatCount="indefinite"
                 />
               </text>

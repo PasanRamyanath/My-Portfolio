@@ -128,11 +128,11 @@ export default function ProjectsSection() {
                 className="cursor-pointer rounded-none p-6 bg-[#f3f3f3] border border-[#e1e1e1] shadow-[0_0_0_1px_#e1e1e1,0_0_0_3px_#fff,0_0_0_4px_#e1e1e1] hover:shadow-none transition-all flex flex-col h-full"
               >
                 {thumb && (
-                  <div className="w-full h-44 mb-4 bg-black/5 overflow-hidden rounded">
+                  <div className="w-full h-44 mb-4 bg-black/5 overflow-hidden rounded flex items-center justify-center">
                     {isVideoThumb ? (
                       <video
                         src={thumb}
-                        className="object-cover w-full h-full"
+                        className="object-contain w-full h-full"
                         autoPlay
                         muted
                         loop
@@ -144,7 +144,7 @@ export default function ProjectsSection() {
                         alt={project.title}
                         width={1200}
                         height={700}
-                        className="object-cover w-full h-full"
+                        className="object-contain w-full h-full"
                       />
                     )}
                   </div>
