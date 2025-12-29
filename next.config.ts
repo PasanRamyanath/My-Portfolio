@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "i.imgur.com" },
     ],
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '50mb',
+    },
+  },
 };
 
 export default nextConfig;

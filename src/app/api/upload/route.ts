@@ -5,6 +5,7 @@ import ImageKit from "imagekit";
 import { v2 as cloudinary } from "cloudinary";
 
 export const runtime = "nodejs";
+export const maxDuration = 300; // 5 minutes for video uploads
 
 function createImageKitInstance() {
   const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
@@ -63,20 +64,37 @@ export async function POST(request: Request) {
       }
       console.log(`Uploading video ${fileName} (${buffer.length} bytes) to Cloudinary`);
       try {
-        // Prefer using data URI to avoid temp files. Derive mime from original name when possible.
-        const ext = fileName.split('.').pop()?.toLowerCase();
-        const mime = ext === 'webm' ? 'video/webm' : ext === 'mov' ? 'video/quicktime' : 'video/mp4';
-        const base64 = `data:${mime};base64,${buffer.toString("base64")}`;
-        const cloudRes = await cloud.uploader.upload(base64, {
-          resource_type: "video",
-          folder: "portfolio_uploads",
-          public_id: fileName.replace(/\.[^.]+$/, ""),
-        });
-        if (!cloudRes?.secure_url) {
-          return NextResponse.json({ success: false, error: "Cloudinary video upload failed" }, { status: 500 });
+        // For large files, use streaming upload via temporary file to avoid memory/timeout issues
+        const uploadsDir = path.join(process.cwd(), "tmp");
+        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+        const tempPath = path.join(uploadsDir, `temp-${Date.now()}-${fileName}`);
+        
+        // Write buffer to temporary file
+        await fs.promises.writeFile(tempPath, buffer);
+        
+        try {
+          // Upload using file path with chunked upload for large files
+          const cloudRes = await cloud.uploader.upload(tempPath, {
+            resource_type: "video",
+            folder: "portfolio_uploads",
+            public_id: fileName.replace(/\.[^.]+$/, ""),
+            chunk_size: 6000000, // 6MB chunks for better upload reliability
+            timeout: 240000, // 4 minute timeout
+          });
+          
+          // Clean up temp file
+          await fs.promises.unlink(tempPath).catch(() => {});
+          
+          if (!cloudRes?.secure_url) {
+            return NextResponse.json({ success: false, error: "Cloudinary video upload failed" }, { status: 500 });
+          }
+          // Return fileId mapped to public_id so deletion code can treat uniformly.
+          return NextResponse.json({ success: true, url: cloudRes.secure_url, provider: "cloudinary", fileId: cloudRes.public_id });
+        } catch (uploadErr) {
+          // Clean up temp file on error
+          await fs.promises.unlink(tempPath).catch(() => {});
+          throw uploadErr;
         }
-        // Return fileId mapped to public_id so deletion code can treat uniformly.
-        return NextResponse.json({ success: true, url: cloudRes.secure_url, provider: "cloudinary", fileId: cloudRes.public_id });
       } catch (e) {
         console.error("Cloudinary upload error", e);
         return NextResponse.json({ success: false, error: "Cloudinary upload error" }, { status: 500 });
