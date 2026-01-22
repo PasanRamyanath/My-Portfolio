@@ -268,43 +268,35 @@ export default function ProjectMediaViewer({ media, title = "Media", vertical = 
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.2 }}
             >
-              {/* Progress dots */}
               {/* Embla thumbnail strip (single horizontal row, no native scrollbar visible) */}
-              <div className="embla overflow-hidden">
+              <div className="embla overflow-hidden" style={{ height: '84px' }}>
                 <div className="embla__viewport" ref={emblaRef as unknown as (el: HTMLElement | null) => void}>
-                  <div className="embla__container flex gap-2 py-2 px-1">
-                    {(() => {
-                      const thumbCount = Math.min(15, cleaned.length);
-                      const percent = `${100 / thumbCount}%`;
-                      return cleaned.slice(0, thumbCount).map((m, idx) => (
-                        <div key={idx} className="embla__slide flex-shrink-0" style={{ width: percent }}>
-                          {renderThumbnail(m, idx, true)}
-                        </div>
-                      ));
-                    })()}
+                  <div className="embla__container flex gap-2 py-2 px-1 items-center" style={{ height: '80px', minHeight: '80px' }}>
+                    {cleaned.map((m, idx) => (
+                      <div key={idx} className="embla__slide flex-shrink-0" style={{ width: '80px', height: '80px' }}>
+                        {renderThumbnail(m, idx, true)}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
 
               {/* Progress dots below the strip (for the visible thumbnails) */}
               <div className="flex items-center justify-center gap-2 mt-3">
-                {(() => {
-                  const thumbCount = Math.min(15, cleaned.length);
-                  return Array.from({ length: thumbCount }).map((_, idx) => (
-                    <motion.button
-                      key={idx}
-                      onClick={() => { setSelected(idx); emblaApi?.scrollTo(idx); }}
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        idx === selected 
-                          ? "w-8 bg-[#bd1550]" 
-                          : "w-1.5 bg-gray-300 hover:bg-[#bd1550]/50"
-                      }`}
-                      aria-label={`Go to media ${idx + 1}`}
-                      whileHover={{ scale: 1.2 }}
-                      whileTap={{ scale: 0.9 }}
-                    />
-                  ));
-                })()}
+                {cleaned.map((_, idx) => (
+                  <motion.button
+                    key={idx}
+                    onClick={() => { setSelected(idx); emblaApi?.scrollTo(idx); }}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      idx === selected 
+                        ? "w-8 bg-[#bd1550]" 
+                        : "w-1.5 bg-gray-300 hover:bg-[#bd1550]/50"
+                    }`}
+                    aria-label={`Go to media ${idx + 1}`}
+                    whileHover={{ scale: 1.2 }}
+                    whileTap={{ scale: 0.9 }}
+                  />
+                ))}
               </div>
             </motion.div>
           )}
