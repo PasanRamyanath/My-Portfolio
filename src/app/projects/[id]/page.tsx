@@ -1,6 +1,7 @@
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { Metadata } from "next";
+import Image from "next/image";
 import ProjectMediaViewerClient from "../ProjectMediaViewer";
 import BackButton from "@/app/components/BackButton";
 
@@ -165,10 +166,10 @@ export default async function ProjectDetailPage({ params }: { params?: Promise<P
                     href={demoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                    className="group inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
-                    <span>Live Demo</span>
-                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <span style={{ color: 'white' }}>Live Demo</span>
+                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="white">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5-5 5M6 12h12" />
                     </svg>
                   </a>
@@ -180,7 +181,8 @@ export default async function ProjectDetailPage({ params }: { params?: Promise<P
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-800/80 text-slate-200 rounded-xl font-semibold border-2 border-slate-700 hover:border-blue-400 hover:text-blue-300 transition-all duration-300 shadow-md hover:shadow-lg"
                   >
-                    GitHub
+                    <Image src="/footer/Github.png" alt="GitHub" width={20} height={20} />
+                    <span style={{ color: 'white' }}>GitHub</span>
                   </a>
                 )}
                 {project.linkedin_post && (
